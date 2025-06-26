@@ -5,35 +5,78 @@
   <meta charset="UTF-8">
   <title>RC Blog – Pařízek3DXD</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; padding: 0; color: #333; }
-    header { background: #002244; color: white; padding: 20px; text-align: center; }
-    main { max-width: 800px; margin: auto; padding: 20px; background: white; }
-    article { margin-bottom: 40px; border-bottom: 1px solid #ccc; padding-bottom: 20px; }
-    h2 { color: #002244; margin-bottom: 5px; }
-    .date { font-size: 0.9em; color: #777; margin-bottom: 10px; }
-    footer { text-align: center; padding: 10px; background: #eee; }
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    header {
+      background: #003366;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    main {
+      max-width: 800px;
+      margin: auto;
+      padding: 30px 20px;
+      background: white;
+    }
+    .post {
+      margin-bottom: 40px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 20px;
+      white-space: pre-wrap;
+    }
+    h1 {
+      margin: 0;
+    }
+    footer {
+      text-align: center;
+      padding: 15px;
+      background: #eee;
+      margin-top: 40px;
+    }
   </style>
 </head>
 <body>
   <header>
-    <h1>🛩️ RC Blog – Pařízek3DXD</h1>
-    <p>Tipy, projekty a návody pro modeláře</p>
+    <h1> RC Blog </h1>
+    <p> BLOG O RC LETADLECH VŠÍ KONSTRUKCE</p>
   </header>
-  <main>
-    <article>
-      <h2>Postavit vlastní model z XPS</h2>
-      <div class="date">26. června 2025</div>
-      <p>V tomto článku ti ukážu, jak si jednoduše postavit RC letadlo ze zbytků XPS desek. Materiál je levný, lehký a ideální pro začátečníky...</p>
-    </article>
 
-    <article>
-      <h2>Výběr správného motoru a vrtule</h2>
-      <div class="date">20. června 2025</div>
-      <p>Pokud nevíš, jaký motor použít pro tvůj model, mrkni na tento návod. Vysvětlím rozdíly mezi KV, výběrem vrtule a co sledovat při ladění tahu.</p>
-    </article>
+  <main id="obsah">
+    <p>Načítám články...</p>
   </main>
   <footer>
-    &copy; 2025 Pařízek3DXD | GitHub Pages Blog
+    &copy; 2025 Pařízek3DXD
   </footer>
+
+  <script>
+    const soubory = [
+      "clanky/2025-06-26-letadlo.txt",
+      "clanky/2025-06-20-motor.txt"
+    ];
+
+    const obsah = document.getElementById("obsah");
+    obsah.innerHTML = "";
+
+    soubory.forEach((soubor) => {
+      fetch(soubor)
+        .then((res) => res.text())
+        .then((text) => {
+          const div = document.createElement("div");
+          div.className = "post";
+          div.textContent = text;
+          obsah.appendChild(div);
+        })
+        .catch((err) => {
+          console.error("Chyba načítání:", err);
+        });
+    });
+  </script>
 </body>
 </html>
+  
