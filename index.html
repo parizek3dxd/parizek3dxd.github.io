@@ -3,80 +3,58 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <title>RC Blog – Pařízek3DXD</title>
+  <title>Hlavní Stránka</title>
   <style>
     body {
-      font-family: "Segoe UI", sans-serif;
-      background: #f0f2f5;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
       margin: 0;
       padding: 0;
-      color: #333;
     }
     header {
-      background: #003366;
+      background-color: #333;
       color: white;
       padding: 20px;
       text-align: center;
     }
     main {
+      padding: 20px;
       max-width: 800px;
       margin: auto;
-      padding: 30px 20px;
       background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    .post {
-      margin-bottom: 40px;
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 20px;
-      white-space: pre-wrap;
+    h1, h2 {
+      color: #444;
     }
-    h1 {
-      margin: 0;
+    ul {
+      padding-left: 20px;
     }
     footer {
       text-align: center;
-      padding: 15px;
+      padding: 10px;
       background: #eee;
-      margin-top: 40px;
+      margin-top: 30px;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1> RC Blog </h1>
-    <p> BLOG O RC LETADLECH VŠÍ KONSTRUKCE</p>
+    <h1>HLAVNÍ STRÁNKA</h1>
   </header>
+  <main>
+    <h2>O mně</h2>
+    <p>Jsem 3D grafik a vášnivý modelář v oblasti RC letadel.</p>
 
-  <main id="obsah">
-    <p>Načítám články...</p>
+    <h2>Projekty</h2>
+    <ul>
+      <li><strong>SPACE SHUTLE Z XPS:</strong> space shutle: 2x servo 9g 180 stupňů, motor s regulátorem, příjmač a baterie (XPS)</li>
+      <li><strong>Web vizitka:</strong> jednoduchý web o RC létání</li>
+    </ul>
   </main>
   <footer>
     &copy; 2025 Pařízek3DXD
   </footer>
-
-  <script>
-    const soubory = [
-      "clanky/2025-06-26-letadlo.txt",
-      "clanky/2025-06-20-motor.txt"
-    ];
-
-    const obsah = document.getElementById("obsah");
-    obsah.innerHTML = "";
-
-    soubory.forEach((soubor) => {
-      fetch(soubor)
-        .then((res) => res.text())
-        .then((text) => {
-          const div = document.createElement("div");
-          div.className = "post";
-          div.textContent = text;
-          obsah.appendChild(div);
-        })
-        .catch((err) => {
-          console.error("Chyba načítání:", err);
-        });
-    });
-  </script>
 </body>
 </html>
-  
