@@ -2,99 +2,70 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Drone Frame Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pro FPV Frame Gen</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com"></script>
     <script src="https://cdn.jsdelivr.net"></script>
     <script src="https://cdn.jsdelivr.net"></script>
+    <script src="https://cdnjs.cloudflare.com"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com');
-        body { font-family: 'Inter', sans-serif; background: #0f172a; color: white; margin: 0; }
-        .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; }
-        input[type=range] { width: 100%; height: 6px; background: #334155; border-radius: 5px; appearance: none; cursor: pointer; }
-        input[type=range]::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; background: #3b82f6; border-radius: 50%; border: 2px solid #fff; }
-        .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); transition: all 0.3s; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); }
-        .btn-preset { background: #1e293b; border: 1px solid #334155; transition: all 0.2s; }
-        .btn-preset:hover { background: #334155; }
-        .active-preset { border-color: #3b82f6; background: rgba(59, 130, 246, 0.2); }
-        #canvas-container { border-radius: 12px; overflow: hidden; width: 100%; height: 500px; background: #020617; }
+        body { font-family: 'Inter', sans-serif; background: #020617; color: white; margin: 0; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        #canvas-container { width: 100%; height: 45vh; min-height: 350px; cursor: move; touch-action: none; border-radius: 12px; }
+        input[type=range] { width: 100%; height: 6px; background: #334155; border-radius: 5px; appearance: none; }
+        input[type=range]::-webkit-slider-thumb { appearance: none; width: 20px; height: 20px; background: #3b82f6; border-radius: 50%; border: 2px solid #fff; }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-4 md:p-6">
     <div class="max-w-6xl mx-auto">
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-2">FPV Frame Generator</h1>
-            <p class="text-slate-400">Customize parameters or use presets, then export for 3D printing</p>
+        <header class="flex justify-between items-center mb-6">
+            <h1 class="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">FPV FRAME DESIGNER</h1>
+            <button onclick="resetCamera()" class="text-[10px] bg-slate-800 px-3 py-1 rounded border border-slate-700">RESET VIEW</button>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Sidebar -->
-            <div class="lg:col-span-1 space-y-6">
-                <!-- Presets -->
-                <div class="glass-card p-6">
-                    <h2 class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">Quick Presets</h2>
-                    <div class="grid grid-cols-1 gap-2">
-                        <button onclick="applyPreset('5inch')" id="pre-5inch" class="btn-preset p-3 rounded-lg text-left text-sm flex justify-between items-center">
-                            <span>Standard 5" Freestyle</span>
-                            <span class="text-xs text-slate-500">225mm</span>
-                        </button>
-                        <button onclick="applyPreset('3.5inch')" id="pre-3.5inch" class="btn-preset p-3 rounded-lg text-left text-sm flex justify-between items-center">
-                            <span>Performance 3.5"</span>
-                            <span class="text-xs text-slate-500 =">160mm</span>
-                        </button>
-                        <button onclick="applyPreset('whoop')" id="pre-whoop" class="btn-preset p-3 rounded-lg text-left text-sm flex justify-between items-center">
-                            <span>Tiny Whoop (65mm)</span>
-                            <span class="text-xs text-slate-500">65mm</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Customization -->
-                <div class="glass-card p-6 space-y-5">
-                    <h2 class="text-sm font-bold text-slate-500 uppercase tracking-widest border-b border-slate-700 pb-2">Dimensions (mm)</h2>
-                    
-                    <div>
-                        <label class="flex justify-between text-xs text-slate-400 mb-2">Arm Length <span id="val-armL" class="text-blue-400 font-bold">140</span></label>
-                        <input type="range" id="armL" min="40" max="280" value="140" oninput="updateFromSliders()">
-                    </div>
-
-                    <div>
-                        <label class="flex justify-between text-xs text-slate-400 mb-2">Arm Width <span id="val-armW" class="text-blue-400 font-bold">12</span></label>
-                        <input type="range" id="armW" min="4" max="30" value="12" oninput="updateFromSliders()">
-                    </div>
-
-                    <div>
-                        <label class="flex justify-between text-xs text-slate-400 mb-2">Body Length <span id="val-bodyL" class="text-blue-400 font-bold">80</span></label>
-                        <input type="range" id="bodyL" min="20" max="150" value="80" oninput="updateFromSliders()">
-                    </div>
-
-                    <div>
-                        <label class="flex justify-between text-xs text-slate-400 mb-2">Body Width <span id="val-bodyW" class="text-blue-400 font-bold">35</span></label>
-                        <input type="range" id="bodyW" min="15" max="70" value="35" oninput="updateFromSliders()">
-                    </div>
-
-                    <div class="pt-4 space-y-3">
-                        <button onclick="exportSTL()" class="w-full btn-primary text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2">
-                            <span>📥 Export STL</span>
-                        </button>
-                    </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- 3D PREVIEW -->
+            <div class="lg:col-span-2 order-1">
+                <div class="glass p-2 rounded-xl">
+                    <div id="canvas-container"></div>
                 </div>
             </div>
 
-            <!-- Preview -->
-            <div class="lg:col-span-2">
-                <div class="glass-card p-4 h-full flex flex-col">
-                    <div id="canvas-container" class="flex-grow"></div>
-                    <div class="mt-4 flex justify-between items-center text-xs text-slate-500 px-2">
-                        <div class="flex gap-4">
-                            <span>Left Click: Rotate</span>
-                            <span>Right Click: Pan</span>
-                            <span>Scroll: Zoom</span>
-                        </div>
-                        <button onclick="resetCamera()" class="hover:text-blue-400 transition-colors uppercase font-bold tracking-tighter">Reset View</button>
+            <!-- CONTROLS -->
+            <div class="order-2 space-y-4">
+                <!-- PRESETS -->
+                <div class="glass p-4 rounded-xl">
+                    <h2 class="text-xs font-bold text-slate-500 mb-3 uppercase tracking-widest">Presets</h2>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="applyPreset('5inch')" class="bg-blue-600/20 border border-blue-500/50 p-2 rounded text-xs hover:bg-blue-600 transition">5"</button>
+                        <button onclick="applyPreset('3.5inch')" class="bg-slate-800 p-2 rounded text-xs hover:bg-slate-700 transition">3.5"</button>
+                        <button onclick="applyPreset('whoop')" class="bg-slate-800 p-2 rounded text-xs hover:bg-slate-700 transition">Whoop</button>
+                    </div>
+                </div>
+
+                <!-- CONFIG -->
+                <div class="glass p-5 rounded-xl space-y-5">
+                    <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-slate-700 pb-2">Configuration</h2>
+                    
+                    <div>
+                        <label class="flex justify-between text-xs mb-2">Arm Length (mm): <span id="val-armL" class="text-blue-400">140</span></label>
+                        <input type="range" id="armL" min="50" max="250" value="140" oninput="updateModel()">
+                    </div>
+
+                    <div>
+                        <label class="flex justify-between text-xs mb-2">Stack Type: <span id="val-stack" class="text-blue-400">30.5mm</span></label>
+                        <select id="stackSize" onchange="updateModel()" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-sm">
+                            <option value="30.5">30.5 x 30.5 (Standard)</option>
+                            <option value="20">20.0 x 20.0 (Mini)</option>
+                            <option value="25.5">25.5 x 25.5 (Whoop/AIO)</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 pt-4">
+                        <button onclick="exportSTL()" class="bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-bold text-xs">📥 STL (3D)</button>
+                        <button onclick="exportPDF()" class="bg-emerald-600 hover:bg-emerald-500 py-3 rounded-lg font-bold text-xs">📄 PDF (INFO)</button>
                     </div>
                 </div>
             </div>
@@ -102,127 +73,129 @@
     </div>
 
     <script>
-        let scene, camera, renderer, controls, droneGroup;
-        let isWireframe = false;
+        let scene, camera, renderer, controls, frameGroup;
+        const { jsPDF } = window.jspdf;
 
         const presets = {
-            '5inch': { armL: 160, armW: 14, bodyL: 90, bodyW: 38 },
-            '3.5inch': { armL: 115, armW: 10, bodyL: 65, bodyW: 28 },
-            'whoop': { armL: 45, armW: 8, bodyL: 25, bodyW: 25 }
+            '5inch': { armL: 155, stack: "30.5" },
+            '3.5inch': { armL: 110, stack: "20" },
+            'whoop': { armL: 45, stack: "25.5" }
         };
 
         function init() {
+            const container = document.getElementById('canvas-container');
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x020617);
             
-            const container = document.getElementById('canvas-container');
-            camera = new THREE.PerspectiveCamera(45, container.clientWidth / 500, 1, 2000);
-            camera.position.set(200, 200, 200);
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 1, 2000);
+            camera.position.set(160, 160, 160);
 
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(container.clientWidth, 500);
+            renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(container.clientWidth, container.clientHeight);
             container.appendChild(renderer.domElement);
 
-            const sun = new THREE.DirectionalLight(0xffffff, 1.2);
-            sun.position.set(100, 200, 100);
-            scene.add(sun);
-            scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+            const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambient);
+            const direct = new THREE.DirectionalLight(0xffffff, 0.8);
+            direct.position.set(50, 100, 50);
+            scene.add(direct);
 
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
 
-            const grid = new THREE.GridHelper(400, 40, 0x1e293b, 0x0f172a);
-            scene.add(grid);
-
-            droneGroup = new THREE.Group();
-            scene.add(droneGroup);
+            frameGroup = new THREE.Group();
+            scene.add(frameGroup);
+            scene.add(new THREE.GridHelper(300, 30, 0x1e293b, 0x0f172a));
 
             applyPreset('5inch');
             animate();
 
             window.onresize = () => {
-                camera.aspect = container.clientWidth / 500;
+                camera.aspect = container.clientWidth / container.clientHeight;
                 camera.updateProjectionMatrix();
-                renderer.setSize(container.clientWidth, 500);
+                renderer.setSize(container.clientWidth, container.clientHeight);
             };
         }
 
         function applyPreset(key) {
             const p = presets[key];
             document.getElementById('armL').value = p.armL;
-            document.getElementById('armW').value = p.armW;
-            document.getElementById('bodyL').value = p.bodyL;
-            document.getElementById('bodyW').value = p.bodyW;
-
-            document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active-preset'));
-            document.getElementById('pre-' + key).classList.add('active-preset');
-
-            updateFromSliders();
+            document.getElementById('stackSize').value = p.stack;
+            updateModel();
         }
 
-        function updateFromSliders() {
-            const config = {
-                armL: parseInt(document.getElementById('armL').value),
-                armW: parseInt(document.getElementById('armW').value),
-                bodyL: parseInt(document.getElementById('bodyL').value),
-                bodyW: parseInt(document.getElementById('bodyW').value)
-            };
+        function updateModel() {
+            const al = parseInt(document.getElementById('armL').value);
+            const stack = parseFloat(document.getElementById('stackSize').value);
+            
+            document.getElementById('val-armL').innerText = al;
+            document.getElementById('val-stack').innerText = stack + "mm";
 
-            document.getElementById('val-armL').innerText = config.armL;
-            document.getElementById('val-armW').innerText = config.armW;
-            document.getElementById('val-bodyL').innerText = config.bodyL;
-            document.getElementById('val-bodyW').innerText = config.bodyW;
-
-            renderDrone(config);
-        }
-
-        function renderDrone(p) {
-            while(droneGroup.children.length > 0) droneGroup.remove(droneGroup.children[0]);
-
-            const mat = new THREE.MeshPhongMaterial({ color: 0x3b82f6, shininess: 80 });
-
-            // Main Plate
-            const body = new THREE.Mesh(new THREE.BoxGeometry(p.bodyW, 3, p.bodyL), mat);
-            droneGroup.add(body);
-
-            // Arms
-            const armGeo = new THREE.BoxGeometry(p.armL, 3, p.armW);
+            while(frameGroup.children.length > 0) frameGroup.remove(frameGroup.children[0]);
+            
+            const carbonMat = new THREE.MeshPhongMaterial({ color: 0x1e293b, shininess: 100 });
+            
+            // BOTTOM PLATE (X Shape)
+            const armW = al * 0.08;
+            const armGeo = new THREE.BoxGeometry(al, 3, armW);
+            
             for(let i = 0; i < 2; i++) {
-                const arm = new THREE.Mesh(armGeo, mat);
+                const arm = new THREE.Mesh(armGeo, carbonMat);
                 arm.rotation.y = (i === 0) ? Math.PI / 4 : -Math.PI / 4;
-                droneGroup.add(arm);
+                frameGroup.add(arm);
             }
 
-            // Simple Motor Mounts
-            const motorGeo = new THREE.CylinderGeometry(p.armW * 0.7, p.armW * 0.7, 4, 16);
-            const offset = (p.armL / 2) * 0.9;
-            const angle = Math.PI / 4;
-            const posCoords = [
-                [offset * Math.cos(angle), offset * Math.sin(angle)],
-                [-offset * Math.cos(angle), offset * Math.sin(angle)],
-                [offset * Math.cos(angle), -offset * Math.sin(angle)],
-                [-offset * Math.cos(angle), -offset * Math.sin(angle)]
-            ];
+            // CENTER STACK AREA
+            const centerSize = stack + 15;
+            const center = new THREE.Mesh(new THREE.BoxGeometry(centerSize, 3, centerSize), carbonMat);
+            frameGroup.add(center);
 
-            posCoords.forEach(c => {
-                const m = new THREE.Mesh(motorGeo, mat);
-                m.position.set(c[0], 0, c[1]);
-                droneGroup.add(m);
+            // STACK HOLES (Visualized as cylinders)
+            const holeGeo = new THREE.CylinderGeometry(1.5, 1.5, 10, 8);
+            const holeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+            const hPos = stack / 2;
+            const holes = [[hPos, hPos], [hPos, -hPos], [-hPos, hPos], [-hPos, -hPos]];
+            
+            holes.forEach(pos => {
+                const hole = new THREE.Mesh(holeGeo, holeMat);
+                hole.position.set(pos[0], 0, pos[1]);
+                frameGroup.add(hole);
             });
         }
 
         function exportSTL() {
             const exporter = new THREE.STLExporter();
-            const result = exporter.parse(droneGroup);
-            const blob = new Blob([result], { type: 'application/octet-stream' });
+            const result = exporter.parse(frameGroup);
+            saveFile(new Blob([result], { type: 'application/octet-stream' }), 'frame.stl');
+        }
+
+        function exportPDF() {
+            const doc = new jsPDF();
+            const imgData = renderer.domElement.toDataURL("image/png");
+            
+            doc.setFontSize(22);
+            doc.text("FPV Frame Configuration Report", 20, 20);
+            doc.setFontSize(12);
+            doc.text(`Arm Length: ${document.getElementById('armL').value} mm`, 20, 40);
+            doc.text(`Stack Size: ${document.getElementById('stackSize').value} mm`, 20, 50);
+            doc.text(`Generated on: ${new Date().toLocaleString()}`, 20, 60);
+            
+            doc.addImage(imgData, 'PNG', 20, 70, 160, 100);
+            doc.text("Notes: Holes are pre-cut for M3 or M2 hardware based on stack size.", 20, 180);
+            
+            doc.save("frame_config.pdf");
+        }
+
+        function saveFile(blob, filename) {
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `frame_${Date.now()}.stl`;
+            link.download = filename;
             link.click();
         }
 
         function resetCamera() {
-            camera.position.set(200, 200, 200);
+            camera.position.set(160, 160, 160);
             controls.target.set(0,0,0);
         }
 
@@ -232,7 +205,7 @@
             renderer.render(scene, camera);
         }
 
-        init();
+        setTimeout(init, 100);
     </script>
 </body>
 </html>
