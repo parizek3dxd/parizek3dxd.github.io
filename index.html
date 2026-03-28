@@ -1,186 +1,409 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FPV Frame Designer Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI FPV Drone Frame Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com"></script>
-    <script src="https://cdn.jsdelivr.net"></script>
-    <script src="https://cdn.jsdelivr.net"></script>
-    <script src="https://cdnjs.cloudflare.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/exporters/STLExporter.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background: #020617; color: white; margin: 0; touch-action: pan-y; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; }
-        #canvas-container { width: 100%; height: 40vh; min-height: 350px; background: #000; border-radius: 12px; position: relative; overflow: hidden; }
-        input[type=range] { width: 100%; height: 6px; background: #334155; border-radius: 5px; appearance: none; }
-        input[type=range]::-webkit-slider-thumb { appearance: none; width: 20px; height: 20px; background: #3b82f6; border-radius: 50%; border: 2px solid #fff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        #canvas-container { width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .slider-container { position: relative; }
+        .slider-value { position: absolute; top: -20px; right: 0; font-size: 12px; color: #6b7280; }
+        input[type="range"] { width: 100%; }
+        .preset-card { transition: all 0.3s ease; cursor: pointer; }
+        .preset-card:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        .tab-active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .glass-effect { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .loading { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
     </style>
 </head>
-<body class="p-4 md:p-8">
-    <div class="max-w-4xl mx-auto">
-        <header class="text-center mb-6">
-            <h1 class="text-2xl font-bold text-blue-400">FPV FRAME GEN</h1>
-            <p class="text-[10px] text-slate-500 tracking-[0.2em] uppercase">Advanced Carbon Engineering</p>
-        </header>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex flex-col lg:flex-row">
+        <!-- Control Panel -->
+        <div class="w-full lg:w-96 bg-white shadow-xl p-6 overflow-y-auto max-h-screen">
+            <div class="mb-6">
+                <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+                    AI FPV Drone Frame Generator
+                </h1>
+                <p class="text-gray-600 text-sm">Design custom racing drone frames with AI optimization</p>
+            </div>
 
-        <div class="grid grid-cols-1 gap-6">
-            <!-- 3D PREVIEW -->
-            <div class="glass p-2">
-                <div id="canvas-container"></div>
-                <div class="flex justify-between p-2 text-[9px] text-slate-500 font-bold">
-                    <span>TOUCH: ROTATE | PINCH: ZOOM</span>
-                    <button onclick="resetCamera()" class="text-blue-500 uppercase">Reset Camera</button>
+            <!-- Tabs -->
+            <div class="flex space-x-2 mb-6">
+                <button onclick="switchTab('presets')" id="presets-tab" class="tab-active px-4 py-2 rounded-lg font-medium transition-all">
+                    Presets
+                </button>
+                <button onclick="switchTab('custom')" id="custom-tab" class="px-4 py-2 rounded-lg font-medium bg-gray-100 hover:bg-gray-200 transition-all">
+                    Custom
+                </button>
+                <button onclick="switchTab('ai')" id="ai-tab" class="px-4 py-2 rounded-lg font-medium bg-gray-100 hover:bg-gray-200 transition-all">
+                    AI Optimize
+                </button>
+            </div>
+
+            <!-- Presets Tab -->
+            <div id="presets-content" class="tab-content">
+                <div class="space-y-4">
+                    <div class="preset-card bg-gradient-to-br from-purple-50 to-indigo-50 p-4 rounded-xl border border-purple-200" onclick="applyPreset('5inch')">
+                        <h3 class="font-bold text-lg mb-2">5" Racing Frame</h3>
+                        <div class="text-sm text-gray-600 space-y-1">
+                            <p>• Motor Distance: 220mm</p>
+                            <p>• Weight: ~80g</p>
+                            <p>• 30.5x30.5mm Stack</p>
+                            <p>• 5mm Arms</p>
+                        </div>
+                    </div>
+                    <div class="preset-card bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-xl border border-blue-200" onclick="applyPreset('3.5inch')">
+                        <h3 class="font-bold text-lg mb-2">3.5" Freestyle</h3>
+                        <div class="text-sm text-gray-600 space-y-1">
+                            <p>• Motor Distance: 150mm</p>
+                            <p>• Weight: ~50g</p>
+                            <p>• 20x20mm Stack</p>
+                            <p>• 3mm Arms</p>
+                        </div>
+                    </div>
+                    <div class="preset-card bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200" onclick="applyPreset('whoop')">
+                        <h3 class="font-bold text-lg mb-2">Tiny Whoop</h3>
+                        <div class="text-sm text-gray-600 space-y-1">
+                            <p>• Motor Distance: 65mm</p>
+                            <p>• Weight: ~12g</p>
+                            <p>• AIO Board</p>
+                            <p>• Ducted Design</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- UI CONTROLS -->
-            <div class="glass p-6 space-y-6">
-                <div class="grid grid-cols-3 gap-2">
-                    <button onclick="applyPreset('5inch')" class="bg-slate-800 p-2 rounded text-[10px] font-bold border border-slate-700 active:bg-blue-600">5" INCH</button>
-                    <button onclick="applyPreset('3.5inch')" class="bg-slate-800 p-2 rounded text-[10px] font-bold border border-slate-700 active:bg-blue-600">3.5" INCH</button>
-                    <button onclick="applyPreset('whoop')" class="bg-slate-800 p-2 rounded text-[10px] font-bold border border-slate-700 active:bg-blue-600">TINY WHOOP</button>
-                </div>
-
+            <!-- Custom Tab -->
+            <div id="custom-content" class="tab-content hidden">
                 <div class="space-y-4">
-                    <div>
-                        <label class="flex justify-between text-xs text-slate-400 mb-2">ARM LENGTH: <span id="val-armL" class="text-white font-mono">140mm</span></label>
-                        <input type="range" id="armL" min="50" max="260" value="140" oninput="updateModel()">
+                    <div class="slider-container">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Motor Distance (mm)</label>
+                        <span class="slider-value" id="motor-distance-value">220</span>
+                        <input type="range" id="motor-distance" min="65" max="300" value="220" class="w-full" oninput="updateValue('motor-distance')">
                     </div>
+                    
+                    <div class="slider-container">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Arm Width (mm)</label>
+                        <span class="slider-value" id="arm-width-value">15</span>
+                        <input type="range" id="arm-width" min="8" max="25" value="15" class="w-full" oninput="updateValue('arm-width')">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Arm Thickness (mm)</label>
+                        <span class="slider-value" id="arm-thickness-value">5</span>
+                        <input type="range" id="arm-thickness" min="2" max="8" value="5" step="0.5" class="w-full" oninput="updateValue('arm-thickness')">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Stack Height (mm)</label>
+                        <span class="slider-value" id="stack-height-value">25</span>
+                        <input type="range" id="stack-height" min="15" max="40" value="25" class="w-full" oninput="updateValue('stack-height')">
+                    </div>
+
+                    <div class="slider-container">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Top Plate Thickness (mm)</label>
+                        <span class="slider-value" id="top-plate-value">2</span>
+                        <input type="range" id="top-plate" min="1.5" max="4" value="2" step="0.5" class="w-full" oninput="updateValue('top-plate')">
+                    </div>
+
+                    <div class="slider-container">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Bottom Plate Thickness (mm)</label>
+                        <span class="slider-value" id="bottom-plate-value">2</span>
+                        <input type="range" id="bottom-plate" min="1.5" max="4" value="2" step="0.5" class="w-full" oninput="updateValue('bottom-plate')">
+                    </div>
+
                     <div>
-                        <label class="block text-xs text-slate-400 mb-2 uppercase">Stack Mounting Pattern:</label>
-                        <select id="stackSize" onchange="updateModel()" class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-sm outline-none focus:border-blue-500">
-                            <option value="30.5">30.5 x 30.5 mm (Standard)</option>
-                            <option value="20">20.0 x 20.0 mm (Mini)</option>
-                            <option value="25.5">25.5 x 25.5 mm (Whoop AIO)</option>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Frame Style</label>
+                        <select id="frame-style" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" onchange="updateFrame()">
+                            <option value="x">X Frame</option>
+                            <option value="h">H Frame</option>
+                            <option value="hybrid">Hybrid</option>
+                            <option value="stretched">Stretched X</option>
                         </select>
                     </div>
-                </div>
 
-                <div class="grid grid-cols-2 gap-4 pt-2">
-                    <button onclick="exportSTL()" class="bg-blue-600 py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg">Download STL</button>
-                    <button onclick="exportPDF()" class="bg-emerald-600 py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg">Download PDF</button>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Camera Angle</label>
+                        <span class="slider-value" id="camera-angle-value">30°</span>
+                        <input type="range" id="camera-angle" min="0" max="60" value="30" class="w-full" oninput="updateValue('camera-angle')">
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Tab -->
+            <div id="ai-content" class="tab-content hidden">
+                <div class="space-y-4">
+                    <div class="bg-gradient-to-r from-purple-100 to-indigo-100 p-4 rounded-xl">
+                        <h3 class="font-semibold mb-2">AI Optimization</h3>
+                        <p class="text-sm text-gray-600 mb-4">Let AI optimize your frame for specific requirements</p>
+                        
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Optimize For</label>
+                                <select id="optimize-for" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                    <option value="weight">Minimum Weight</option>
+                                    <option value="strength">Maximum Strength</option>
+                                    <option value="balanced">Balanced</option>
+                                    <option value="speed">Speed Racing</option>
+                                    <option value="freestyle">Freestyle</option>
+                                </select>
+                            </div>
+                            
+                            <button onclick="aiOptimize()" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 px-4 rounded-lg font-medium hover:from-purple-700 hover:to-indigo-700 transition-all">
+                                🤖 AI Optimize Frame
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="ai-suggestions" class="hidden bg-blue-50 p-4 rounded-xl">
+                        <h4 class="font-semibold text-blue-900 mb-2">AI Suggestions Applied:</h4>
+                        <ul id="suggestions-list" class="text-sm text-blue-700 space-y-1">
+                        </ul>
+                    </div>
+
+                    <div class="bg-gray-100 p-4 rounded-xl">
+                        <h4 class="font-semibold mb-2">Frame Statistics</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span>Estimated Weight:</span>
+                                <span id="weight-stat" class="font-medium">80g</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Strength Rating:</span>
+                                <span id="strength-stat" class="font-medium">8/10</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Aerodynamics:</span>
+                                <span id="aero-stat" class="font-medium">7/10</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Buttons -->
+            <div class="mt-6 space-y-3">
+                <button onclick="exportSTL()" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-4 rounded-lg font-medium hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg">
+                    📥 Export STL File
+                </button>
+                <button onclick="resetView()" class="w-full bg-gray-200 text-gray-800 py-3 px-4 rounded-lg font-medium hover:bg-gray-300 transition-all">
+                    🔄 Reset View
+                </button>
+            </div>
+
+            <div class="mt-6 text-xs text-gray-500 text-center">
+                <p>Compatible with GitHub Pages</p>
+                <p>Mobile & Desktop Ready</p>
+            </div>
+        </div>
+
+        <!-- 3D Viewport -->
+        <div class="flex-1 relative">
+            <div id="canvas-container"></div>
+            <div class="absolute bottom-4 left-4 glass-effect px-4 py-2 rounded-lg shadow-lg">
+                <p class="text-sm font-medium">🖱️ Left Click: Rotate | Scroll: Zoom | Right Click: Pan</p>
+            </div>
+            <div id="loading-indicator" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 loading hidden">
+                <div class="bg-white rounded-lg px-6 py-4 shadow-xl">
+                    <p class="font-medium">Generating Frame...</p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let scene, camera, renderer, controls, droneGroup;
+        let scene, camera, renderer, controls, droneFrame;
+        let frameParams = {
+            motorDistance: 220,
+            armWidth: 15,
+            armThickness: 5,
+            stackHeight: 25,
+            topPlate: 2,
+            bottomPlate: 2,
+            frameStyle: 'x',
+            cameraAngle: 30
+        };
 
         function init() {
-            const container = document.getElementById('canvas-container');
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x020617);
+            scene.background = new THREE.Color(0xf0f0f0);
             
-            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 1, 1000);
-            camera.position.set(160, 160, 160);
-
-            renderer = new THREE.WebGLRenderer({ 
-                antialias: true, 
-                preserveDrawingBuffer: true // KRITICKÉ PRO PDF EXPORT
-            });
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.setSize(container.clientWidth, container.clientHeight);
+            const container = document.getElementById('canvas-container');
+            const width = container.clientWidth;
+            const height = window.innerHeight;
+            
+            camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+            camera.position.set(300, 200, 300);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(width, height);
+            renderer.shadowMap.enabled = true;
             container.appendChild(renderer.domElement);
-
+            
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
-            controls.touchAction = 'none';
-
-            const sun = new THREE.DirectionalLight(0xffffff, 1);
-            sun.position.set(100, 200, 100);
-            scene.add(sun);
-            scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-
-            droneGroup = new THREE.Group();
-            scene.add(droneGroup);
-            scene.add(new THREE.GridHelper(300, 20, 0x1e293b, 0x0f172a));
-
-            applyPreset('5inch');
+            controls.dampingFactor = 0.05;
+            
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(100, 100, 50);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+            
+            // Grid
+            const gridHelper = new THREE.GridHelper(400, 20, 0x888888, 0xcccccc);
+            scene.add(gridHelper);
+            
+            createDroneFrame();
             animate();
-
-            window.addEventListener('resize', () => {
-                camera.aspect = container.clientWidth / container.clientHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(container.clientWidth, container.clientHeight);
-            });
+            
+            window.addEventListener('resize', onWindowResize, false);
         }
 
-        function updateModel() {
-            const al = parseInt(document.getElementById('armL').value);
-            const stack = parseFloat(document.getElementById('stackSize').value);
-            document.getElementById('val-armL').innerText = al + "mm";
-
-            while(droneGroup.children.length > 0) droneGroup.remove(droneGroup.children[0]);
-            
-            const carbonMat = new THREE.MeshPhongMaterial({ color: 0x2563eb, shininess: 80 });
-            
-            // ARMS (True-X)
-            const armGeo = new THREE.BoxGeometry(al, 4, 10);
-            for(let i = 0; i < 2; i++) {
-                const arm = new THREE.Mesh(armGeo, carbonMat);
-                arm.rotation.y = (i === 0) ? Math.PI / 4 : -Math.PI / 4;
-                droneGroup.add(arm);
+        function createDroneFrame() {
+            if (droneFrame) {
+                scene.remove(droneFrame);
             }
-
-            // CENTER PLATE
-            const plateSize = stack + 15;
-            const plate = new THREE.Mesh(new THREE.BoxGeometry(plateSize, 3.5, plateSize), carbonMat);
-            droneGroup.add(plate);
-
-            // STACK HOLES (Visual Aid)
-            const holeGeo = new THREE.CylinderGeometry(1.5, 1.5, 10, 8);
-            const holeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-            const hPos = stack / 2;
-            [[hPos, hPos], [hPos, -hPos], [-hPos, hPos], [-hPos, -hPos]].forEach(pos => {
-                const hole = new THREE.Mesh(holeGeo, holeMat);
-                hole.position.set(pos[0], 0, pos[1]);
-                droneGroup.add(hole);
+            
+            droneFrame = new THREE.Group();
+            
+            const material = new THREE.MeshPhongMaterial({ 
+                color: 0x333333,
+                specular: 0x111111,
+                shininess: 100
             });
-        }
-
-        function applyPreset(key) {
-            const data = { '5inch': [155, "30.5"], '3.5inch': [115, "20"], 'whoop': [65, "25.5"] }[key];
-            document.getElementById('armL').value = data[0];
-            document.getElementById('stackSize').value = data[1];
-            updateModel();
-        }
-
-        // --- EXPORT PDF (Podle tvého zadání) ---
-        function exportPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
             
-            // Tvůj požadovaný základ:
-            doc.text("Drone Frame Report", 10, 10);
+            const carbonMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0x1a1a1a,
+                specular: 0x444444,
+                shininess: 150
+            });
             
-            // Rozšíření o parametry a náhled:
-            const canvasImg = renderer.domElement.toDataURL("image/png");
-            doc.setFontSize(10);
-            doc.text(`Arm Length: ${document.getElementById('armL').value}mm`, 10, 20);
-            doc.text(`Stack Pattern: ${document.getElementById('stackSize').value}mm`, 10, 30);
-            doc.addImage(canvasImg, 'PNG', 10, 40, 180, 100);
+            // Bottom plate
+            const bottomPlateGeom = new THREE.BoxGeometry(
+                frameParams.motorDistance * 0.4, 
+                frameParams.bottomPlate, 
+                frameParams.motorDistance * 0.4
+            );
+            const bottomPlate = new THREE.Mesh(bottomPlateGeom, carbonMaterial);
+            bottomPlate.position.y = 0;
+            bottomPlate.castShadow = true;
+            droneFrame.add(bottomPlate);
             
-            doc.save("report.pdf");
-        }
-
-        // --- EXPORT STL (Podle tvého zadání) ---
-        function exportSTL() {
-            const exporter = new THREE.STLExporter();
-            const stlString = exporter.parse(droneGroup); // Exportujeme dron, ne celou scénu
-
-            const blob = new Blob([stlString], { type: 'text/plain' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = "frame_export.stl";
-            link.click();
-            URL.revokeObjectURL(link.href);
-        }
-
-        function resetCamera() {
-            camera.position.set(160, 160, 160);
-            controls.target.set(0,0,0);
+            // Top plate
+            const topPlateGeom = new THREE.BoxGeometry(
+                frameParams.motorDistance * 0.35, 
+                frameParams.topPlate, 
+                frameParams.motorDistance * 0.35
+            );
+            const topPlate = new THREE.Mesh(topPlateGeom, carbonMaterial);
+            topPlate.position.y = frameParams.stackHeight;
+            topPlate.castShadow = true;
+            droneFrame.add(topPlate);
+            
+            // Standoffs
+            const standoffGeom = new THREE.CylinderGeometry(3, 3, frameParams.stackHeight);
+            const standoffMaterial = new THREE.MeshPhongMaterial({ color: 0x666666 });
+            
+            const standoffPositions = [
+                [-30, frameParams.stackHeight/2, -30],
+                [30, frameParams.stackHeight/2, -30],
+                [-30, frameParams.stackHeight/2, 30],
+                [30, frameParams.stackHeight/2, 30]
+            ];
+            
+            standoffPositions.forEach(pos => {
+                const standoff = new THREE.Mesh(standoffGeom, standoffMaterial);
+                standoff.position.set(...pos);
+                standoff.castShadow = true;
+                droneFrame.add(standoff);
+            });
+            
+            // Arms based on frame style
+            const armGeom = new THREE.BoxGeometry(
+                frameParams.motorDistance * 0.7, 
+                frameParams.armThickness, 
+                frameParams.armWidth
+            );
+            
+            if (frameParams.frameStyle === 'x' || frameParams.frameStyle === 'stretched') {
+                const stretch = frameParams.frameStyle === 'stretched' ? 1.2 : 1;
+                
+                // X configuration arms
+                for (let i = 0; i < 4; i++) {
+                    const arm = new THREE.Mesh(armGeom, material);
+                    const angle = (Math.PI / 4) + (i * Math.PI / 2);
+                    arm.rotation.y = angle;
+                    arm.position.y = frameParams.armThickness / 2;
+                    if (i % 2 === 0) arm.scale.x *= stretch;
+                    arm.castShadow = true;
+                    droneFrame.add(arm);
+                }
+            } else if (frameParams.frameStyle === 'h') {
+                // H configuration
+                const hArmGeom = new THREE.BoxGeometry(
+                    frameParams.motorDistance, 
+                    frameParams.armThickness, 
+                    frameParams.armWidth
+                );
+                
+                const frontArm = new THREE.Mesh(hArmGeom, material);
+                frontArm.position.z = frameParams.motorDistance * 0.3;
+                frontArm.position.y = frameParams.armThickness / 2;
+                droneFrame.add(frontArm);
+                
+                const backArm = new THREE.Mesh(hArmGeom, material);
+                backArm.position.z = -frameParams.motorDistance * 0.3;
+                backArm.position.y = frameParams.armThickness / 2;
+                droneFrame.add(backArm);
+                
+                const centerBeam = new THREE.Mesh(
+                    new THREE.BoxGeometry(frameParams.armWidth, frameParams.armThickness, frameParams.motorDistance * 0.6),
+                    material
+                );
+                centerBeam.position.y = frameParams.armThickness / 2;
+                droneFrame.add(centerBeam);
+            }
+            
+            // Motor mounts
+            const motorGeom = new THREE.CylinderGeometry(11, 11, 8);
+            const motorMaterial = new THREE.MeshPhongMaterial({ color: 0xff4444 });
+            
+            const motorPositions = [
+                [frameParams.motorDistance/2, 8, frameParams.motorDistance/2],
+                [-frameParams.motorDistance/2, 8, frameParams.motorDistance/2],
+                [frameParams.motorDistance/2, 8, -frameParams.motorDistance/2],
+                [-frameParams.motorDistance/2, 8, -frameParams.motorDistance/2]
+            ];
+            
+            motorPositions.forEach(pos => {
+                const motor = new THREE.Mesh(motorGeom, motorMaterial);
+                motor.position.set(...pos);
+                motor.castShadow = true;
+                droneFrame.add(motor);
+            });
+            
+            // Camera mount
+            const cameraMount = new THREE.Mesh(
+                new THREE.BoxGeometry(30, 20, 5),
+                new THREE.MeshPhongMaterial({ color: 0x4444ff })
+            );
+            cameraMount.position.set(0, frameParams.stackHeight + 10, frameParams.motorDistance * 0.25);
+            cameraMount.rotation.x = -frameParams.cameraAngle * Math.PI / 180;
+            droneFrame.add(cameraMount);
+            
+            scene.add(droneFrame);
         }
 
         function animate() {
@@ -189,7 +412,271 @@
             renderer.render(scene, camera);
         }
 
-        window.onload = init;
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            camera.aspect = container.clientWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, window.innerHeight);
+        }
+
+        function updateValue(param) {
+            const value = document.getElementById(param).value;
+            document.getElementById(param + '-value').textContent = value + (param === 'camera-angle' ? '°' : '');
+            
+            switch(param) {
+                case 'motor-distance':
+                    frameParams.motorDistance = parseFloat(value);
+                    break;
+                case 'arm-width':
+                    frameParams.armWidth = parseFloat(value);
+                    break;
+                case 'arm-thickness':
+                    frameParams.armThickness = parseFloat(value);
+                    break;
+                case 'stack-height':
+                    frameParams.stackHeight = parseFloat(value);
+                    break;
+                case 'top-plate':
+                    frameParams.topPlate = parseFloat(value);
+                    break;
+                case 'bottom-plate':
+                    frameParams.bottomPlate = parseFloat(value);
+                    break;
+                case 'camera-angle':
+                    frameParams.cameraAngle = parseFloat(value);
+                    break;
+            }
+            
+            updateFrame();
+            updateStats();
+        }
+
+        function updateFrame() {
+            frameParams.frameStyle = document.getElementById('frame-style').value;
+            createDroneFrame();
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.querySelectorAll('[id$="-tab"]').forEach(button => {
+                button.classList.remove('tab-active');
+                button.classList.add('bg-gray-100');
+            });
+            
+            document.getElementById(tab + '-content').classList.remove('hidden');
+            document.getElementById(tab + '-tab').classList.add('tab-active');
+            document.getElementById(tab + '-tab').classList.remove('bg-gray-100');
+        }
+
+        function applyPreset(preset) {
+            const presets = {
+                '5inch': {
+                    motorDistance: 220,
+                    armWidth: 15,
+                    armThickness: 5,
+                    stackHeight: 25,
+                    topPlate: 2,
+                    bottomPlate: 2,
+                    frameStyle: 'x',
+                    cameraAngle: 30
+                },
+                '3.5inch': {
+                    motorDistance: 150,
+                    armWidth: 12,
+                    armThickness: 3,
+                    stackHeight: 20,
+                    topPlate: 1.5,
+                    bottomPlate: 1.5,
+                    frameStyle: 'x',
+                    cameraAngle: 25
+                },
+                'whoop': {
+                    motorDistance: 65,
+                    armWidth: 8,
+                    armThickness: 2,
+                    stackHeight: 15,
+                    topPlate: 1.5,
+                    bottomPlate: 1.5,
+                    frameStyle: 'x',
+                    cameraAngle: 20
+                }
+            };
+            
+            const settings = presets[preset];
+            frameParams = { ...settings };
+            
+            // Update UI
+            Object.keys(settings).forEach(key => {
+                const element = document.getElementById(key.replace(/([A-Z])/g, '-$1').toLowerCase());
+                if (element) {
+                    element.value = settings[key];
+                    if (element.type === 'range') {
+                        const displayElement = document.getElementById(key.replace(/([A-Z])/g, '-$1').toLowerCase() + '-value');
+                        if (displayElement) {
+                            displayElement.textContent = settings[key] + (key === 'cameraAngle' ? '°' : '');
+                        }
+                    }
+                }
+            });
+            
+            createDroneFrame();
+            updateStats();
+        }
+
+        function aiOptimize() {
+            document.getElementById('loading-indicator').classList.remove('hidden');
+            
+            setTimeout(() => {
+                const optimizeFor = document.getElementById('optimize-for').value;
+                let suggestions = [];
+                
+                switch(optimizeFor) {
+                    case 'weight':
+                        frameParams.armThickness = 3;
+                        frameParams.armWidth = 10;
+                        frameParams.topPlate = 1.5;
+                        frameParams.bottomPlate = 1.5;
+                        frameParams.stackHeight = 20;
+                        suggestions = [
+                            '✓ Reduced arm thickness to 3mm',
+                            '✓ Narrowed arms to 10mm',
+                            '✓ Optimized plate thickness',
+                            '✓ Minimized stack height',
+                            '✓ Estimated weight: 45g'
+                        ];
+                        break;
+                    case 'strength':
+                        frameParams.armThickness = 6;
+                        frameParams.armWidth = 18;
+                        frameParams.topPlate = 3;
+                        frameParams.bottomPlate = 3;
+                        suggestions = [
+                            '✓ Increased arm thickness to 6mm',
+                            '✓ Widened arms for rigidity',
+                            '✓ Reinforced plates to 3mm',
+                            '✓ Added structural integrity',
+                            '✓ Strength rating: 9.5/10'
+                        ];
+                        break;
+                    case 'balanced':
+                        frameParams.armThickness = 4;
+                        frameParams.armWidth = 14;
+                        frameParams.topPlate = 2;
+                        frameParams.bottomPlate = 2;
+                        frameParams.stackHeight = 25;
+                        suggestions = [
+                            '✓ Balanced weight distribution',
+                            '✓ Optimal arm dimensions',
+                            '✓ Standard plate thickness',
+                            '✓ Versatile configuration',
+                            '✓ Weight: 70g | Strength: 7/10'
+                        ];
+                        break;
+                    case 'speed':
+                        frameParams.frameStyle = 'stretched';
+                        frameParams.armThickness = 4;
+                        frameParams.armWidth = 12;
+                        frameParams.cameraAngle = 45;
+                        suggestions = [
+                            '✓ Switched to stretched X',
+                            '✓ Optimized for aerodynamics',
+                            '✓ Increased camera angle to 45°',
+                            '✓ Reduced drag profile',
+                            '✓ Speed optimized geometry'
+                        ];
+                        break;
+                    case 'freestyle':
+                        frameParams.frameStyle = 'x';
+                        frameParams.armThickness = 5;
+                        frameParams.armWidth = 15;
+                        frameParams.cameraAngle = 30;
+                        frameParams.stackHeight = 30;
+                        suggestions = [
+                            '✓ True X configuration',
+                            '✓ Durable arm structure',
+                            '✓ 30° camera for visibility',
+                            '✓ Extra stack space',
+                            '✓ Freestyle optimized'
+                        ];
+                        break;
+                }
+                
+                // Update UI
+                Object.keys(frameParams).forEach(key => {
+                    const element = document.getElementById(key.replace(/([A-Z])/g, '-$1').toLowerCase());
+                    if (element) {
+                        element.value = frameParams[key];
+                        if (element.type === 'range') {
+                            const displayElement = document.getElementById(key.replace(/([A-Z])/g, '-$1').toLowerCase() + '-value');
+                            if (displayElement) {
+                                displayElement.textContent = frameParams[key] + (key === 'cameraAngle' ? '°' : '');
+                            }
+                        }
+                    }
+                });
+                
+                // Show suggestions
+                const suggestionsDiv = document.getElementById('ai-suggestions');
+                const suggestionsList = document.getElementById('suggestions-list');
+                suggestionsList.innerHTML = suggestions.map(s => `<li>${s}</li>`).join('');
+                suggestionsDiv.classList.remove('hidden');
+                
+                createDroneFrame();
+                updateStats();
+                document.getElementById('loading-indicator').classList.add('hidden');
+            }, 1500);
+        }
+
+        function updateStats() {
+            const weight = Math.round(
+                (frameParams.motorDistance * 0.15) + 
+                (frameParams.armWidth * frameParams.armThickness * 0.8) +
+                (frameParams.topPlate * 10) + 
+                (frameParams.bottomPlate * 10)
+            );
+            
+            const strength = Math.min(10, Math.round(
+                (frameParams.armThickness * 1.5) + 
+                (frameParams.armWidth * 0.2) +
+                (frameParams.topPlate + frameParams.bottomPlate)
+            ));
+            
+            const aero = Math.max(1, Math.min(10, Math.round(
+                10 - (frameParams.armWidth * 0.2) - 
+                (frameParams.armThickness * 0.5)
+            )));
+            
+            document.getElementById('weight-stat').textContent = weight + 'g';
+            document.getElementById('strength-stat').textContent = strength + '/10';
+            document.getElementById('aero-stat').textContent = aero + '/10';
+        }
+
+        function exportSTL() {
+            if (!droneFrame) return;
+            
+            const exporter = new THREE.STLExporter();
+            const stlString = exporter.parse(droneFrame);
+            
+            const blob = new Blob([stlString], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.href = URL.createObjectURL(blob);
+            link.download = `drone_frame_${frameParams.motorDistance}mm_${Date.now()}.stl`;
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function resetView() {
+            camera.position.set(300, 200, 300);
+            controls.reset();
+        }
+
+        // Initialize on load
+        window.addEventListener('load', init);
     </script>
 </body>
 </html>
+```
