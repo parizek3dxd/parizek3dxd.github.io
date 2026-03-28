@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,61 +14,87 @@
         body { font-family: 'Inter', sans-serif; background: #0f172a; color: white; margin: 0; }
         .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; }
         input[type=range] { width: 100%; height: 6px; background: #334155; border-radius: 5px; appearance: none; cursor: pointer; }
-        input[type=range]::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; background: #3b82f6; border-radius: 50%; }
+        input[type=range]::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; background: #3b82f6; border-radius: 50%; border: 2px solid #fff; }
         .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); transition: all 0.3s; }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); }
+        .btn-preset { background: #1e293b; border: 1px solid #334155; transition: all 0.2s; }
+        .btn-preset:hover { background: #334155; }
+        .active-preset { border-color: #3b82f6; background: rgba(59, 130, 246, 0.2); }
         #canvas-container { border-radius: 12px; overflow: hidden; width: 100%; height: 500px; background: #020617; }
     </style>
 </head>
 <body class="p-4 md:p-8">
     <div class="max-w-6xl mx-auto">
         <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-2">Drone Frame Customizer</h1>
-            <p class="text-slate-400">Nastav parametry, prohlédni ve 3D a exportuj pro tisk</p>
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-2">FPV Frame Generator</h1>
+            <p class="text-slate-400">Customize parameters or use presets, then export for 3D printing</p>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Ovládací panel -->
+            <!-- Sidebar -->
             <div class="lg:col-span-1 space-y-6">
-                <div class="glass-card p-6 space-y-6">
-                    <h2 class="text-xl font-semibold border-b border-slate-700 pb-2">Konfigurace (mm)</h2>
+                <!-- Presets -->
+                <div class="glass-card p-6">
+                    <h2 class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">Quick Presets</h2>
+                    <div class="grid grid-cols-1 gap-2">
+                        <button onclick="applyPreset('5inch')" id="pre-5inch" class="btn-preset p-3 rounded-lg text-left text-sm flex justify-between items-center">
+                            <span>Standard 5" Freestyle</span>
+                            <span class="text-xs text-slate-500">225mm</span>
+                        </button>
+                        <button onclick="applyPreset('3.5inch')" id="pre-3.5inch" class="btn-preset p-3 rounded-lg text-left text-sm flex justify-between items-center">
+                            <span>Performance 3.5"</span>
+                            <span class="text-xs text-slate-500 =">160mm</span>
+                        </button>
+                        <button onclick="applyPreset('whoop')" id="pre-whoop" class="btn-preset p-3 rounded-lg text-left text-sm flex justify-between items-center">
+                            <span>Tiny Whoop (65mm)</span>
+                            <span class="text-xs text-slate-500">65mm</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Customization -->
+                <div class="glass-card p-6 space-y-5">
+                    <h2 class="text-sm font-bold text-slate-500 uppercase tracking-widest border-b border-slate-700 pb-2">Dimensions (mm)</h2>
                     
                     <div>
-                        <label class="block text-sm text-slate-400 mb-2">Délka ramen: <span id="val-armL" class="text-blue-400 font-bold">140</span></label>
-                        <input type="range" id="armL" min="50" max="250" value="140" oninput="updateFromSliders()">
+                        <label class="flex justify-between text-xs text-slate-400 mb-2">Arm Length <span id="val-armL" class="text-blue-400 font-bold">140</span></label>
+                        <input type="range" id="armL" min="40" max="280" value="140" oninput="updateFromSliders()">
                     </div>
 
                     <div>
-                        <label class="block text-sm text-slate-400 mb-2">Šířka ramen: <span id="val-armW" class="text-blue-400 font-bold">12</span></label>
-                        <input type="range" id="armW" min="5" max="30" value="12" oninput="updateFromSliders()">
+                        <label class="flex justify-between text-xs text-slate-400 mb-2">Arm Width <span id="val-armW" class="text-blue-400 font-bold">12</span></label>
+                        <input type="range" id="armW" min="4" max="30" value="12" oninput="updateFromSliders()">
                     </div>
 
                     <div>
-                        <label class="block text-sm text-slate-400 mb-2">Délka těla: <span id="val-bodyL" class="text-blue-400 font-bold" >80</span></label>
+                        <label class="flex justify-between text-xs text-slate-400 mb-2">Body Length <span id="val-bodyL" class="text-blue-400 font-bold">80</span></label>
                         <input type="range" id="bodyL" min="20" max="150" value="80" oninput="updateFromSliders()">
                     </div>
 
                     <div>
-                        <label class="block text-sm text-slate-400 mb-2">Šířka těla: <span id="val-bodyW" class="text-blue-400 font-bold">35</span></label>
-                        <input type="range" id="bodyW" min="15" max="60" value="35" oninput="updateFromSliders()">
+                        <label class="flex justify-between text-xs text-slate-400 mb-2">Body Width <span id="val-bodyW" class="text-blue-400 font-bold">35</span></label>
+                        <input type="range" id="bodyW" min="15" max="70" value="35" oninput="updateFromSliders()">
                     </div>
 
                     <div class="pt-4 space-y-3">
-                        <button onclick="exportSTL()" class="w-full btn-primary text-white py-3 rounded-lg font-bold">📥 Exportovat STL</button>
-                        <button onclick="resetCamera()" class="w-full bg-slate-700 hover:bg-slate-600 py-2 rounded-lg text-sm">🔄 Resetovat pohled</button>
+                        <button onclick="exportSTL()" class="w-full btn-primary text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2">
+                            <span>📥 Export STL</span>
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- 3D Náhled -->
+            <!-- Preview -->
             <div class="lg:col-span-2">
-                <div class="glass-card p-4">
-                    <div id="canvas-container"></div>
-                    <div class="mt-4 flex justify-between items-center text-xs text-slate-500">
-                        <span>Levé tlačítko: Otáčení | Pravé: Posun | Kolečko: Zoom</span>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" onchange="toggleWireframe()"> Režim sítě (Wireframe)
-                        </label>
+                <div class="glass-card p-4 h-full flex flex-col">
+                    <div id="canvas-container" class="flex-grow"></div>
+                    <div class="mt-4 flex justify-between items-center text-xs text-slate-500 px-2">
+                        <div class="flex gap-4">
+                            <span>Left Click: Rotate</span>
+                            <span>Right Click: Pan</span>
+                            <span>Scroll: Zoom</span>
+                        </div>
+                        <button onclick="resetCamera()" class="hover:text-blue-400 transition-colors uppercase font-bold tracking-tighter">Reset View</button>
                     </div>
                 </div>
             </div>
@@ -79,38 +105,39 @@
         let scene, camera, renderer, controls, droneGroup;
         let isWireframe = false;
 
+        const presets = {
+            '5inch': { armL: 160, armW: 14, bodyL: 90, bodyW: 38 },
+            '3.5inch': { armL: 115, armW: 10, bodyL: 65, bodyW: 28 },
+            'whoop': { armL: 45, armW: 8, bodyL: 25, bodyW: 25 }
+        };
+
         function init() {
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x020617);
             
             const container = document.getElementById('canvas-container');
             camera = new THREE.PerspectiveCamera(45, container.clientWidth / 500, 1, 2000);
-            camera.position.set(180, 180, 180);
+            camera.position.set(200, 200, 200);
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(container.clientWidth, 500);
             container.appendChild(renderer.domElement);
 
-            // Světla pro plastový vzhled
-            const light1 = new THREE.DirectionalLight(0xffffff, 1);
-            light1.position.set(100, 200, 100);
-            scene.add(light1);
-            const light2 = new THREE.PointLight(0x3b82f6, 0.5);
-            light2.position.set(-100, -100, -100);
-            scene.add(light2);
-            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+            const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+            sun.position.set(100, 200, 100);
+            scene.add(sun);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.4));
 
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
 
-            // Mřížka
-            const grid = new THREE.GridHelper(300, 30, 0x1e293b, 0x0f172a);
+            const grid = new THREE.GridHelper(400, 40, 0x1e293b, 0x0f172a);
             scene.add(grid);
 
             droneGroup = new THREE.Group();
             scene.add(droneGroup);
 
-            updateFromSliders();
+            applyPreset('5inch');
             animate();
 
             window.onresize = () => {
@@ -118,6 +145,19 @@
                 camera.updateProjectionMatrix();
                 renderer.setSize(container.clientWidth, 500);
             };
+        }
+
+        function applyPreset(key) {
+            const p = presets[key];
+            document.getElementById('armL').value = p.armL;
+            document.getElementById('armW').value = p.armW;
+            document.getElementById('bodyL').value = p.bodyL;
+            document.getElementById('bodyW').value = p.bodyW;
+
+            document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active-preset'));
+            document.getElementById('pre-' + key).classList.add('active-preset');
+
+            updateFromSliders();
         }
 
         function updateFromSliders() {
@@ -128,7 +168,6 @@
                 bodyW: parseInt(document.getElementById('bodyW').value)
             };
 
-            // Update textů
             document.getElementById('val-armL').innerText = config.armL;
             document.getElementById('val-armW').innerText = config.armW;
             document.getElementById('val-bodyL').innerText = config.bodyL;
@@ -140,38 +179,34 @@
         function renderDrone(p) {
             while(droneGroup.children.length > 0) droneGroup.remove(droneGroup.children[0]);
 
-            const material = new THREE.MeshPhongMaterial({ 
-                color: 0x3b82f6, 
-                wireframe: isWireframe,
-                shininess: 80 
-            });
+            const mat = new THREE.MeshPhongMaterial({ color: 0x3b82f6, shininess: 80 });
 
-            // Hlavní deska (Plate)
-            const body = new THREE.Mesh(new THREE.BoxGeometry(p.bodyW, 4, p.bodyL), material);
+            // Main Plate
+            const body = new THREE.Mesh(new THREE.BoxGeometry(p.bodyW, 3, p.bodyL), mat);
             droneGroup.add(body);
 
-            // Ramena
-            const armGeo = new THREE.BoxGeometry(p.armL, 4, p.armW);
+            // Arms
+            const armGeo = new THREE.BoxGeometry(p.armL, 3, p.armW);
             for(let i = 0; i < 2; i++) {
-                const arm = new THREE.Mesh(armGeo, material);
+                const arm = new THREE.Mesh(armGeo, mat);
                 arm.rotation.y = (i === 0) ? Math.PI / 4 : -Math.PI / 4;
                 droneGroup.add(arm);
             }
 
-            // Motor Mounts (kolečka na koncích)
-            const motorGeo = new THREE.CylinderGeometry(p.armW * 0.8, p.armW * 0.8, 5, 24);
-            const dist = (p.armL / 2) * 0.9;
-            const positions = [
-                [dist, dist], [dist, -dist], [-dist, dist], [-dist, -dist]
+            // Simple Motor Mounts
+            const motorGeo = new THREE.CylinderGeometry(p.armW * 0.7, p.armW * 0.7, 4, 16);
+            const offset = (p.armL / 2) * 0.9;
+            const angle = Math.PI / 4;
+            const posCoords = [
+                [offset * Math.cos(angle), offset * Math.sin(angle)],
+                [-offset * Math.cos(angle), offset * Math.sin(angle)],
+                [offset * Math.cos(angle), -offset * Math.sin(angle)],
+                [-offset * Math.cos(angle), -offset * Math.sin(angle)]
             ];
 
-            positions.forEach(pos => {
-                const m = new THREE.Mesh(motorGeo, material);
-                // Výpočet rotace pro motor mounts aby seděly na ramenech
-                const angle = Math.PI / 4;
-                const x = pos[0] * Math.cos(angle);
-                const z = pos[1] * Math.sin(angle);
-                m.position.set(x, 0, z);
+            posCoords.forEach(c => {
+                const m = new THREE.Mesh(motorGeo, mat);
+                m.position.set(c[0], 0, c[1]);
                 droneGroup.add(m);
             });
         }
@@ -182,17 +217,12 @@
             const blob = new Blob([result], { type: 'application/octet-stream' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `drone_frame_${Date.now()}.stl`;
+            link.download = `frame_${Date.now()}.stl`;
             link.click();
         }
 
-        function toggleWireframe() {
-            isWireframe = !isWireframe;
-            updateFromSliders();
-        }
-
         function resetCamera() {
-            camera.position.set(180, 180, 180);
+            camera.position.set(200, 200, 200);
             controls.target.set(0,0,0);
         }
 
