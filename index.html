@@ -954,7 +954,7 @@ EOF
     // Export jen frame (ne grid atd.)
     const stlString = exporter.parse(frameGroup);
 
-    const blob = new Blob([stlString], { type: 'text/plain' });
+    const blob = new Blob([stlString], { type: 'application/octet-stream' });
     const url = URL.createObjectURL(blob);
 
     const a = document.createElement('a');
@@ -1004,8 +1004,8 @@ EOF
             });
 
             // Warnings
-            doc.setFontSize(14);
-            doc.text('Important Notes', 20, 130);
+            doc.setFontSize(12);
+            doc.text('IMPORTANT NOTES', 20, 130);
             
             doc.setFontSize(10);
             doc.text('- Always verify measurements before manufacturing', 25, 140);
