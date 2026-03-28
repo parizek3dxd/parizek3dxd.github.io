@@ -9,7 +9,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three-csg-ts@2.0.6/lib/three-csg.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/STLExporter.js"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
@@ -541,6 +543,20 @@
             window.addEventListener('resize', onWindowResize);
         }
 
+        function cutHole(mesh, holeX, holeZ, radius, height) {
+    const holeGeo = new THREE.CylinderGeometry(radius, radius, height, 16);
+    const holeMesh = new THREE.Mesh(holeGeo);
+
+    holeMesh.position.set(holeX, 0, holeZ);
+
+    const bspMesh = CSG.fromMesh(mesh);
+    const bspHole = CSG.fromMesh(holeMesh);
+
+    const result = bspMesh.subtract(bspHole);
+
+    return CSG.toMesh(result, mesh.matrix, mesh.material);
+}
+        
         function createFrame() {
             if (frameGroup) {
                 scene.remove(frameGroup);
@@ -567,9 +583,38 @@
             });
 
             // Center body plate
-            const bodyGeometry = new THREE.BoxGeometry(bodySize, thickness, bodySize);
-            const bodyMesh = new THREE.Mesh(bodyGeometry, material);
-            frameGroup.add(bodyMesh);
+    const bodyShape = new THREE.Shape();
+const half = bodySize / 2;
+
+// čtverec (zatím jednoduchý, ale “CAD-ready”)
+bodyShape.moveTo(-half, -half);
+bodyShape.lineTo(half, -half);
+bodyShape.lineTo(half, half);
+bodyShape.lineTo(-half, half);
+bodyShape.lineTo(-half, -half);
+
+const armShape = new THREE.Shape();
+
+const w = armWidth / 2;
+
+armShape.moveTo(0, -w);
+armShape.lineTo(armLength, -w);
+armShape.lineTo(armLength, w);
+armShape.lineTo(0, w);
+armShape.lineTo(0, -w);
+
+const armGeo = new THREE.ExtrudeGeometry(armShape, {
+    depth: thickness,
+    bevelEnabled: true,
+    bevelThickness: 0.2,
+    bevelSize: 0.2,
+    bevelSegments: 1
+});
+
+const bodyMesh = new THREE.Mesh(bodyGeo, material);
+bodyMesh.rotation.x = -Math.PI / 2;
+
+frameGroup.add(bodyMesh);
 
             // Arms
             for (let i = 0; i < 4; i++) {
@@ -578,9 +623,11 @@
                 // Arm body
                 const armGeo = new THREE.BoxGeometry(armLength, thickness, armWidth);
                 const armMesh = new THREE.Mesh(armGeo, material);
+                armMesh.rotation.x = -Math.PI / 2;
+armMesh.rotation.z = angle;
                 
-                armMesh.position.x = Math.cos(angle) * (armLength / 2 + bodySize / 2);
-                armMesh.position.z = Math.sin(angle) * (armLength / 2 + bodySize / 2);
+            armMesh.position.x = Math.cos(angle) * (bodySize / 2);
+armMesh.position.z = Math.sin(angle) * (bodySize / 2);
                 armMesh.rotation.y = -angle;
                 
                 frameGroup.add(armMesh);
