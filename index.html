@@ -1,60 +1,1048 @@
-<html>
+```html
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Hlavní Stránka</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      color: #333;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background-color: #333;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-    main {
-      padding: 20px;
-      max-width: 800px;
-      margin: auto;
-      background: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h1, h2 {
-      color: #444;
-    }
-    ul {
-      padding-left: 20px;
-    }
-    footer {
-      text-align: center;
-      padding: 10px;
-      background: #eee;
-      margin-top: 30px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drone Frame Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+        }
+        
+        .input-field {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            padding: 10px 14px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        
+        .input-field:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        label {
+            color: #94a3b8;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            display: block;
+        }
+        
+        .size-btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .size-btn.active {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.2);
+        }
+        
+        .warning-box {
+            background: rgba(234, 179, 8, 0.1);
+            border-left: 4px solid #eab308;
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 8px 0;
+        }
+        
+        .warning-box.error {
+            background: rgba(239, 68, 68, 0.1);
+            border-left-color: #ef4444;
+        }
+        
+        .warning-box.info {
+            background: rgba(59, 130, 246, 0.1);
+            border-left-color: #3b82f6;
+        }
+        
+        .warning-icon {
+            color: #eab308;
+            margin-right: 8px;
+        }
+        
+        .warning-box.error .warning-icon {
+            color: #ef4444;
+        }
+        
+        .warning-box.info .warning-icon {
+            color: #3b82f6;
+        }
+        
+        #canvas-container {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            color: #94a3b8;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-btn.active {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+        
+        .range-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+        
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+    </style>
 </head>
-<body>
-  <header>
-    <h1>HLAVNÍ STRÁNKA</h1>
-  </header>
-  <main>
-    <h2>O mně</h2>
-    <p>Jsem 3D grafik a vášnivý modelář v oblasti RC letadel.</p>
+<body class="text-white p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-2">
+                🛩️ Drone Frame Generator
+            </h1>
+            <p class="text-slate-400">Design custom frames for 5", 3.5" and mini whoop builds</p>
+        </header>
 
-    <h2>Projekty</h2>
-    <ul>
-      <li><strong>SPACE SHUTLE Z XPS:</strong> space shutle: 2x servo 9g 180 stupňů, motor s regulátorem, příjmač a baterie (XPS)</li>
-      <li><strong>Web vizitka:</strong> jednoduchý web o RC létání</li>
-    </ul>
-  </main>
-  <footer>
-    &copy; 2025 Pařízek3DXD
-  </footer>
+        <!-- Size Selection -->
+        <div class="glass-card p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Select Frame Size</h2>
+            <div class="flex flex-wrap gap-4">
+                <button onclick="setSize('5inch')" id="btn-5inch" class="size-btn active bg-slate-700 hover:bg-slate-600">
+                    📏 5" Inch (Standard Freestyle)
+                </button>
+                <button onclick="setSize('3.5inch')" id="btn-3.5inch" class="size-btn bg-slate-700 hover:bg-slate-600">
+                    📏 3.5" Inch (Cinematic)
+                </button>
+                <button onclick="setSize('miniwhoop')" id="btn-miniwhoop" class="size-btn bg-slate-700 hover:bg-slate-600">
+                    📏 Mini Whoop (65mm-75mm)
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Controls Panel -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- 3D Preview -->
+                <div class="glass-card p-6">
+                    <h2 class="text-xl font-semibold mb-4">3D Preview</h2>
+                    <div id="canvas-container" class="w-full h-96 bg-gradient-to-b from-slate-800 to-slate-900"></div>
+                    <div class="flex gap-2 mt-4">
+                        <button onclick="resetCamera()" class="btn-secondary text-sm">🔄 Reset View</button>
+                        <button onclick="toggleWireframe()" class="btn-secondary text-sm">🔲 Toggle Wireframe</button>
+                    </div>
+                </div>
+
+                <!-- Parameters -->
+                <div class="glass-card p-6">
+                    <div class="flex gap-4 mb-6 border-b border-slate-700 pb-4">
+                        <button onclick="switchTab('dimensions')" id="tab-dimensions" class="tab-btn active">Dimensions</button>
+                        <button onclick="switchTab('material')" id="tab-material" class="tab-btn">Material</button>
+                        <button onclick="switchTab('motors')" id="tab-motors" class="tab-btn">Motors</button>
+                    </div>
+
+                    <!-- Dimensions Tab -->
+                    <div id="panel-dimensions" class="tab-panel">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label>Arm Length (mm)</label>
+                                <input type="range" min="60" max="150" value="110" id="armLength" class="range-slider mb-2" oninput="updateParam('armLength', this.value)">
+                                <span class="text-blue-400 font-mono" id="armLength-val">110mm</span>
+                            </div>
+                            <div>
+                                <label>Arm Width (mm)</label>
+                                <input type="range" min="8" max="25" value="15" id="armWidth" class="range-slider mb-2" oninput="updateParam('armWidth', this.value)">
+                                <span class="text-blue-400 font-mono" id="armWidth-val">15mm</span>
+                            </div>
+                            <div>
+                                <label>Plate Thickness (mm)</label>
+                                <input type="range" min="2" max="6" value="3" id="thickness" class="range-slider mb-2" oninput="updateParam('thickness', this.value)">
+                                <span class="text-blue-400 font-mono" id="thickness-val">3mm</span>
+                            </div>
+                            <div>
+                                <label>Body Size (mm)</label>
+                                <input type="range" min="20" max="60" value="35" id="bodySize" class="range-slider mb-2" oninput="updateParam('bodySize', this.value)">
+                                <span class="text-blue-400 font-mono" id="bodySize-val">35mm</span>
+                            </div>
+                            <div>
+                                <label>Arm Angle Offset</label>
+                                <input type="range" min="35" max="55" value="45" id="armAngle" class="range-slider mb-2" oninput="updateParam('armAngle', this.value)">
+                                <span class="text-blue-400 font-mono" id="armAngle-val">45°</span>
+                            </div>
+                            <div>
+                                <label>Motor Mount Diameter (mm)</label>
+                                <input type="range" min="12" max="31" value="16" id="motorMount" class="range-slider mb-2" oninput="updateParam('motorMount', this.value)">
+                                <span class="text-blue-400 font-mono" id="motorMount-val">16mm</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Material Tab -->
+                    <div id="panel-material" class="tab-panel hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label>Material Type</label>
+                                <select id="materialType" class="input-field w-full" onchange="updateMaterial()">
+                                    <option value="carbon">Carbon Fiber (3K Twill)</option>
+                                    <option value=" fiberglass"> fiberglass (FR4)</option>
+                                    <option value="glass">Plain Glass Fiber</option>
+                                    <option value="aluminum">Aluminum 6061</option>
+                                    <option value="pla">PLA Plastic</option>
+                                    <option value="pa12">Nylon PA12 (3D Print)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Weave Pattern</label>
+                                <select id="weavePattern" class="input-field w-full" onchange="updateFrame()">
+                                    <option value="twill">Twill Weave</option>
+                                    <option value="plain">Plain Weave</option>
+                                    <option value="unidirectional">Unidirectional</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Layer Count</label>
+                                <input type="range" min="1" max="6" value="2" id="layerCount" class="range-slider mb-2" oninput="updateParam('layerCount', this.value)">
+                                <span class="text-blue-400 font-mono" id="layerCount-val">2 layers</span>
+                            </div>
+                            <div>
+                                <label>Finish Type</label>
+                                <select id="finishType" class="input-field w-full" onchange="updateFrame()">
+                                    <option value="matte">Matte (Sandblasted)</option>
+                                    <option value="glossy">Glossy (Wet Look)</option>
+                                    <option value="textured">Textured (Non-slip)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Motors Tab -->
+                    <div id="panel-motors" class="tab-panel hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label>Motor Size</label>
+                                <select id="motorSize" class="input-field w-full" onchange="updateFrame()">
+                                    <option value="2306">2306 (5" standard)</option>
+                                    <option value="2207">2207 (5" freestyle)</option>
+                                    <option value="1106">1106 (3.5")</option>
+                                    <option value="1107">1107 (3.5"/Mini)</option>
+                                    <option value="0802">0802 (Mini Whoop)</option>
+                                    <option value="0603">0603 (Micro Whoop)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>KV Rating</label>
+                                <select id="motorKV" class="input-field w-full" onchange="updateFrame()">
+                                    <option value="2300">2300 KV (Heavy LiHV)</option>
+                                    <option value="2500">2500 KV (6S LiPo)</option>
+                                    <option value="2700">2700 KV (6S Light)</option>
+                                    <option value="3000">3000 KV (4S LiPo)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Motor Holes Pattern</label>
+                                <select id="motorPattern" class="input-field w-full" onchange="updateFrame()">
+                                    <option value="9mm">9mm (M2 screws)</option>
+                                    <option value="12mm">12mm (M2 screws)</option>
+                                    <option value="16mm">16mm (M3 screws)</option>
+                                    <option value="19mm">19mm (M3 screws)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Propeller Size</label>
+                                <input type="text" id="propSize" class="input-field w-full" value="5 inch" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export -->
+                <div class="glass-card p-6">
+                    <h2 class="text-xl font-semibold mb-4">📦 Export</h2>
+                    <div class="flex flex-wrap gap-4">
+                        <button onclick="exportDXF()" class="btn-primary">📐 Export DXF</button>
+                        <button onclick="exportSTL()" class="btn-secondary">📦 Export STL</button>
+                        <button onclick="exportPDF()" class="btn-secondary">📄 Export PDF Specs</button>
+                        <button onclick="saveConfig()" class="btn-secondary">💾 Save Config</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warnings & Info Panel -->
+            <div class="space-y-6">
+                <!-- Frame Specs -->
+                <div class="glass-card p-6">
+                    <h2 class="text-xl font-semibold mb-4">📊 Frame Specifications</h2>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Frame Type:</span>
+                            <span id="spec-type" class="font-mono text-blue-400">5" X-Frame</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Wheelbase:</span>
+                            <span id="spec-wheelbase" class="font-mono text-green-400">220mm</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Max Prop Size:</span>
+                            <span id="spec-props" class="font-mono text-purple-400">5.5"</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Weight (Est):</span>
+                            <span id="spec-weight" class="font-mono text-orange-400">45g</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Material:</span>
+                            <span id="spec-material" class="font-mono text-cyan-400">Carbon Fiber</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Warnings -->
+                <div class="glass-card p-6">
+                    <h2 class="text-xl font-semibold mb-4">⚠️ Warnings & Alerts</h2>
+                    <div id="warnings-container" class="space-y-2">
+                        <div class="warning-box info">
+                            <span class="warning-icon">ℹ️</span>
+                            <span>Frame generator ready. Adjust parameters to see real-time updates.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Motor Compatibility -->
+                <div class="glass-card p-6">
+                    <h2 class="text-xl font-semibold mb-4">🔧 Motor Compatibility</h2>
+                    <div id="motor-compatibility" class="space-y-3 text-sm">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                            <span>2306/2207 Motors - Compatible</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                            <span>16mm / 19mm Mount Pattern</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                            <span>Check prop clearance</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Tips -->
+                <div class="glass-card p-6">
+                    <h2 class="text-xl font-semibold mb-4">💡 Design Tips</h2>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li>• <span class="text-blue-400">Arms:</span> Thicker arms = stronger but heavier</li>
+                        <li>• <span class="text-blue-400">Plate:</span> 3mm ideal for 5", 2mm for whoops</li>
+                        <li>• <span class="text-blue-400">Clearance:</span> Keep 5mm between prop and arm</li>
+                        <li>• <span class="text-blue-400">Vibration:</span> Use staggered motor screws</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center text-slate-500 mt-8 pb-8">
+            <p>Drone Frame Generator v1.0 | For Educational Purposes</p>
+            <p class="text-xs mt-2">Always verify measurements before manufacturing</p>
+        </footer>
+    </div>
+
+    <script>
+        // ================= CONFIGURATION =================
+        let config = {
+            size: '5inch',
+            armLength: 110,
+            armWidth: 15,
+            thickness: 3,
+            bodySize: 35,
+            armAngle: 45,
+            motorMount: 16,
+            material: 'carbon',
+            layerCount: 2
+        };
+
+        const sizePresets = {
+            '5inch': {
+                armLength: 110,
+                armWidth: 15,
+                thickness: 3,
+                bodySize: 35,
+                armAngle: 45,
+                motorMount: 16,
+                maxProp: '5.5"',
+                wheelbase: 220,
+                propSize: '5 inch'
+            },
+            '3.5inch': {
+                armLength: 70,
+                armWidth: 12,
+                thickness: 2.5,
+                bodySize: 28,
+                armAngle: 45,
+                motorMount: 12,
+                maxProp: '4"',
+                wheelbase: 140,
+                propSize: '3.5 inch'
+            },
+            'miniwhoop': {
+                armLength: 35,
+                armWidth: 8,
+                thickness: 1.5,
+                bodySize: 20,
+                armAngle: 45,
+                motorMount: 6,
+                maxProp: '2.5"',
+                wheelbase: 65,
+                propSize: '2 inch'
+            }
+        };
+
+        // ================= THREE.JS SETUP =================
+        let scene, camera, renderer, controls;
+        let frameGroup;
+        let isWireframe = false;
+
+        function initThree() {
+            const container = document.getElementById('canvas-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a2e);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+            camera.position.set(100, 80, 100);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(50, 50, 50);
+            scene.add(directionalLight);
+
+            const directionalLight2 = new THREE.DirectionalLight(0x8888ff, 0.4);
+            directionalLight2.position.set(-50, -50, -50);
+            scene.add(directionalLight2);
+
+            // Grid
+            const gridHelper = new THREE.GridHelper(200, 20, 0x333355, 0x222244);
+            scene.add(gridHelper);
+
+            // Initial frame
+            createFrame();
+
+            // Animation loop
+            animate();
+
+            // Handle resize
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function createFrame() {
+            if (frameGroup) {
+                scene.remove(frameGroup);
+            }
+
+            frameGroup = new THREE.Group();
+
+            const { armLength, armWidth, thickness, bodySize, armAngle, motorMount } = config;
+            const angleRad = (armAngle * Math.PI) / 180;
+
+            // Material
+            const materialColor = config.material === 'carbon' ? 0x1a1a1a : 
+                                 config.material === 'fiberglass' ? 0x2d4a3e :
+                                 config.material === 'glass' ? 0x87ceeb :
+                                 config.material === 'aluminum' ? 0x888888 :
+                                 config.material === 'pla' ? 0x2244aa : 0xdddddd;
+            
+            const material = new THREE.MeshPhongMaterial({
+                color: materialColor,
+                specular: 0x444444,
+                shininess: 30,
+                flatShading: false,
+                side: THREE.DoubleSide
+            });
+
+            // Center body plate
+            const bodyGeometry = new THREE.BoxGeometry(bodySize, thickness, bodySize);
+            const bodyMesh = new THREE.Mesh(bodyGeometry, material);
+            frameGroup.add(bodyMesh);
+
+            // Arms
+            for (let i = 0; i < 4; i++) {
+                const angle = (i * Math.PI / 2) + (angleRad * Math.PI / 180);
+                
+                // Arm body
+                const armGeo = new THREE.BoxGeometry(armLength, thickness, armWidth);
+                const armMesh = new THREE.Mesh(armGeo, material);
+                
+                armMesh.position.x = Math.cos(angle) * (armLength / 2 + bodySize / 2);
+                armMesh.position.z = Math.sin(angle) * (armLength / 2 + bodySize / 2);
+                armMesh.rotation.y = -angle;
+                
+                frameGroup.add(armMesh);
+
+                // Motor mount cone
+                const coneHeight = 5;
+                const coneGeo = new THREE.CylinderGeometry(motorMount / 2 + 2, motorMount / 2, coneHeight, 16);
+                const coneMesh = new THREE.Mesh(coneGeo, material);
+                
+                coneMesh.position.x = Math.cos(angle) * (armLength + bodySize / 2);
+                coneMesh.position.z = Math.sin(angle) * (armLength + bodySize / 2);
+                coneMesh.position.y = thickness / 2;
+                
+                frameGroup.add(coneMesh);
+
+                // Motor holes
+                const holeCount = 4;
+                const holeRadius = config.size === 'miniwhoop' ? 3 : 4;
+                const pattern = config.size === 'miniwhoop' ? 6 : (config.size === '3.5inch' ? 9 : 12);
+                
+                for (let h = 0; h < holeCount; h++) {
+                    const holeAngle = (h * Math.PI / 2);
+                    const holeX = Math.cos(angle + holeAngle) * (pattern / 2);
+                    const holeZ = Math.sin(angle + holeAngle) * (pattern / 2);
+                    
+                    const holeGeo = new THREE.CylinderGeometry(holeRadius, holeRadius, thickness + 2, 8);
+                    const holeMesh = new THREE.Mesh(holeGeo, new THREE.MeshBasicMaterial({ color: 0x000000 }));
+                    
+                    holeMesh.position.x = coneMesh.position.x + holeX;
+                    holeMesh.position.z = coneMesh.position.z + holeZ;
+                    holeMesh.position.y = 0;
+                    
+                    frameGroup.add(holeMesh);
+                }
+            }
+
+            // Add camera mounts
+            const camSize = config.size === '5inch' ? 28 : (config.size === '3.5inch' ? 20 : 14);
+            const camGeo = new THREE.BoxGeometry(camSize, 6, camSize);
+            const camMesh = new THREE.Mesh(camGeo, material);
+            camMesh.position.y = thickness / 2 + 3;
+            frameGroup.add(camMesh);
+
+            scene.add(frameGroup);
+            updateWarnings();
+            updateSpecs();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        }
+
+        // ================= CONTROLS =================
+        function setSize(size) {
+            config.size = size;
+            
+            // Update buttons
+            document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-${size}`).classList.add('active');
+
+            // Set preset values
+            const preset = sizePresets[size];
+            config.armLength = preset.armLength;
+            config.armWidth = preset.armWidth;
+            config.thickness = preset.thickness;
+            config.bodySize = preset.bodySize;
+            config.armAngle = preset.armAngle;
+            config.motorMount = preset.motorMount;
+
+            // Update sliders
+            document.getElementById('armLength').value = config.armLength;
+            document.getElementById('armWidth').value = config.armWidth;
+            document.getElementById('thickness').value = config.thickness;
+            document.getElementById('bodySize').value = config.bodySize;
+            document.getElementById('armAngle').value = config.armAngle;
+            document.getElementById('motorMount').value = config.motorMount;
+            document.getElementById('propSize').value = preset.propSize;
+
+            // Update displays
+            updateDisplays();
+
+            // Update motor size dropdown based on size
+            const motorSelect = document.getElementById('motorSize');
+            if (size === '5inch') {
+                motorSelect.value = '2306';
+            } else if (size === '3.5inch') {
+                motorSelect.value = '1107';
+            } else {
+                motorSelect.value = '0802';
+            }
+
+            createFrame();
+        }
+
+        function updateParam(param, value) {
+            config[param] = parseFloat(value);
+            document.getElementById(`${param}-val`).textContent = value + (param === 'armAngle' ? '°' : param === 'layerCount' ? ' layers' : 'mm');
+            createFrame();
+        }
+
+        function updateMaterial() {
+            config.material = document.getElementById('materialType').value;
+            createFrame();
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.add('hidden'));
+            document.getElementById(`panel-${tab}`).classList.remove('hidden');
+        }
+
+        function updateDisplays() {
+            document.getElementById('armLength-val').textContent = config.armLength + 'mm';
+            document.getElementById('armWidth-val').textContent = config.armWidth + 'mm';
+            document.getElementById('thickness-val').textContent = config.thickness + 'mm';
+            document.getElementById('bodySize-val').textContent = config.bodySize + 'mm';
+            document.getElementById('armAngle-val').textContent = config.armAngle + '°';
+            document.getElementById('motorMount-val').textContent = config.motorMount + 'mm';
+            document.getElementById('layerCount-val').textContent = config.layerCount + ' layers';
+        }
+
+        function resetCamera() {
+            camera.position.set(100, 80, 100);
+            controls.reset();
+        }
+
+        function toggleWireframe() {
+            isWireframe = !isWireframe;
+            frameGroup.traverse((child) => {
+                if (child.isMesh && child.material) {
+                    child.material.wireframe = isWireframe;
+                }
+            });
+        }
+
+        // ================= WARNINGS SYSTEM =================
+        function updateWarnings() {
+            const warnings = [];
+            const { armLength, armWidth, thickness, bodySize, motorMount, armAngle } = config;
+            const preset = sizePresets[config.size];
+
+            // Arm width warnings
+            if (armWidth < 10 && config.size === '5inch') {
+                warnings.push({
+                    type: 'error',
+                    text: '⚠️ Arms too thin! Minimum 10mm recommended for 5" frames to prevent breakage.'
+                });
+            }
+
+            // Thickness warnings
+            if (thickness < 2 && config.size === '5inch') {
+                warnings.push({
+                    type: 'warning',
+                    text: '⚠️ Plate too thin for 5" - recommend at least 2.5mm for durability.'
+                });
+            }
+
+            // Motor mount warnings
+            if (motorMount > 20 && config.size === 'miniwhoop') {
+                warnings.push({
+                    type: 'warning',
+                    text: '⚠️ Large motor mount on mini whoop - verify motor compatibility.'
+                });
+            }
+
+            // Prop clearance check
+            const propSize = parseFloat(preset.maxProp);
+            const clearance = (armLength * 2) - (bodySize * 2) - (propSize * 25.4);
+            if (clearance < 5) {
+                warnings.push({
+                    type: 'error',
+                    text: '🚨 PROP COLLISION WARNING: Insufficient clearance between props and body!'
+                });
+            } else if (clearance < 10) {
+                warnings.push({
+                    type: 'warning',
+                    text: '⚠️ Low prop clearance (' + Math.round(clearance) + 'mm). Consider reducing prop size or arm length.'
+                });
+            }
+
+            // Weight estimate
+            const estWeight = (armLength * armWidth * 4 * thickness * 0.0015 + bodySize * bodySize * thickness * 0.002).toFixed(1);
+            if (estWeight > 60) {
+                warnings.push({
+                    type: 'warning',
+                    text: '⚠️ Heavy frame estimated (' + estWeight + 'g). Consider reducing thickness or arm size.'
+                });
+            }
+
+            // Arm angle warnings
+            if (armAngle > 50) {
+                warnings.push({
+                    type: 'info',
+                    text: 'ℹ️ Wide arm angle reduces prop wash on arms but increases frame footprint.'
+                });
+            }
+
+            // Material specific warnings
+            if (config.material === 'pla' && config.size === '5inch') {
+                warnings.push({
+                    type: 'warning',
+                    text: '⚠️ PLA not recommended for 5" - will soften in heat. Use PA12 or Carbon Fiber.'
+                });
+            }
+
+            if (config.material === 'aluminum' && thickness < 4) {
+                warnings.push({
+                    type: 'warning',
+                    text: '⚠️ Aluminum under 4mm may bend. Consider thicker plates or different material.'
+                });
+            }
+
+            // Layer count
+            if (config.layerCount > 3 && config.material === 'carbon') {
+                warnings.push({
+                    type: 'info',
+                    text: 'ℹ️ High layer count increases strength but adds weight and cost.'
+                });
+            }
+
+            // Render warnings
+            const container = document.getElementById('warnings-container');
+            container.innerHTML = warnings.map(w => `
+                <div class="warning-box ${w.type}">
+                    <span class="warning-icon">${w.text.split(' ')[0]}</span>
+                    <span>${w.text.substring(w.text.indexOf(' ') + 1)}</span>
+                </div>
+            `).join('');
+
+            if (warnings.length === 0) {
+                container.innerHTML = `
+                    <div class="warning-box info">
+                        <span class="warning-icon">✅</span>
+                        <span>Frame design looks good! No warnings.</span>
+                    </div>
+                `;
+            }
+        }
+
+        function updateSpecs() {
+            const preset = sizePresets[config.size];
+            const { armLength, armWidth, thickness, bodySize } = config;
+            
+            // Calculate wheelbase
+            const wheelbase = Math.round(armLength * 2 + bodySize);
+
+            // Estimate weight
+            const weight = ((armLength * armWidth * 4 * thickness * 0.0015) + 
+                          (bodySize * bodySize * thickness * 0.002) + 
+                          (config.layerCount * 5)).toFixed(1);
+
+            document.getElementById('spec-type').textContent = config.size === '5inch' ? '5" X-Frame' : 
+                                                               config.size === '3.5inch' ? '3.5" X-Frame' : 'Mini Whoop';
+            document.getElementById('spec-wheelbase').textContent = wheelbase + 'mm';
+            document.getElementById('spec-props').textContent = preset.maxProp;
+            document.getElementById('spec-weight').textContent = weight + 'g';
+            
+            const matNames = {
+                'carbon': 'Carbon Fiber',
+                'fiberglass': 'FR4 Fiberglass',
+                'glass': 'Plain Glass',
+                'aluminum': 'Aluminum 6061',
+                'pla': 'PLA Plastic',
+                'pa12': 'Nylon PA12'
+            };
+            document.getElementById('spec-material').textContent = matNames[config.material];
+
+            // Update motor compatibility
+            updateMotorCompatibility();
+        }
+
+        function updateMotorCompatibility() {
+            const container = document.getElementById('motor-compatibility');
+            let html = '';
+
+            const motorInfo = {
+                '5inch': { motors: ['2306', '2207'], mount: '16mm/19mm' },
+                '3.5inch': { motors: ['1106', '1107'], mount: '9mm/12mm' },
+                'miniwhoop': { motors: ['0802', '0603'], mount: '6mm' }
+            };
+
+            const info = motorInfo[config.size];
+            
+            info.motors.forEach(motor => {
+                html += `<div class="flex items-center gap-2">
+                    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                    <span>${motor} Motors - Compatible</span>
+                </div>`;
+            });
+
+            html += `<div class="flex items-center gap-2">
+                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                <span>${info.mount} Mount Pattern</span>
+            </div>`;
+
+            const preset = sizePresets[config.size];
+            html += `<div class="flex items-center gap-2">
+                <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
+                <span>Max prop: ${preset.maxProp}</span>
+            </div>`;
+
+            container.innerHTML = html;
+        }
+
+        // ================= EXPORT FUNCTIONS =================
+        function exportDXF() {
+            const { armLength, armWidth, thickness, bodySize, motorMount, armAngle } = config;
+            
+            // Create simple DXF content
+            let dxf = `0
+SECTION
+2
+ENTITIES
+`;
+            
+            // Draw arms
+            const angleRad = (armAngle * Math.PI) / 180;
+            for (let i = 0; i < 4; i++) {
+                const angle = (i * Math.PI / 2) + angleRad;
+                const x1 = Math.cos(angle) * (bodySize / 2);
+                const y1 = Math.sin(angle) * (bodySize / 2);
+                const x2 = Math.cos(angle) * (armLength + bodySize / 2);
+                const y2 = Math.sin(angle) * (armLength + bodySize / 2);
+                
+                dxf += `0
+LINE
+8
+ARM${i}
+10
+${x1.toFixed(3)}
+20
+${y1.toFixed(3)}
+30
+0
+11
+${x2.toFixed(3)}
+21
+${y2.toFixed(3)}
+31
+0
+`;
+            }
+
+            dxf += `0
+ENDSEC
+0
+EOF
+`;
+
+            downloadFile(dxf, `drone_frame_${config.size}.dxf`, 'application/dxf');
+            showExportSuccess('DXF exported successfully!');
+        }
+
+        function exportSTL() {
+            // For a proper STL export, we'd need more complex geometry processing
+            // This is a simplified version
+            const info = `Drone Frame STL Export
+Size: ${config.size}
+Arm Length: ${config.armLength}mm
+Arm Width: ${config.armWidth}mm
+Thickness: ${config.thickness}mm
+Body Size: ${config.bodySize}mm
+
+Note: For actual STL export, use CAD software with the DXF file.`;
+
+            downloadFile(info, `drone_frame_${config.size}_specs.txt`, 'text/plain');
+            showExportSuccess('STL specs exported! (Full STL requires CAD software)');
+        }
+
+        function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Title
+            doc.setFontSize(20);
+            doc.text('Drone Frame Specification', 105, 20, { align: 'center' });
+
+            doc.setFontSize(12);
+            doc.text(`Generated: ${new Date().toLocaleDateString()}`, 105, 30, { align: 'center' });
+
+            // Frame Details
+            doc.setFontSize(14);
+            doc.text('Frame Configuration', 20, 45);
+            
+            doc.setFontSize(11);
+            const lines = [
+                `Frame Size: ${config.size}`,
+                `Arm Length: ${config.armLength}mm`,
+                `Arm Width: ${config.armWidth}mm`,
+                `Plate Thickness: ${config.thickness}mm`,
+                `Body Size: ${config.bodySize}mm`,
+                `Arm Angle: ${config.armAngle}°`,
+                `Motor Mount: ${config.motorMount}mm`,
+                `Material: ${document.getElementById('materialType').value}`,
+                `Layer Count: ${config.layerCount}`,
+                `Wheelbase: ${document.getElementById('spec-wheelbase').textContent}`,
+                `Est. Weight: ${document.getElementById('spec-weight').textContent}`
+            ];
+
+            lines.forEach((line, i) => {
+                doc.text(line, 25, 55 + (i * 8));
+            });
+
+            // Warnings
+            doc.setFontSize(14);
+            doc.text('Important Notes', 20, 130);
+            
+            doc.setFontSize(10);
+            doc.text('- Always verify measurements before manufacturing', 25, 140);
+            doc.text('- Check local regulations for drone operation', 25, 147);
+            doc.text('- Test fit components before final assembly', 25, 154);
+            doc.text('- Use appropriate fasteners and thread locker', 25, 161);
+
+            doc.save(`drone_frame_${config.size}_specs.pdf`);
+            showExportSuccess('PDF specification exported!');
+        }
+
+        function saveConfig() {
+            const configData = JSON.stringify(config, null, 2);
+            downloadFile(configData, `drone_frame_config_${Date.now()}.json`, 'application/json');
+            showExportSuccess('Configuration saved!');
+        }
+
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function showExportSuccess(message) {
+            const container = document.getElementById('warnings-container');
+            container.innerHTML = `
+                <div class="warning-box info">
+                    <span class="warning-icon">✅</span>
+                    <span>${message}</span>
+                </div>
+            `;
+            setTimeout(() => updateWarnings(), 3000);
+        }
+
+        // ================= INITIALIZE =================
+        window.addEventListener('load', initThree);
+    </script>
 </body>
 </html>
+```
