@@ -546,6 +546,22 @@
                 scene.remove(frameGroup);
             }
 
+            function createArmShape(length, width) {
+    const shape = new THREE.Shape();
+
+    const w = width / 2;
+
+    shape.moveTo(0, -w);
+    shape.lineTo(length * 0.7, -w);
+    shape.quadraticCurveTo(length, -w, length, 0);
+    shape.quadraticCurveTo(length, w, length * 0.7, w);
+    shape.lineTo(0, w);
+    shape.lineTo(0, -w);
+
+    return shape;
+}
+            
+
             frameGroup = new THREE.Group();
 
             const { armLength, armWidth, thickness, bodySize, armAngle, motorMount } = config;
@@ -567,7 +583,7 @@
             });
 
             // Center body plate
-            const bodyGeometry = new THREE.BoxGeometry(bodySize, thickness, bodySize);
+            const bodyGeometry = new THREE.BoxGeometry(bodySize, thickness, bodySize, 6, 6, 6);
             const bodyMesh = new THREE.Mesh(bodyGeometry, material);
             frameGroup.add(bodyMesh);
 
@@ -576,8 +592,15 @@
                 const angle = (i * Math.PI / 2) + (angleRad * Math.PI / 180);
                 
                 // Arm body
-                const armGeo = new THREE.BoxGeometry(armLength, thickness, armWidth);
-                const armMesh = new THREE.Mesh(armGeo, material);
+                const shape = createArmShape(100, 10);
+
+const extrudeSettings = {
+    depth: 5,
+    bevelEnabled: false
+};
+
+const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+const mesh = new THREE.Mesh(geometry, material);
                 
                 armMesh.position.x = Math.cos(angle) * (armLength / 2 + bodySize / 2);
                 armMesh.position.z = Math.sin(angle) * (armLength / 2 + bodySize / 2);
@@ -644,7 +667,7 @@
             camera.updateProjectionMatrix();
             renderer.setSize(width, height);
         }
-
+        
         // ================= CONTROLS =================
         function setSize(size) {
             config.size = size;
