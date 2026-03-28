@@ -599,7 +599,7 @@ const extrudeSettings = {
     bevelEnabled: false
 };
 
-const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+const geometry = new THREE.BoxGeometry(width, height, depth, 6,6,6);
 const mesh = new THREE.Mesh(geometry, material);
                 
                 armMesh.position.x = Math.cos(angle) * (armLength / 2 + bodySize / 2);
