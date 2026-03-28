@@ -545,21 +545,6 @@
             if (frameGroup) {
                 scene.remove(frameGroup);
             }
-
-            function createArmShape(length, width) {
-    const shape = new THREE.Shape();
-
-    const w = width / 2;
-
-    shape.moveTo(0, -w);
-    shape.lineTo(length * 0.7, -w);
-    shape.quadraticCurveTo(length, -w, length, 0);
-    shape.quadraticCurveTo(length, w, length * 0.7, w);
-    shape.lineTo(0, w);
-    shape.lineTo(0, -w);
-
-    return shape;
-}
             
 
             frameGroup = new THREE.Group();
