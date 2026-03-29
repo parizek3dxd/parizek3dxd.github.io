@@ -3,177 +3,278 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Drone Frame Architect</title>
+    <title>SkyForge | Pro Drone Frame Customizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/STLExporter.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <style>
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: white; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
-        #ui { position: absolute; top: 10px; left: 10px; z-index: 10; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; width: 280px; max-height: 90vh; overflow-y: auto; }
-        .control-group { margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px; }
-        label { display: block; font-size: 12px; color: #aaa; margin-bottom: 5px; }
-        select, input { width: 100%; padding: 8px; background: #333; border: 1px solid #555; color: white; border-radius: 4px; }
-        button { width: 100%; padding: 10px; margin-top: 5px; background: #007bff; border: none; color: white; font-weight: bold; cursor: pointer; border-radius: 4px; }
-        button:hover { background: #0056b3; }
-        #viewer { flex-grow: 1; width: 100%; height: 100%; }
-        .stats { font-size: 11px; margin-top: 10px; color: #00ff88; }
+        body { background: #0f172a; color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        input[type="range"] { accent-color: #3b82f6; }
+        #canvas-container { cursor: grab; }
+        #canvas-container:active { cursor: grabbing; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     </style>
 </head>
-<body>
+<body class="h-screen w-screen flex flex-col md:flex-row">
 
-<div id="ui">
-    <h3>Frame Architect</h3>
-    
-    <div class="control-group">
-        <label>Presets</label>
-        <select id="preset" onchange="applyPreset()">
-            <option value="5">5 Inch Freestyle</option>
-            <option value="3.5">3.5 Inch Cine</option>
-            <option value="tiny">Tiny Whoop (65mm)</option>
-        </select>
-    </div>
+    <aside class="w-full md:w-96 glass h-1/2 md:h-full z-10 p-6 overflow-y-auto flex flex-col gap-6">
+        <div>
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
+                SKYFORGE V1.0
+            </h1>
+            <p class="text-xs text-slate-400">Professional FPV Frame Generator</p>
+        </div>
 
-    <div class="control-group">
-        <label>Arm Thickness (mm)</label>
-        <input type="range" id="thickness" min="2" max="10" step="0.5" value="4" oninput="updateFrame()">
-        <label>Stack Style</label>
-        <select id="stack" onchange="updateFrame()">
-            <option value="single">Single Plate (Bottom)</option>
-            <option value="double">Double Plate (Stack)</option>
-        </select>
-    </div>
+        <section>
+            <label class="text-sm font-semibold uppercase tracking-wider text-slate-500">Frame Preset</label>
+            <select id="preset" class="w-full mt-2 bg-slate-800 border border-slate-700 p-2 rounded-lg outline-none focus:ring-2 ring-blue-500">
+                <option value="5">5 Inch Freestyle</option>
+                <option value="3.5">3.5 Inch Cine</option>
+                <option value="2">Tiny Whoop (2")</option>
+                <option value="7">7 Inch Long Range</option>
+                <option value="custom">Fully Custom</option>
+            </select>
+        </section>
 
-    <div class="control-group">
-        <label>Weight Reduction (Holes)</label>
-        <input type="range" id="reduction" min="0" max="1" step="0.1" value="0.5" oninput="updateFrame()">
-    </div>
+        <hr class="border-slate-700">
 
-    <div class="control-group">
-        <label>3D Print Material</label>
-        <select id="material" onchange="updateStats()">
-            <option value="1.24">PLA (Heavier/Stiff)</option>
-            <option value="1.04">ABS (Lighter/Durable)</option>
-            <option value="1.27">PETG (Impact Resistant)</option>
-        </select>
-    </div>
+        <section class="flex flex-col gap-4">
+            <div>
+                <div class="flex justify-between text-sm mb-2">
+                    <span>Arm Thickness (mm)</span>
+                    <span id="val-thick" class="text-blue-400 font-mono">4.0</span>
+                </div>
+                <input type="range" id="thick" min="1" max="10" step="0.5" value="4" class="w-full">
+            </div>
 
-    <button onclick="exportSTL()">Download .STL</button>
-    <div id="stats" class="stats">Est. Weight: --g</div>
-</div>
+            <div>
+                <div class="flex justify-between text-sm mb-2">
+                    <span>Motor to Motor (mm)</span>
+                    <span id="val-size" class="text-blue-400 font-mono">220</span>
+                </div>
+                <input type="range" id="size" min="75" max="400" step="1" value="220" class="w-full">
+            </div>
 
-<div id="viewer"></div>
+            <div>
+                <label class="text-sm">Frame Type</label>
+                <div class="flex gap-2 mt-2">
+                    <button id="type-single" class="flex-1 bg-blue-600 p-2 rounded text-sm font-bold">SINGLE</button>
+                    <button id="type-stack" class="flex-1 bg-slate-700 p-2 rounded text-sm font-bold opacity-50">STACK</button>
+                </div>
+            </div>
+        </section>
 
-<script>
-    let scene, camera, renderer, frameMesh;
-    const exporter = new THREE.STLExporter();
+        <section class="bg-slate-900/50 p-4 rounded-xl border border-blue-500/20">
+            <h3 class="text-sm font-bold mb-3 flex items-center gap-2">
+                <span class="w-2 h-2 bg-emerald-500 rounded-full"></span> 3D PRINT ANALYSIS
+            </h3>
+            <div class="grid grid-cols-2 gap-4 text-xs">
+                <div>
+                    <label class="text-slate-500">Material</label>
+                    <select id="material" class="w-full bg-slate-800 mt-1 p-1 rounded">
+                        <option value="1.25">PLA</option>
+                        <option value="1.04">ABS</option>
+                        <option value="1.27">PETG</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-slate-500">Est. Weight</label>
+                    <div id="weight-display" class="mt-1 text-lg font-mono text-emerald-400">42g</div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <label class="inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="weight-reduction" class="sr-only peer" checked>
+                    <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    <span class="ml-3 text-sm font-medium">Intelligent Cutouts</span>
+                </label>
+            </div>
+        </section>
 
-    init();
-    animate();
+        <button id="export-btn" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-4 rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
+            EXPORT .STL
+        </button>
+    </aside>
 
-    function init() {
-        scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x111111);
+    <main id="canvas-container" class="flex-1 relative bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-800 to-slate-950">
+        <div class="absolute bottom-6 right-6 flex gap-4">
+            <div class="glass px-4 py-2 rounded-lg text-xs font-mono text-slate-300">
+                X: <span id="dim-x">0</span>mm | Y: <span id="dim-y">0</span>mm
+            </div>
+        </div>
+    </main>
 
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(100, 100, 150);
-
-        renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('viewer').appendChild(renderer.domElement);
-
-        const light = new THREE.DirectionalLight(0xffffff, 1);
-        light.position.set(10, 20, 10);
-        scene.add(light);
-        scene.add(new THREE.AmbientLight(0x404040));
-
-        updateFrame();
-        window.addEventListener('resize', onWindowResize);
-    }
-
-    function updateFrame() {
-        if (frameMesh) scene.remove(frameMesh);
+    <script>
+        /** * CORE APP LOGIC 
+         * Written in pure JS for maximum performance and portability
+         */
         
-        const size = parseFloat(document.getElementById('preset').value === 'tiny' ? 32 : document.getElementById('preset').value * 25.4 / 2);
-        const thickness = parseFloat(document.getElementById('thickness').value);
-        const reduction = parseFloat(document.getElementById('reduction').value);
-        const isStack = document.getElementById('stack').value === 'double';
+        let scene, camera, renderer, controls, frameMesh;
+        let params = {
+            size: 220,
+            thickness: 4,
+            isStack: false,
+            reduction: true,
+            density: 1.25 // PLA
+        };
 
-        const frameGroup = new THREE.Group();
-        const material = new THREE.MeshPhongMaterial({ color: 0x555555, specular: 0x111111, shininess: 30 });
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            
+            const container = document.getElementById('canvas-container');
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
 
-        // Create Main Body
-        const bodyGeom = new THREE.BoxGeometry(30, thickness, 40);
-        const body = new THREE.Mesh(bodyGeom, material);
-        frameGroup.add(body);
+            // Lighting
+            const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+            const direct = new THREE.DirectionalLight(0xffffff, 0.8);
+            direct.position.set(10, 20, 10);
+            scene.add(ambient, direct);
 
-        // Create 4 Arms
-        const armAngles = [Math.PI/4, 3*Math.PI/4, 5*Math.PI/4, 7*Math.PI/4];
-        armAngles.forEach(angle => {
-            const armLen = size;
-            const armWidth = 10 * (1 - (reduction * 0.3)); // Simple weight reduction logic
+            // Grid
+            const grid = new THREE.GridHelper(500, 50, 0x334155, 0x1e293b);
+            grid.rotation.x = Math.PI/2;
+            scene.add(grid);
+
+            camera.position.set(150, -150, 150);
+            camera.up.set(0,0,1);
             
-            const armGeom = new THREE.BoxGeometry(armWidth, thickness, armLen);
-            const arm = new THREE.Mesh(armGeom, material);
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
             
-            arm.position.x = Math.cos(angle) * (armLen/2);
-            arm.position.z = Math.sin(angle) * (armLen/2);
-            arm.rotation.y = -angle;
+            updateGeometry();
+            animate();
+        }
+
+        function createDronePlate(zPos = 0) {
+            const shape = new THREE.Shape();
+            const s = params.size / 2;
+            const w = 15; // Arm width
+
+            // Build an "X" Frame Shape
+            shape.moveTo(-w, -s);
+            shape.lineTo(w, -s);
+            shape.lineTo(w, -w);
+            shape.lineTo(s, -w);
+            shape.lineTo(s, w);
+            shape.lineTo(w, w);
+            shape.lineTo(w, s);
+            shape.lineTo(-w, s);
+            shape.lineTo(-w, w);
+            shape.lineTo(-s, w);
+            shape.lineTo(-s, -w);
+            shape.lineTo(-w, -w);
+            shape.lineTo(-w, -s);
+
+            const extrudeSettings = { depth: params.thickness, bevelEnabled: false };
+            const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+            const material = new THREE.MeshPhongMaterial({ 
+                color: 0x3b82f6, 
+                specular: 0x111111, 
+                shininess: 100 
+            });
             
-            frameGroup.add(arm);
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.z = zPos;
+            return mesh;
+        }
+
+        function updateGeometry() {
+            if (frameMesh) scene.remove(frameMesh);
+            frameMesh = new THREE.Group();
+
+            const bottomPlate = createDronePlate(0);
+            frameMesh.add(bottomPlate);
+
+            if (params.isStack) {
+                const topPlate = createDronePlate(30); // 30mm standoff height
+                frameMesh.add(topPlate);
+            }
+
+            scene.add(frameMesh);
+            calculateMetrics();
+        }
+
+        function calculateMetrics() {
+            // Simulated weight calc based on volume and density
+            const vol = (params.size * 2 * params.thickness * 0.4);
+            const weight = (vol * params.density * (params.isStack ? 1.8 : 1)).toFixed(1);
+            document.getElementById('weight-display').innerText = weight + 'g';
+            document.getElementById('dim-x').innerText = params.size;
+            document.getElementById('dim-y').innerText = params.size;
+        }
+
+        // --- Event Listeners ---
+        document.getElementById('size').addEventListener('input', (e) => {
+            params.size = parseInt(e.target.value);
+            document.getElementById('val-size').innerText = params.size;
+            updateGeometry();
         });
 
-        // Add Top Plate if "Stack" is selected
-        if (isStack) {
-            const topPlate = body.clone();
-            topPlate.position.y = 25; // Standard 25mm stack height
-            topPlate.scale.y = 0.5; // Top plates are usually thinner
-            frameGroup.add(topPlate);
+        document.getElementById('thick').addEventListener('input', (e) => {
+            params.thickness = parseFloat(e.target.value);
+            document.getElementById('val-thick').innerText = params.thickness.toFixed(1);
+            updateGeometry();
+        });
+
+        document.getElementById('preset').addEventListener('change', (e) => {
+            const val = e.target.value;
+            if(val === "5") { params.size = 220; params.thickness = 4; }
+            else if(val === "3.5") { params.size = 150; params.thickness = 3; }
+            else if(val === "2") { params.size = 90; params.thickness = 1.5; }
+            else if(val === "7") { params.size = 320; params.thickness = 6; }
+            
+            document.getElementById('size').value = params.size;
+            document.getElementById('thick').value = params.thickness;
+            document.getElementById('val-size').innerText = params.size;
+            document.getElementById('val-thick').innerText = params.thickness;
+            updateGeometry();
+        });
+
+        document.getElementById('type-single').addEventListener('click', () => {
+            params.isStack = false;
+            document.getElementById('type-single').classList.remove('opacity-50', 'bg-slate-700');
+            document.getElementById('type-single').classList.add('bg-blue-600');
+            document.getElementById('type-stack').classList.add('opacity-50', 'bg-slate-700');
+            updateGeometry();
+        });
+
+        document.getElementById('type-stack').addEventListener('click', () => {
+            params.isStack = true;
+            document.getElementById('type-stack').classList.remove('opacity-50', 'bg-slate-700');
+            document.getElementById('type-stack').classList.add('bg-blue-600');
+            document.getElementById('type-single').classList.add('opacity-50', 'bg-slate-700');
+            updateGeometry();
+        });
+
+        document.getElementById('export-btn').addEventListener('click', () => {
+            const exporter = new THREE.STLExporter();
+            const result = exporter.parse(frameMesh);
+            const blob = new Blob([result], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `SkyForge_Frame_${params.size}mm.stl`;
+            link.click();
+        });
+
+        window.addEventListener('resize', () => {
+            const container = document.getElementById('canvas-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
         }
 
-        frameMesh = frameGroup;
-        scene.add(frameMesh);
-        updateStats();
-    }
-
-    function applyPreset() {
-        const p = document.getElementById('preset').value;
-        if (p === 'tiny') {
-            document.getElementById('thickness').value = 2;
-        } else if (p === '3.5') {
-            document.getElementById('thickness').value = 3;
-        } else {
-            document.getElementById('thickness').value = 5;
-        }
-        updateFrame();
-    }
-
-    function updateStats() {
-        const density = parseFloat(document.getElementById('material').value);
-        // Rough volume calculation for demo purposes
-        const estVolume = 15; 
-        const weight = (estVolume * density).toFixed(1);
-        document.getElementById('stats').innerText = `Estimated Weight: ${weight}g (${document.getElementById('material').selectedOptions[0].text.split(' ')[0]})`;
-    }
-
-    function exportSTL() {
-        const result = exporter.parse(frameMesh);
-        const blob = new Blob([result], { type: 'text/plain' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'custom_drone_frame.stl';
-        link.click();
-    }
-
-    function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-
-    function animate() {
-        requestAnimationFrame(animate);
-        if (frameMesh) frameMesh.rotation.y += 0.005;
-        renderer.render(scene, camera);
-    }
-</script>
+        init();
+    </script>
 </body>
 </html>
