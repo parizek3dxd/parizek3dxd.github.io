@@ -1,60 +1,361 @@
-<html>
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Hlavní Stránka</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      color: #333;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background-color: #333;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-    main {
-      padding: 20px;
-      max-width: 800px;
-      margin: auto;
-      background: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h1, h2 {
-      color: #444;
-    }
-    ul {
-      padding-left: 20px;
-    }
-    footer {
-      text-align: center;
-      padding: 10px;
-      background: #eee;
-      margin-top: 30px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drone Frame Customizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLExporter.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+        }
+        #scene-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            z-index: 1;
+        }
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            color: white;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        .animate-pulse {
+            animation: pulse 3s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            border-radius: 4px;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #00b8d4;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        .slider::-webkit-slider-thumb:hover {
+            background: #00e5ff;
+            transform: scale(1.1);
+        }
+        @media (max-width: 768px) {
+            #ui {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                padding: 15px;
+                font-size: 0.9em;
+            }
+            .grid-cols-3 {
+                grid-template-columns: 1fr;
+            }
+            .flex.flex-row {
+                flex-direction: column;
+            }
+            .flex.flex-row > button {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
 </head>
-<body>
-  <header>
-    <h1>HLAVNÍ STRÁNKA</h1>
-  </header>
-  <main>
-    <h2>O mně</h2>
-    <p>Jsem 3D grafik a vášnivý modelář v oblasti RC letadel.</p>
+<body class="bg-gray-900 text-white">
+    <div id="scene-container"></div>
+    <div id="ui" class="max-h-[calc(100vh-40px)] overflow-y-auto custom-scrollbar">
+        <h1 class="text-3xl font-bold mb-6 text-center text-cyan-400">Drone Frame Customizer</h1>
+        <p class="text-center text-gray-300 mb-6">Design and export 3D printable drone frames for FPV and racing.</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Presets & Frame Type -->
+            <div class="bg-gray-800 bg-opacity-50 p-5 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold mb-4 text-cyan-300">Frame Presets</h2>
+                <select id="framePreset" class="w-full p-3 bg-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 mb-4">
+                    <option value="5inch">5 Inch (Freestyle/ Racing)</option>
+                    <option value="3.5inch">3.5 Inch (Cinewhoop)</option>
+                    <option value="tinywhoop">Tiny Whoop (Micro)</option>
+                    <option value="7inch">7 Inch (Long Range)</option>
+                </select>
+                
+                <h2 class="text-xl font-semibold mt-6 mb-2 text-cyan-300">Frame Type</h2>
+                <div class="flex space-x-3">
+                    <button id="singlePlate" class="flex-1 p-3 bg-gray-700 hover:bg-cyan-500 transition-all rounded-lg text-white">Single Plate</button>
+                    <button id="stackPlate" class="flex-1 p-3 bg-gray-700 hover:bg-cyan-500 transition-all rounded-lg text-white">Stack (2 Plates)</button>
+                </div>
+            </div>
 
-    <h2>Projekty</h2>
-    <ul>
-      <li><strong>SPACE SHUTLE Z XPS:</strong> space shutle: 2x servo 9g 180 stupňů, motor s regulátorem, příjmač a baterie (XPS)</li>
-      <li><strong>Web vizitka:</strong> jednoduchý web o RC létání</li>
-    </ul>
-  </main>
-  <footer>
-    &copy; 2025 Pařízek3DXD
-  </footer>
+            <!-- Dimensions & Material -->
+            <div class="bg-gray-800 bg-opacity-50 p-5 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold mb-4 text-cyan-300">Dimensions & Material</h2>
+                <div class="mb-4">
+                    <label for="armLength" class="block text-gray-300 mb-1">Arm Length (mm)</label>
+                    <input type="range" id="armLength" min="50" max="150" value="100" class="slider">
+                    <span id="armLengthVal" class="text-cyan-400">100</span>
+                </div>
+                <div class="mb-4">
+                    <label for="armWidth" class="block text-gray-300 mb-1">Arm Width (mm)</label>
+                    <input type="range" id="armWidth" min="5" max="20" value="10" class="slider">
+                    <span id="armWidthVal" class="text-cyan-400">10</span>
+                </div>
+                <div class="mb-4">
+                    <label for="thickness" class="block text-gray-300 mb-1">Plate Thickness (mm)</label>
+                    <input type="range" id="thickness" min="2" max="6" value="3" class="slider">
+                    <span id="thicknessVal" class="text-cyan-400">3</span>
+                </div>
+                <div>
+                    <label for="material" class="block text-gray-300 mb-1">Material</label>
+                    <select id="material" class="w-full p-3 bg-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                        <option value="pla">PLA (Lightweight)</option>
+                        <option value="abs">ABS (Durable)</option>
+                        <option value="petg">PETG (Balanced)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Weight Reduction & Export -->
+            <div class="bg-gray-800 bg-opacity-50 p-5 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold mb-4 text-cyan-300">Weight Reduction</h2>
+                <div class="mb-4">
+                    <label for="cutoutPercentage" class="block text-gray-300 mb-1">Cutout Percentage (%)</label>
+                    <input type="range" id="cutoutPercentage" min="0" max="50" value="20" class="slider">
+                    <span id="cutoutPercentageVal" class="text-cyan-400">20</span>
+                </div>
+                <p class="text-gray-400 text-sm mb-4">Higher values reduce weight but may compromise strength. Material impacts durability.</p>
+                <div class="flex flex-row space-x-3 mt-6">
+                    <button id="updateModel" class="flex-1 p-3 bg-cyan-600 hover:bg-cyan-500 transition-all rounded-lg text-white font-semibold shadow-lg">Update Model</button>
+                    <button id="exportSTL" class="flex-1 p-3 bg-green-600 hover:bg-green-500 transition-all rounded-lg text-white font-semibold shadow-lg">Export STL</button>
+                </div>
+                <p id="status" class="text-center text-gray-400 mt-2 animate-pulse hidden">Processing...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let scene, camera, renderer, controls, frameGroup, currentFrameType = 'stack';
+        const framePresets = {
+            '5inch': { armLength: 100, armWidth: 10, thickness: 3 },
+            '3.5inch': { armLength: 70, armWidth: 8, thickness: 2.5 },
+            'tinywhoop': { armLength: 50, armWidth: 5, thickness: 2 },
+            '7inch': { armLength: 130, armWidth: 12, thickness: 4 }
+        };
+
+        function init() {
+            // Scene Setup
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('scene-container').appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
+            directionalLight.position.set(50, 50, 50);
+            scene.add(directionalLight);
+            const pointLight = new THREE.PointLight(0xffffff, 0.5);
+            pointLight.position.set(50, 50, 50);
+            scene.add(pointLight);
+
+            // Camera Position
+            camera.position.set(0, 100, 150);
+            camera.lookAt(0, 0, 0);
+
+            // Orbit Controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.minDistance = 50;
+            controls.maxDistance = 300;
+            controls.maxPolarAngle = Math.PI / 2;
+
+            // Frame Group
+            frameGroup = new THREE.Group();
+            scene.add(frameGroup);
+
+            // Initial Frame
+            buildFrame();
+
+            // Event Listeners
+            document.getElementById('framePreset').addEventListener('change', updatePreset);
+            document.getElementById('singlePlate').addEventListener('click', () => setFrameType('single'));
+            document.getElementById('stackPlate').addEventListener('click', () => setFrameType('stack'));
+            document.getElementById('updateModel').addEventListener('click', buildFrame);
+            document.getElementById('exportSTL').addEventListener('click', exportSTL);
+
+            // Range Inputs
+            document.getElementById('armLength').addEventListener('input', updateSliderLabels);
+            document.getElementById('armWidth').addEventListener('input', updateSliderLabels);
+            document.getElementById('thickness').addEventListener('input', updateSliderLabels);
+            document.getElementById('cutoutPercentage').addEventListener('input', updateSliderLabels);
+            updateSliderLabels();
+
+            // Window Resize
+            window.addEventListener('resize', onWindowResize, false);
+
+            animate();
+        }
+
+        function updateSliderLabels() {
+            document.getElementById('armLengthVal').textContent = document.getElementById('armLength').value;
+            document.getElementById('armWidthVal').textContent = document.getElementById('armWidth').value;
+            document.getElementById('thicknessVal').textContent = document.getElementById('thickness').value;
+            document.getElementById('cutoutPercentageVal').textContent = document.getElementById('cutoutPercentage').value;
+        }
+
+        function updatePreset() {
+            const preset = document.getElementById('framePreset').value;
+            const config = framePresets[preset];
+            document.getElementById('armLength').value = config.armLength;
+            document.getElementById('armWidth').value = config.armWidth;
+            document.getElementById('thickness').value = config.thickness;
+            updateSliderLabels();
+            buildFrame();
+        }
+
+        function setFrameType(type) {
+            currentFrameType = type;
+            document.getElementById('singlePlate').classList.toggle('bg-cyan-600', type === 'single');
+            document.getElementById('singlePlate').classList.toggle('bg-gray-700', type !== 'single');
+            document.getElementById('stackPlate').classList.toggle('bg-cyan-600', type === 'stack');
+            document.getElementById('stackPlate').classList.toggle('bg-gray-700', type !== 'stack');
+            buildFrame();
+        }
+
+        function buildFrame() {
+            // Clear previous frame
+            while (frameGroup.children.length > 0) {
+                frameGroup.remove(frameGroup.children[0]);
+            }
+
+            const armLength = parseFloat(document.getElementById('armLength').value);
+            const armWidth = parseFloat(document.getElementById('armWidth').value);
+            const thickness = parseFloat(document.getElementById('thickness').value);
+            const cutoutPercentage = parseFloat(document.getElementById('cutoutPercentage').value);
+            const material = document.getElementById('material').value;
+
+            // Material properties (visual)
+            const colorMap = { pla: 0x00ff00, abs: 0xff0000, petg: 0x00b8d4 };
+            const materialColor = new THREE.MeshPhongMaterial({ color: colorMap[material], shininess: 60 });
+
+            // Build Quadcopter Frame
+            const plateCount = currentFrameType === 'stack' ? 2 : 1;
+            for (let p = 0; p < plateCount; p++) {
+                const plateGroup = new THREE.Group();
+                const bodySize = armLength * 0.4;
+                const bodyGeom = new THREE.BoxGeometry(bodySize, thickness, bodySize);
+                const body = new THREE.Mesh(bodyGeom, materialColor);
+                plateGroup.add(body);
+
+                // Arms
+                for (let i = 0; i < 4; i++) {
+                    const angle = (i * Math.PI) / 2 + Math.PI / 4;
+                    const armGeom = new THREE.BoxGeometry(armWidth, thickness, armLength);
+                    const arm = new THREE.Mesh(armGeom, materialColor);
+                    arm.position.set(
+                        Math.cos(angle) * (bodySize / 2 + armLength / 2),
+                        0,
+                        Math.sin(angle) * (bodySize / 2 + armLength / 2)
+                    );
+                    arm.rotation.y = angle;
+                    plateGroup.add(arm);
+
+                    // Weight reduction cutouts
+                    if (cutoutPercentage > 0) {
+                        const cutoutSize = armLength * (cutoutPercentage / 100) * 0.3;
+                        const cutoutGeom = new THREE.BoxGeometry(armWidth * 0.6, thickness + 0.1, cutoutSize);
+                        const cutoutMaterial = new THREE.MeshPhongMaterial({ color: 0x000000, shininess: 0 });
+                        for (let c = 0; c < 3; c++) {
+                            const cutout = new THREE.Mesh(cutoutGeom, cutoutMaterial);
+                            cutout.position.set(
+                                Math.cos(angle) * (bodySize / 2 + armLength * (0.3 + c * 0.2)),
+                                0,
+                                Math.sin(angle) * (bodySize / 2 + armLength * (0.3 + c * 0.2))
+                            );
+                            cutout.rotation.y = angle;
+                            plateGroup.add(cutout);
+                        }
+                    }
+                }
+
+                plateGroup.position.y = p * (thickness + 10);
+                frameGroup.add(plateGroup);
+            }
+
+            // Center camera on model
+            camera.lookAt(0, 0, 0);
+            renderer.render(scene, camera);
+        }
+
+        function exportSTL() {
+            const exporter = new THREE.STLExporter();
+            const result = exporter.parse(frameGroup);
+            const blob = new Blob([result], { type: 'application/octet-stream' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = `drone_frame_${currentFrameType}_${document.getElementById('material').value}.stl`;
+            link.click();
+
+            const status = document.getElementById('status');
+            status.classList.remove('hidden');
+            setTimeout(() => status.classList.add('hidden'), 2000);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // Initialize on load
+        window.onload = init;
+    </script>
 </body>
 </html>
