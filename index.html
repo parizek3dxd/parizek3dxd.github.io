@@ -3,203 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FPV Frame Customizer</title>
+    <title>AI Drone Frame Architect</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/STLExporter.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a1a; color: white; }
-        #ui { position: absolute; top: 10px; left: 10px; width: 280px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; z-index: 10; max-height: 90vh; overflow-y: auto; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: white; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
+        #ui { position: absolute; top: 10px; left: 10px; z-index: 10; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; width: 280px; max-height: 90vh; overflow-y: auto; }
         .control-group { margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px; }
         label { display: block; font-size: 12px; color: #aaa; margin-bottom: 5px; }
-        select, input, button { width: 100%; padding: 8px; background: #333; border: 1px solid #555; color: white; border-radius: 4px; margin-bottom: 5px; }
-        button { background: #007bff; cursor: pointer; font-weight: bold; border: none; margin-top: 10px; }
+        select, input { width: 100%; padding: 8px; background: #333; border: 1px solid #555; color: white; border-radius: 4px; }
+        button { width: 100%; padding: 10px; margin-top: 5px; background: #007bff; border: none; color: white; font-weight: bold; cursor: pointer; border-radius: 4px; }
         button:hover { background: #0056b3; }
-        .stats { font-size: 11px; color: #00ff88; margin-top: 10px; }
-        canvas { display: block; }
+        #viewer { flex-grow: 1; width: 100%; height: 100%; }
+        .stats { font-size: 11px; margin-top: 10px; color: #00ff88; }
     </style>
 </head>
 <body>
 
 <div id="ui">
-    <h3>Drone Customizer</h3>
+    <h3>Frame Architect</h3>
     
     <div class="control-group">
         <label>Presets</label>
-        <select id="preset">
+        <select id="preset" onchange="applyPreset()">
             <option value="5">5 Inch Freestyle</option>
             <option value="3.5">3.5 Inch Cine</option>
-            <option value="2">2 Inch Whoop</option>
-            <option value="7">7 Inch Long Range</option>
-        </select>
-    </div>
-
-    <div class="control-group">
-        <label>Frame Type</label>
-        <select id="frameType">
-            <option value="single">Single Plate (True X)</option>
-            <option value="stack">Stack (Top + Bottom)</option>
-        </select>
-    </div>
-
-    <div class="control-group">
-        <label>Material (Density calculation)</label>
-        <select id="material">
-            <option value="1.25">PLA (1.25g/cm³)</option>
-            <option value="1.04">ABS (1.04g/cm³)</option>
-            <option value="1.27">PETG (1.27g/cm³)</option>
+            <option value="tiny">Tiny Whoop (65mm)</option>
         </select>
     </div>
 
     <div class="control-group">
         <label>Arm Thickness (mm)</label>
-        <input type="range" id="thickness" min="2" max="8" step="0.5" value="4">
-        
-        <label>Weight Reduction (%)</label>
-        <input type="range" id="lighten" min="0" max="50" step="5" value="20">
+        <input type="range" id="thickness" min="2" max="10" step="0.5" value="4" oninput="updateFrame()">
+        <label>Stack Style</label>
+        <select id="stack" onchange="updateFrame()">
+            <option value="single">Single Plate (Bottom)</option>
+            <option value="double">Double Plate (Stack)</option>
+        </select>
     </div>
 
-    <div id="weightDisplay" class="stats">Estimated Weight: 0g</div>
-    
-    <button onclick="exportSTL()">Export .STL for Printing</button>
+    <div class="control-group">
+        <label>Weight Reduction (Holes)</label>
+        <input type="range" id="reduction" min="0" max="1" step="0.1" value="0.5" oninput="updateFrame()">
+    </div>
+
+    <div class="control-group">
+        <label>3D Print Material</label>
+        <select id="material" onchange="updateStats()">
+            <option value="1.24">PLA (Heavier/Stiff)</option>
+            <option value="1.04">ABS (Lighter/Durable)</option>
+            <option value="1.27">PETG (Impact Resistant)</option>
+        </select>
+    </div>
+
+    <button onclick="exportSTL()">Download .STL</button>
+    <div id="stats" class="stats">Est. Weight: --g</div>
 </div>
 
-<script type="importmap">
-    {
-        "imports": {
-            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-        }
-    }
-</script>
+<div id="viewer"></div>
 
-<script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    import { STLExporter } from 'three/addons/exporters/STLExporter.js';
-
-    let scene, camera, renderer, controls, frameMesh;
-    const exporter = new STLExporter();
+<script>
+    let scene, camera, renderer, frameMesh;
+    const exporter = new THREE.STLExporter();
 
     init();
     animate();
 
     function init() {
-        // Basic Setup
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0x111111);
-        
-        camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
-        camera.position.set(150, 150, 150);
+
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(100, 100, 150);
 
         renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+        document.getElementById('viewer').appendChild(renderer.domElement);
 
-        controls = new OrbitControls(camera, renderer.domElement);
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(10, 20, 10);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0x404040));
+
+        updateFrame();
+        window.addEventListener('resize', onWindowResize);
+    }
+
+    function updateFrame() {
+        if (frameMesh) scene.remove(frameMesh);
         
-        // Lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-        scene.add(ambientLight);
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-        dirLight.position.set(10, 20, 10);
-        scene.add(dirLight);
+        const size = parseFloat(document.getElementById('preset').value === 'tiny' ? 32 : document.getElementById('preset').value * 25.4 / 2);
+        const thickness = parseFloat(document.getElementById('thickness').value);
+        const reduction = parseFloat(document.getElementById('reduction').value);
+        const isStack = document.getElementById('stack').value === 'double';
 
-        // Grid
-        const grid = new THREE.GridHelper(200, 20, 0x444444, 0x222222);
-        grid.rotation.x = Math.PI / 2;
-        scene.add(grid);
+        const frameGroup = new THREE.Group();
+        const material = new THREE.MeshPhongMaterial({ color: 0x555555, specular: 0x111111, shininess: 30 });
 
-        // UI Event Listeners
-        document.querySelectorAll('input, select').forEach(el => {
-            el.addEventListener('input', generateFrame);
+        // Create Main Body
+        const bodyGeom = new THREE.BoxGeometry(30, thickness, 40);
+        const body = new THREE.Mesh(bodyGeom, material);
+        frameGroup.add(body);
+
+        // Create 4 Arms
+        const armAngles = [Math.PI/4, 3*Math.PI/4, 5*Math.PI/4, 7*Math.PI/4];
+        armAngles.forEach(angle => {
+            const armLen = size;
+            const armWidth = 10 * (1 - (reduction * 0.3)); // Simple weight reduction logic
+            
+            const armGeom = new THREE.BoxGeometry(armWidth, thickness, armLen);
+            const arm = new THREE.Mesh(armGeom, material);
+            
+            arm.position.x = Math.cos(angle) * (armLen/2);
+            arm.position.z = Math.sin(angle) * (armLen/2);
+            arm.rotation.y = -angle;
+            
+            frameGroup.add(arm);
         });
 
-        generateFrame();
-    }
-
-    function generateFrame() {
-        if (frameMesh) scene.remove(frameMesh);
-
-        const sizeInch = parseFloat(document.getElementById('preset').value);
-        const type = document.getElementById('frameType').value;
-        const thickness = parseFloat(document.getElementById('thickness').value);
-        const lighten = parseFloat(document.getElementById('lighten').value);
-        const density = parseFloat(document.getElementById('material').value);
-
-        const group = new THREE.Group();
-        const sizeMm = sizeInch * 25.4;
-        const armWidth = 12 - (lighten / 10); // Intelligent arm width reduction
-
-        // Material Visuals
-        const matColors = { "1.25": 0xff4400, "1.04": 0x0088ff, "1.27": 0xeeeeee };
-        const material = new THREE.MeshPhongMaterial({ color: matColors[density.toString()], flatShading: true });
-
-        // Helper to make a plate
-        const createPlate = (zPos) => {
-            const shape = new THREE.Shape();
-            // Center body
-            shape.moveTo(-20, -20);
-            shape.lineTo(20, -20);
-            shape.lineTo(20, 20);
-            shape.lineTo(-20, 20);
-            shape.lineTo(-20, -20);
-
-            // Arms (True X Layout)
-            const armLen = sizeMm / 2;
-            [45, 135, 225, 315].forEach(angle => {
-                const rad = angle * Math.PI / 180;
-                const s = Math.sin(rad);
-                const c = Math.cos(rad);
-                
-                // Draw Arm
-                shape.moveTo(c * 15, s * 15);
-                shape.lineTo(c * armLen, s * armLen);
-                shape.lineTo(c * armLen + Math.cos(rad + 1.5) * armWidth, s * armLen + Math.sin(rad + 1.5) * armWidth);
-                shape.lineTo(c * 15 + Math.cos(rad + 1.5) * armWidth, s * 15 + Math.sin(rad + 1.5) * armWidth);
-            });
-
-            const extrudeSettings = { depth: thickness, bevelEnabled: false };
-            const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-            const mesh = new THREE.Mesh(geometry, material);
-            mesh.position.z = zPos;
-            return mesh;
-        };
-
-        if (type === 'single') {
-            group.add(createPlate(0));
-        } else {
-            group.add(createPlate(0));
-            group.add(createPlate(25)); // 25mm stack height
+        // Add Top Plate if "Stack" is selected
+        if (isStack) {
+            const topPlate = body.clone();
+            topPlate.position.y = 25; // Standard 25mm stack height
+            topPlate.scale.y = 0.5; // Top plates are usually thinner
+            frameGroup.add(topPlate);
         }
 
-        frameMesh = group;
+        frameMesh = frameGroup;
         scene.add(frameMesh);
-
-        // Simple Volume Estimation for Weight
-        const volumeCm3 = (sizeMm * thickness * 0.1); 
-        const weight = (volumeCm3 * density).toFixed(1);
-        document.getElementById('weightDisplay').innerText = `Estimated Weight: ${weight}g`;
+        updateStats();
     }
 
-    window.exportSTL = function() {
-        const result = exporter.parse(frameMesh, { binary: true });
-        const blob = new Blob([result], { type: 'application/octet-stream' });
+    function applyPreset() {
+        const p = document.getElementById('preset').value;
+        if (p === 'tiny') {
+            document.getElementById('thickness').value = 2;
+        } else if (p === '3.5') {
+            document.getElementById('thickness').value = 3;
+        } else {
+            document.getElementById('thickness').value = 5;
+        }
+        updateFrame();
+    }
+
+    function updateStats() {
+        const density = parseFloat(document.getElementById('material').value);
+        // Rough volume calculation for demo purposes
+        const estVolume = 15; 
+        const weight = (estVolume * density).toFixed(1);
+        document.getElementById('stats').innerText = `Estimated Weight: ${weight}g (${document.getElementById('material').selectedOptions[0].text.split(' ')[0]})`;
+    }
+
+    function exportSTL() {
+        const result = exporter.parse(frameMesh);
+        const blob = new Blob([result], { type: 'text/plain' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = 'drone_frame.stl';
+        link.download = 'custom_drone_frame.stl';
         link.click();
-    };
-
-    function animate() {
-        requestAnimationFrame(animate);
-        controls.update();
-        renderer.render(scene, camera);
     }
 
-    window.addEventListener('resize', () => {
+    function onWindowResize() {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-</script>
+    }
 
+    function animate() {
+        requestAnimationFrame(animate);
+        if (frameMesh) frameMesh.rotation.y += 0.005;
+        renderer.render(scene, camera);
+    }
+</script>
 </body>
 </html>
