@@ -1,234 +1,206 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cs">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Drone Frame Customizer</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/exporters/STLExporter.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/controls/OrbitControls.js"></script>
-    <style>
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: white; overflow: hidden; }
-        #ui { position: absolute; top: 10px; left: 10px; width: 280px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 8px; z-index: 10; max-height: 90vh; overflow-y: auto; }
-        .control-group { margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px; }
-        label { display: block; font-size: 0.8em; color: #aaa; margin-bottom: 5px; }
-        select, input, button { width: 100%; padding: 8px; background: #333; border: 1px solid #555; color: white; border-radius: 4px; margin-bottom: 5px; }
-        button { background: #007bff; cursor: pointer; border: none; font-weight: bold; transition: 0.3s; }
-        button:hover { background: #0056b3; }
-        .export-btn { background: #28a745; margin-top: 10px; }
-        .stats { font-size: 0.75em; color: #00ff88; margin-top: 10px; }
-    </style>
+<meta charset="UTF-8">
+<title>Drone AI Frame Designer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<style>
+body { margin:0; font-family:'Roboto',sans-serif; background:#121212; color:white; overflow:hidden; }
+#ui {
+ position:absolute; top:10px; left:10px; width:280px; background:#1e1e2f; padding:20px; border-radius:15px; box-shadow:0 5px 20px rgba(0,0,0,0.5); z-index:10;
+}
+#ui h2 { margin:0 0 10px 0; font-size:20px; color:#22d3ee; }
+#ui label { display:block; margin:8px 0 2px 0; font-size:12px; color:#cbd5e1; }
+#ui input, #ui select, #ui button { width:100%; margin:4px 0; border-radius:6px; padding:6px; border:none; font-size:14px; }
+#ui input[type=range] { cursor:pointer; }
+#ui button { background:#22d3ee; color:#000; font-weight:bold; cursor:pointer; transition:0.2s; }
+#ui button:hover { background:#0ea5e9; }
+</style>
 </head>
 <body>
 
 <div id="ui">
-    <h3>Drone Customizer</h3>
-    
-    <div class="control-group">
-        <label>Presets</label>
-        <select id="preset">
-            <option value="5">5 Inch Freestyle</option>
-            <option value="3.5">3.5 Inch Cine</option>
-            <option value="whoop">Tiny Whoop (65mm)</option>
-        </select>
-    </div>
+<h2>Drone AI Frame Designer</h2>
 
-    <div class="control-group">
-        <label>Wheelbase (mm)</label>
-        <input type="range" id="wheelbase" min="65" max="300" value="225">
-        <label>Arm Width (mm)</label>
-        <input type="range" id="armWidth" min="4" max="15" value="10">
-        <label>Plate Thickness (mm)</label>
-        <input type="range" id="thickness" min="1" max="6" step="0.5" value="4">
-    </div>
+<label>Preset</label>
+<select id="preset">
+<option value="120">3 inch</option>
+<option value="180" selected>5 inch</option>
+<option value="250">7 inch</option>
+</select>
 
-    <div class="control-group">
-        <label>Frame Type</label>
-        <select id="frameType">
-            <option value="single">Single Plate</option>
-            <option value="stack">Stack (2-Plate)</option>
-        </select>
-        <label id="stackLabel" style="display:none;">Standoff Height (mm)</label>
-        <input type="range" id="standoff" min="15" max="35" value="25" style="display:none;">
-    </div>
+<label>Velikost</label>
+<input id="size" type="range" min="100" max="300" value="180">
 
-    <div class="control-group">
-        <label>Weight Reduction</label>
-        <select id="lighten">
-            <option value="none">Solid (Strongest)</option>
-            <option value="intelligent">Intelligent Cutouts</option>
-        </select>
-        <label>Material (3D Print Stats)</label>
-        <select id="material">
-            <option value="1.25">PLA (Heavy/Stiff)</option>
-            <option value="1.04">ABS (Light/Durable)</option>
-            <option value="1.27">PETG (Flexible/Strong)</option>
-        </select>
-    </div>
+<label>Zatížení</label>
+<input id="load" type="range" min="10" max="100" value="50">
 
-    <div class="stats" id="statsDisplay">Estimated Weight: 0g</div>
-    <button class="export-btn" onclick="exportSTL()">EXPORT .STL</button>
+<label>Organika</label>
+<input id="organic" type="range" min="1" max="60" value="25">
+
+<label>Detail</label>
+<input id="detail" type="range" min="10" max="40" value="20">
+
+<label>Materiál</label>
+<select id="mat">
+<option>PLA</option>
+<option>PETG</option>
+</select>
+
+<button onclick="gen()">🔄 Generovat</button>
+<button onclick="exportSTL()">⬇ STL Export</button>
+<button onclick="suggestAI()">🧠 AI Návrh</button>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three-csgmesh@1/build/three-csgmesh.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three/examples/js/exporters/STLExporter.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+
 <script>
-    let scene, camera, renderer, controls, frameMesh;
-    const exporter = new THREE.STLExporter();
+// 🌐 THREE.js scéna
+let scene=new THREE.Scene();
+let cam=new THREE.PerspectiveCamera(70, innerWidth/innerHeight,1,2000);
+let ren=new THREE.WebGLRenderer({antialias:true});
+ren.setSize(innerWidth,innerHeight);
+document.body.appendChild(ren.domElement);
+cam.position.set(0,0,300);
+scene.add(new THREE.AmbientLight(0x404040));
+let dl=new THREE.DirectionalLight(0xffffff,1);
+dl.position.set(200,200,300);
+scene.add(dl);
 
-    init();
-    animate();
+// 🌟 FRAME
+let frame;
 
-    function init() {
-        scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x1a1a1a);
+// 🔹 MATERIÁL
+function getMat(){
+ return new THREE.MeshStandardMaterial({color: mat.value==="PLA"?0x60a5fa:0x34d399, roughness:0.5});
+}
 
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(150, 150, 150);
+// 🔹 FEM-lite stress mapa
+function stress(x,y,size){
+ let d=Math.sqrt(x*x+y*y);
+ let center=1-(d/(size/2));
+ let motor=(Math.abs(x)>size/3 && Math.abs(y)>size/3)?1:0.5;
+ return center*0.7 + motor*0.8;
+}
 
-        renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+// 🔹 honeycomb CSG
+function honey(base,size,t,detail){
+ for(let x=-size/2;x<size/2;x+=detail){
+  for(let y=-size/2;y<size/2;y+=detail){
+   if(stress(x,y,size)>0.65) continue;
+   let hex=new THREE.Mesh(new THREE.CylinderGeometry(detail/3,detail/3,t+2,6));
+   hex.position.set(x,y,0);
+   base=CSG.subtract(base,hex);
+  }
+ }
+ return base;
+}
 
-        controls = new THREE.OrbitControls(camera, renderer.domElement);
-        
-        const light = new THREE.DirectionalLight(0xffffff, 1);
-        light.position.set(10, 20, 10);
-        scene.add(light);
-        scene.add(new THREE.AmbientLight(0x404040));
-        
-        // Grid
-        const grid = new THREE.GridHelper(400, 40, 0x444444, 0x222222);
-        grid.rotation.x = Math.PI/2;
-        scene.add(grid);
+// 🔹 Generativní větve
+function branches(size,load,organic){
+ let g=new THREE.Group();
+ for(let i=0;i<organic;i++){
+  let path=new THREE.CatmullRomCurve3([
+   new THREE.Vector3(0,0,0),
+   new THREE.Vector3((Math.random()-0.5)*size,(Math.random()-0.5)*size,0)
+  ]);
+  let geo=new THREE.TubeGeometry(path,20,2+load/40,8,false);
+  g.add(new THREE.Mesh(geo));
+ }
+ return g;
+}
 
-        updateFrame();
+// 🔹 GENERATOR
+function gen(){
+ if(frame) scene.remove(frame);
+ let s=+size.value, loadVal=+load.value, org=+organic.value, det=+detail.value;
+ let t=3+loadVal/40;
+ if(mat.value==="PETG") t+=0.5;
+ let base=new THREE.Mesh(new THREE.BoxGeometry(s,s,t));
+ base=honey(base,s,t,det);
+ let br=branches(s,loadVal,org);
+ br.children.forEach(b=>{ base=CSG.union(base,b); });
+ base.material=getMat();
+ let g=new THREE.Group();
+ let top=base.clone(); top.position.z=10;
+ let bottom=base.clone(); bottom.position.z=-10;
+ g.add(top); g.add(bottom);
+ frame=g; scene.add(frame);
+}
 
-        // Listeners
-        document.querySelectorAll('input, select').forEach(el => {
-            el.addEventListener('input', () => {
-                if (el.id === 'preset') applyPreset();
-                if (el.id === 'frameType') toggleStackUI();
-                updateFrame();
-            });
-        });
-    }
+// 🔹 STL export
+function exportSTL(){
+ let ex=new THREE.STLExporter();
+ let data=ex.parse(scene);
+ let blob=new Blob([data]);
+ let a=document.createElement("a");
+ a.href=URL.createObjectURL(blob);
+ a.download="drone_frame.stl";
+ a.click();
+}
 
-    function applyPreset() {
-        const p = document.getElementById('preset').value;
-        if (p === '5') { setVals(225, 12, 4); }
-        else if (p === '3.5') { setVals(150, 8, 3); }
-        else if (p === 'whoop') { setVals(65, 5, 1.5); }
-    }
+// 🔹 PSEUDO AI – TensorFlow.js
+let model, dataX=[], dataY=[];
+async function initAI(){
+ model=tf.sequential();
+ model.add(tf.layers.dense({units:16,inputShape:[4],activation:'relu'}));
+ model.add(tf.layers.dense({units:8,activation:'relu'}));
+ model.add(tf.layers.dense({units:3}));
+ model.compile({optimizer:'adam',loss:'meanSquaredError'});
+}
+function evaluate(size,load,organic,detail){
+ return load*0.6 + organic*0.2 - (size*0.3 + detail*0.4);
+}
+function learnSample(size,load,organic,detail){
+ let score=evaluate(size,load,organic,detail);
+ dataX.push([size,load,organic,detail]);
+ dataY.push([size,load,organic]);
+ if(dataX.length>20) trainAI();
+}
+async function trainAI(){
+ let xs=tf.tensor2d(dataX), ys=tf.tensor2d(dataY);
+ await model.fit(xs,ys,{epochs:10,shuffle:true});
+ console.log("AI natrénována");
+}
+function suggestAI(){
+ if(!model) return;
+ let input=tf.tensor2d([[+size.value,+load.value,+organic.value,+detail.value]]);
+ let pred=model.predict(input);
+ let out=pred.dataSync();
+ size.value=Math.max(100,Math.min(300,out[0]));
+ load.value=Math.max(10,Math.min(100,out[1]));
+ organic.value=Math.max(1,Math.min(60,out[2]));
+ gen();
+}
 
-    function setVals(wb, aw, th) {
-        document.getElementById('wheelbase').value = wb;
-        document.getElementById('armWidth').value = aw;
-        document.getElementById('thickness').value = th;
-    }
+// 🔹 Eventy
+document.querySelectorAll("input,select").forEach(el=>el.oninput=gen);
+preset.onchange=e=>{ size.value=e.target.value; gen(); }
 
-    function toggleStackUI() {
-        const isStack = document.getElementById('frameType').value === 'stack';
-        document.getElementById('standoff').style.display = isStack ? 'block' : 'none';
-        document.getElementById('stackLabel').style.display = isStack ? 'block' : 'none';
-    }
+// 🔹 Ovládání 3D myš + mobil
+let down=false,px=0;
+document.onmousedown=e=>{down=true; px=e.clientX;}
+document.onmouseup=()=>down=false;
+document.onmousemove=e=>{ if(!down||!frame) return; frame.rotation.y+=(e.clientX-px)*0.01; px=e.clientX;}
+document.ontouchmove=e=>{ if(frame) frame.rotation.y+=0.02;}
 
-    function updateFrame() {
-        if (frameMesh) scene.remove(frameMesh);
+// 🔹 Resize
+window.onresize=()=>{ cam.aspect=innerWidth/innerHeight; cam.updateProjectionMatrix(); ren.setSize(innerWidth,innerHeight);}
 
-        const wb = parseFloat(document.getElementById('wheelbase').value);
-        const aw = parseFloat(document.getElementById('armWidth').value);
-        const th = parseFloat(document.getElementById('thickness').value);
-        const type = document.getElementById('frameType').value;
-        const lighten = document.getElementById('lighten').value;
-        const densityMultiplier = parseFloat(document.getElementById('material').value);
+// 🔹 Render loop
+function loop(){ requestAnimationFrame(loop); ren.render(scene,cam); }
+loop();
 
-        const group = new THREE.Group();
-        const material = new THREE.MeshPhongMaterial({ color: 0x555555, flatShading: true });
+// 🔹 Inicializace AI + první generování
+initAI(); gen();
 
-        // Logic for creating the shape
-        const createPlate = (zPos) => {
-            const shape = new THREE.Shape();
-            const armLen = wb / 2;
-            
-            // Central Hub
-            shape.absarc(0, 0, aw * 1.5, 0, Math.PI * 2);
-
-            // 4 Arms
-            for (let i = 0; i < 4; i++) {
-                const angle = (Math.PI / 4) + (i * Math.PI / 2);
-                const x = Math.cos(angle) * armLen;
-                const y = Math.sin(angle) * armLen;
-                
-                // Simplified Arm Geometry
-                shape.moveTo(Math.cos(angle + 0.2) * (aw), Math.sin(angle + 0.2) * (aw));
-                shape.lineTo(x, y);
-                shape.lineTo(Math.cos(angle - 0.2) * (aw), Math.sin(angle - 0.2) * (aw));
-            }
-
-            // Intelligent Weight Reduction Holes
-            if (lighten === 'intelligent') {
-                for (let i = 0; i < 4; i++) {
-                    const hole = new THREE.Path();
-                    const angle = (i * Math.PI / 2);
-                    hole.absarc(Math.cos(angle) * (aw * 2), Math.sin(angle) * (aw * 2), aw / 2, 0, Math.PI * 2, true);
-                    shape.holes.push(hole);
-                }
-            }
-
-            const extrudeSettings = { depth: th, bevelEnabled: false };
-            const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-            const mesh = new THREE.Mesh(geometry, material);
-            mesh.position.z = zPos;
-            return mesh;
-        };
-
-        group.add(createPlate(0));
-        
-        if (type === 'stack') {
-            const stHeight = parseFloat(document.getElementById('standoff').value);
-            group.add(createPlate(stHeight));
-            
-            // Simple Standoffs (visual representation)
-            const stGeom = new THREE.CylinderGeometry(2, 2, stHeight, 8);
-            for (let i = 0; i < 4; i++) {
-                const s = new THREE.Mesh(stGeom, new THREE.MeshPhongMaterial({color: 0x999999}));
-                const dist = aw * 1.2;
-                s.position.set(i < 2 ? dist : -dist, i % 2 === 0 ? dist : -dist, stHeight/2);
-                s.rotation.x = Math.PI/2;
-                group.add(s);
-            }
-        }
-
-        frameMesh = group;
-        scene.add(frameMesh);
-
-        // Calculate Weight (Rough Volume * Density)
-        // Average volume calc: (wb * aw * th) * correction factor
-        const estVol = (wb * aw * th * 0.001) * (type === 'stack' ? 1.8 : 1);
-        const weight = (estVol * densityMultiplier).toFixed(1);
-        document.getElementById('statsDisplay').innerText = `Estimated Weight: ${weight}g`;
-    }
-
-    function animate() {
-        requestAnimationFrame(animate);
-        controls.update();
-        renderer.render(scene, camera);
-    }
-
-    function exportSTL() {
-        const result = exporter.parse(frameMesh);
-        const blob = new Blob([result], { type: 'application/octet-stream' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'custom_drone_frame.stl';
-        link.click();
-    }
-
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    });
+// 🔹 Po každém generování učíme AI
+let oldGen=gen;
+gen=function(){ oldGen(); learnSample(+size.value,+load.value,+organic.value,+detail.value); }
 </script>
-
 </body>
 </html>
