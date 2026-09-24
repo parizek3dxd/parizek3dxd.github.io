@@ -1,49 +1,78 @@
 import os
+import io
+from mutagen.mp3 import MP3
+from mutagen.id3 import ID3, APIC
 from PIL import Image, ImageOps
 
-# Nastavení složek
-INPUT_DIR = "./prevedeno"
-OUTPUT_DIR = "./nahledy_png"
-SIZE = (80, 80)
+# NASTAVENÍ SLOŽEK A ROZMĚRU
+MUSIC_DIR = "./hudba"
+OUTPUT_BIN_DIR = "./prevedeno"
+OUTPUT_PREVIEW_DIR = "./nahledy_png"
+TARGET_SIZE = (96, 96)  # PŘEDĚLÁNO NA 96x96
 
-# Kontrola, zda složka s .bin vůbec existuje
-if not os.path.exists(INPUT_DIR):
-    print(f"[ERR] Složka '{INPUT_DIR}' neexistuje!")
-    print("-> Nejdříve spusť 'convert_art.py', aby se vytvořily .bin soubory.")
-    exit()
+# Vytvoření složek
+os.makedirs(OUTPUT_BIN_DIR, exist_ok=True)
+os.makedirs(OUTPUT_PREVIEW_DIR, exist_ok=True)
 
-bin_files = [f for f in os.listdir(INPUT_DIR) if f.endswith(".bin")]
+def process_mp3(file_path, filename):
+    try:
+        audio = MP3(file_path, ID3=ID3)
+        img_data = None
 
-if not bin_files:
-    print(f"[ERR] Ve složce '{INPUT_DIR}' nejsou žádné .bin soubory.")
-    print("-> Nakopíruj do složky 'hudba' nějaké MP3 s obalem a spusť 'convert_art.py'.")
-    exit()
+        # 1. Najít obal v MP3
+        for tag in audio.tags.values():
+            if isinstance(tag, APIC):
+                img_data = tag.data
+                break
 
-os.makedirs(OUTPUT_DIR, exist_ok=True)
-print(f"--- Nalezeno {len(bin_files)} .bin souborů. Převádím na PNG náhledy ---")
+        if img_data:
+            img = Image.open(io.BytesIO(img_data))
+            
+            # 2. Ořez na čtverec
+            width, height = img.size
+            if width > height:
+                left = (width - height) / 2
+                img = img.crop((left, 0, left + height, height))
+            elif height > width:
+                top = (height - width) / 2
+                img = img.crop((0, top, width, top + width))
 
-for filename in bin_files:
-    bin_path = os.path.join(INPUT_DIR, filename)
-    
-    with open(bin_path, "rb") as f:
-        raw_bytes = f.read()
-        
-    # Kontrola správné velikosti (80x80 px / 8 = 800 bajtů)
-    if len(raw_bytes) != 800:
-        print(f"[!] Soubor {filename} má špatnou velikost ({len(raw_bytes)} B namísto 800 B). Přeskakuji.")
-        continue
+            # 3. Resize na 96x96 px
+            img = img.resize(TARGET_SIZE, Image.Resampling.LANCZOS)
 
-    # Převedení bajtů na obrázek
-    img = Image.frombytes('1', SIZE, raw_bytes)
-    
-    # Invertování barev pro zobrazení na monitoru (černé pixely na bílém podkladu)
-    img_preview = ImageOps.invert(img.convert('L'))
-    
-    # Uložení jako PNG
-    png_name = os.path.splitext(filename)[0] + "_preview.png"
-    out_path = os.path.join(OUTPUT_DIR, png_name)
-    img_preview.save(out_path)
-    
-    print(f"[OK] Vytvořen náhled: {out_path}")
+            # 4. Černobílý dithering
+            img_bw = img.convert('1', dither=Image.Dither.FLOYDSTEINBERG)
+            
+            # 5. Export binárních dat pro ePaper (1152 B)
+            img_inverted = ImageOps.invert(img_bw.convert('L')).convert('1')
+            bin_data = img_inverted.tobytes()
 
-print("\n--- HOTOVO! Otevři složku 'nahledy_png' a prohlédni si výsledky. ---")
+            name_no_ext = os.path.splitext(filename)[0]
+
+            # Uložení .bin
+            bin_path = os.path.join(OUTPUT_BIN_DIR, f"{name_no_ext}.bin")
+            with open(bin_path, "wb") as f:
+                f.write(bin_data)
+
+            # 6. Přímé uložení PNG náhledu do počítače
+            preview_img = ImageOps.invert(img_inverted.convert('L'))
+            preview_path = os.path.join(OUTPUT_PREVIEW_DIR, f"{name_no_ext}_96x96.png")
+            preview_img.save(preview_path)
+                
+            print(f"[OK] Vytvořen 96x96 art + PNG náhled pro: {name_no_ext}")
+
+        else:
+            print(f"[--] Žádný obal v: {filename}")
+
+    except Exception as e:
+        print(f"[ERR] Chyba u {filename}: {e}")
+
+# Spuštění
+print("--- Začínám převod na 96x96 px ---")
+if os.path.exists(MUSIC_DIR):
+    for filename in os.listdir(MUSIC_DIR):
+        if filename.lower().endswith(".mp3"):
+            process_mp3(os.path.join(MUSIC_DIR, filename), filename)
+    print("\n--- HOTOVO! Náhledy najdeš ve složce 'nahledy_png' ---")
+else:
+    print(f"[ERR] Složka '{MUSIC_DIR}' neexistuje! Vytvoř ji a vlož do ní MP3.")
