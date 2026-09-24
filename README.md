@@ -10,10 +10,12 @@ from PIL import Image, ImageOps
 # KOSTRA ADRESÁŘŮ
 MUSIC_DIR = "./music"
 SD_DIR = "./sd_card"
+PREVIEWS_DIR = "./previews"
 TARGET_SIZE = (80, 80)
 
 os.makedirs(MUSIC_DIR, exist_ok=True)
 os.makedirs(SD_DIR, exist_ok=True)
+os.makedirs(PREVIEWS_DIR, exist_ok=True)
 
 def parse_filename_fallback(filename):
     """Pokud chybí ID3 tagy, vytáhne interpreta a název z názvu souboru."""
@@ -31,17 +33,13 @@ def parse_filename_fallback(filename):
 
 def convert_to_4gray_bytes(pil_img):
     """Převede obrázek na 4 úrovně šedi (2 bity na pixel = 1600 B pro 80x80 px)."""
-    # 1. Převedení na stupně šedi (L)
     gray = pil_img.convert('L')
-    # 2. Kvantizace na 4 barvy (0, 85, 170, 255) s ditheringem
     gray_4 = gray.quantize(colors=4, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.FLOYDSTEINBERG)
     
-    # 3. Převod pixelů na 2-bitový binární formát
     pixels = list(gray_4.getdata())
     bin_bytes = bytearray()
     
     for i in range(0, len(pixels), 4):
-        # Spojíme 4 pixely (každý 2 bity) do jednoho bajtu
         p0 = pixels[i] & 0x03
         p1 = pixels[i+1] & 0x03
         p2 = pixels[i+2] & 0x03
@@ -65,10 +63,13 @@ def process_sync(log_callback, progress_callback):
         base_name = os.path.splitext(filename)[0]
         mp3_in = os.path.join(MUSIC_DIR, filename)
         
+        # Cesty pro SD kartu (ČISTÉ BEZ PNG)
         mp3_out = os.path.join(SD_DIR, filename)
         bin_out = os.path.join(SD_DIR, f"{base_name}.bin")
         txt_out = os.path.join(SD_DIR, f"{base_name}.txt")
-        png_out = os.path.join(SD_DIR, f"{base_name}_preview.png")
+        
+        # Cesta pro náhledy na PC (MIMO SD KARTU)
+        png_out = os.path.join(PREVIEWS_DIR, f"{base_name}_preview.png")
 
         # KONTROLA SYNCU: Pokud už soubory na SD existují, přeskočíme
         if os.path.exists(mp3_out) and os.path.exists(bin_out) and os.path.exists(txt_out):
@@ -100,7 +101,7 @@ def process_sync(log_callback, progress_callback):
             artists_list = [a.strip() for a in re.split(r'[,&]|\bfeat\b|\bft\b', artist, flags=re.IGNORECASE)]
             artist_clean = ", ".join(artists_list)
 
-            # Úložka textových metadat pro Pico
+            # Úložka textových metadat pro Pico na SD
             with open(txt_out, "w", encoding="utf-8") as f:
                 f.write(f"{title}\n{artist_clean}")
 
@@ -108,7 +109,6 @@ def process_sync(log_callback, progress_callback):
             if img_data:
                 img = Image.open(io.BytesIO(img_data))
             else:
-                # Náhradní prázdný obal, pokud v MP3 obrázek není
                 img = Image.new('RGB', TARGET_SIZE, color=(200, 200, 200))
 
             # Crop na čtverec
@@ -120,10 +120,11 @@ def process_sync(log_callback, progress_callback):
             # Konverze na 4-bit binární šedotón pro ePaper
             raw_bytes, preview_img = convert_to_4gray_bytes(img)
             
+            # .bin soubor uložíme na SD
             with open(bin_out, "wb") as f:
                 f.write(raw_bytes)
 
-            # Uložení PNG náhledu pro PC
+            # PNG náhled uložíme DO SLOŽKY PREVIEWS NA PC
             preview_img.save(png_out)
 
             # --- 3. KOPÍROVÁNÍ MP3 NA SD ---
@@ -137,7 +138,7 @@ def process_sync(log_callback, progress_callback):
 
         progress_callback((idx + 1) / total_files * 100)
 
-    log_callback("\n🎉 SYNCHRONIZACE HOTOVA! Složku 'sd_card' můžeš překopírovat na SD.")
+    log_callback("\n🎉 SYNCHRONIZACE HOTOVA! Obsah složky 'sd_card' můžeš přetáhnout na SD.")
 
 # --- GUI APLIKACE (Tkinter) ---
 class WalkmanSyncApp:
@@ -151,7 +152,7 @@ class WalkmanSyncApp:
         title_label = tk.Label(root, text="🎧 Walkman SD Synchronizátor", font=("Helvetica", 14, "bold"))
         title_label.pack(pady=10)
 
-        info_label = tk.Label(root, text="Vlož MP3 do složky 'music/' a klikni na Sync.", font=("Helvetica", 9))
+        info_label = tk.Label(root, text="Vlož MP3 do 'music/' a klikni na Sync. Náhledy budou v 'previews/'.", font=("Helvetica", 9))
         info_label.pack()
 
         self.btn_sync = tk.Button(root, text="🚀 Spustit synchronizaci", font=("Helvetica", 11, "bold"), bg="#4CAF50", fg="white", command=self.start_sync)
@@ -180,7 +181,7 @@ class WalkmanSyncApp:
         process_sync(self.log, self.set_progress)
         
         self.btn_sync.config(state=tk.NORMAL)
-        messagebox.showinfo("Hotovo", "Synchronizace do složky 'sd_card' byla dokončena!")
+        messagebox.showinfo("Hotovo", "Synchronizace byla dokončena! Složka 'sd_card' je připravena k přetažení.")
 
 if __name__ == "__main__":
     root = tk.Tk()
