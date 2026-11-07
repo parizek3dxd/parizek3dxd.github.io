@@ -1,353 +1,281 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FACT ENGINE</title>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#10101c">
+<title>FACT ENGINE</title>
 <style>
-:root{--bg:#121220;--panel:#1b1b30;--line:#2e2e4c;--tx:#eceaf8;--mut:#9b99ba;--ac:#7c8cff;--sig:#ffcf5c;--bad:#ff7a8a;color-scheme:dark}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 "Avenir Next","Segoe UI",system-ui,sans-serif}
-main{max-width:760px;margin:0 auto;padding:max(20px,env(safe-area-inset-top)) 16px 64px;display:grid;gap:16px}
-h1{font-size:30px;letter-spacing:.06em;margin:8px 0 0;font-weight:800}h2{font-size:18px;margin:0 0 10px}h3{font-size:15px;margin:14px 0 4px}
-.sub,.mut,small{color:var(--mut)}.sub{margin:0}.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
-input,select,textarea{width:100%;color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit;background:#161628}
-input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
-textarea{resize:vertical}label{display:block;font-size:14px;color:var(--mut);margin-top:10px}label>*{margin-top:4px}
-button,.btn{background:var(--ac);color:#0d0d1c;border:0;border-radius:10px;padding:12px 16px;font:inherit;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;text-align:center}
-button.ghost,.btn.ghost{background:transparent;color:var(--tx);border:1px solid var(--line);font-weight:600}button:disabled{opacity:.45;cursor:not-allowed}
-.row{display:flex;gap:8px;flex-wrap:wrap}.row>input{flex:1 1 200px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-#go{width:100%;margin-top:14px;font-size:17px;padding:14px}
-.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.chips button{background:#161628;color:var(--tx);border:1px solid var(--line);font-weight:500;font-size:14px;padding:8px 12px}
-.note{border-color:var(--sig)}.note p{margin:4px 0;font-size:14px}#err{color:var(--bad);font-weight:600}
-#bar{height:8px;background:#161628;border-radius:8px;overflow:hidden;margin:8px 0}#bar i{display:block;height:100%;width:0;background:var(--sig);transition:width .4s}
-.ln{border-top:1px solid var(--line);padding:10px 0}.ln:first-child{border:0}.ln input{padding:8px 10px;font-size:14px}
-.strip{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px}.fr{flex:0 0 156px;scroll-snap-align:start;font-size:12px}
-.im{aspect-ratio:9/16;background:linear-gradient(160deg,#2a2a52,#121220) center/cover;border-radius:12px;border:1px solid var(--line);display:grid;place-items:center;color:var(--mut);text-align:center;padding:8px}
-.fr a{color:var(--ac)}.fr p{margin:4px 0}.fr button,.fr .btn{padding:6px 10px;font-size:12px;margin:0 4px 4px 0}
-video{width:min(100%,360px);aspect-ratio:9/16;background:#000;border-radius:14px;display:block;margin:0 auto 12px}audio{width:100%}
-a{color:var(--ac)}ul,ol{padding-left:20px;margin:4px 0}[hidden]{display:none!important}@media(max-width:480px){.grid2{grid-template-columns:1fr}}
-</style></head><body><main>
-<header><h1>FACT ENGINE</h1><p class="sub">Runs in your browser. No account, no API keys, no server. Free unlimited voiceover, engine chosen automatically.</p></header>
-<section class="card note"><h2>Read this first</h2>
-<p>Script: built from the intro of a Wikipedia article (CC BY-SA, credited below), or from a script you paste. There is no AI writer without a key, so it is extractive, not original. Edit any line.</p>
-<p>Voice: free, unlimited, no API key, no account. The app automatically picks the first engine that works: Microsoft Edge neural voices (instant on desktop Edge/Chrome; Microsoft blocks iPhone Safari), a free shared OpenAI voice API (works on iPhone, up to ~17 s per sentence), or an on-device AI voice (Kokoro; first use downloads ~90 MB, then cached). Last fallback: basic offline voice.</p>
-<p>Images: Wikimedia Commons only (free licenses, credited). No stock video without keys. You can add your own image per line.</p>
-<p>Video: recorded live in your browser, so it takes as long as the video and the tab must stay open and visible. Output is MP4 where your browser supports it, otherwise WebM.</p></section>
-<section class="card">
-  <label style="margin:0">Topic<div class="row"><input id="topic" placeholder="e.g. Octopus" maxlength="120"><button id="sug" class="ghost" type="button">Suggest topics</button></div></label>
-  <div id="chips" class="chips"></div>
-  <label>Or paste your own script (optional, you are responsible for its accuracy)<textarea id="own" rows="3"></textarea></label>
-  <div class="grid2"><label>Voice<select id="voice"><option value="en-US-JennyNeural|nova|af_bella">Jenny (US, female, natural)</option><option value="en-US-AriaNeural|shimmer|af_heart">Aria (US, female, natural)</option><option value="en-US-GuyNeural|onyx|am_michael">Guy (US, male, natural)</option><option value="en-GB-EmmaNeural|alloy|bf_emma">Emma (UK, female, natural)</option><option value="en-GB-RyanNeural|ash|bm_george">Ryan (UK, male, natural)</option><option value="basic">Basic robotic voice (offline fallback)</option><option value="none">No voice (captions only)</option></select></label>
-  <label>Background music<select id="music"><option value="none">None</option><option value="commons">Free tracks from Wikimedia Commons</option><option value="file">My own file (e.g. from Pixabay Music)</option></select></label>
-  <label>Length<select id="len"><option value="20">About 20 seconds</option><option value="30">About 30 seconds</option><option value="45" selected>About 45 seconds</option><option value="60">About 60 seconds</option></select></label>
-  <label>Smoothness<select id="fps"><option value="60" selected>60 fps (smoothest)</option><option value="30">30 fps (safer on old phones)</option></select></label>
-  <label>Quality<select id="res"><option value="720">720x1280 (faster)</option><option value="1080">1080x1920 (heavier)</option></select></label></div>
-  <div id="mus" hidden style="margin-top:12px">
-  <div id="mcommons" hidden><div class="row"><input id="mq" value="upbeat instrumental"><button id="msearch" class="ghost" type="button">Search music</button></div><div id="mres"></div></div>
-  <div id="mfile" hidden><input id="mf" type="file" accept="audio/*"><p class="mut" style="font-size:14px">Download a track first, e.g. from pixabay.com/music (no credit needed), the YouTube Audio Library, or incompetech.com (credit required). Then pick the file here and check its license.</p></div>
-  <p id="mstat" class="mut" style="font-size:14px"></p></div>
-  <button id="go" type="button">Generate Short</button>
+:root{color-scheme:dark;--bg:#10101c;--panel:#1a1a2b;--panel2:#22223a;--line:#343450;--text:#f4f2ff;--muted:#aaa8c4;--accent:#9b8cff;--gold:#ffd36a;--red:#ff7e91}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 20% -10%,#29234b 0,transparent 42%),var(--bg);color:var(--text);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{width:min(900px,100%);margin:auto;padding:calc(22px + env(safe-area-inset-top)) 16px calc(48px + env(safe-area-inset-bottom));display:grid;gap:16px}
+header{padding:8px 2px 4px}h1{font-size:clamp(28px,7vw,42px);line-height:1.05;letter-spacing:.08em;margin:0;font-weight:900}h1 span{color:var(--accent)}h2{font-size:18px;margin:0 0 12px}h3{font-size:14px;margin:14px 0 5px;color:var(--muted)}p{margin:6px 0}.sub,.mut,small{color:var(--muted)}.sub{margin-top:8px}
+.card{background:linear-gradient(145deg,rgba(35,35,58,.96),rgba(24,24,40,.98));border:1px solid var(--line);border-radius:18px;padding:17px;box-shadow:0 12px 35px #0002}
+.notice{border-color:#665638;background:linear-gradient(145deg,#302a21,#211f29)}.notice p{font-size:13px;color:#e0d7c3}
+label{display:block;color:var(--muted);font-size:13px;margin:11px 0 0}input,select,textarea{display:block;width:100%;margin-top:5px;padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:#121222;color:var(--text);font:inherit;min-width:0}textarea{resize:vertical;min-height:82px}input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button,.btn{border:0;border-radius:11px;padding:12px 16px;background:linear-gradient(135deg,#b0a1ff,#8176ed);color:#111020;font:inherit;font-weight:800;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;min-height:44px}
+button.secondary,.btn.secondary{background:#25253e;border:1px solid var(--line);color:var(--text);font-weight:650}button:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:end}.row>*{flex:1 1 150px}.row button{flex:0 0 auto}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px}
+#go{width:100%;margin-top:16px;min-height:52px;font-size:17px}.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.chips button{min-height:36px;padding:7px 11px;font-size:13px;background:#26243f;color:var(--text);border:1px solid var(--line)}
+#progress{height:8px;border-radius:9px;background:#111120;overflow:hidden;margin:10px 0}#progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--gold));transition:width .2s}
+#status{font-size:13px;color:var(--gold)}#error{color:var(--red);font-weight:700}
+.line{border-top:1px solid var(--line);padding:10px 0}.line:first-child{border:0}.line textarea{min-height:60px}
+.strip{display:flex;gap:11px;overflow-x:auto;padding:3px 0 10px;scroll-snap-type:x mandatory}.frame{flex:0 0 150px;scroll-snap-align:start;font-size:12px}.preview{height:240px;border-radius:12px;border:1px solid var(--line);background:linear-gradient(145deg,#36335d,#121222) center/cover;display:grid;place-items:center;text-align:center;color:var(--muted);padding:8px;overflow:hidden}.frame a{color:#b7adff}.frame button{font-size:12px;padding:7px 9px;min-height:34px;margin-top:5px}.frame label{display:inline-flex;align-items:center;gap:5px;margin-top:5px}
+audio{width:100%;margin:6px 0}video{display:block;width:min(100%,380px);aspect-ratio:9/16;object-fit:contain;background:#000;border-radius:16px;margin:8px auto 14px}
+.actions{display:flex;gap:9px;justify-content:center;flex-wrap:wrap}.actions>*{flex:1 1 150px}.hidden{display:none!important}a{color:#b7adff;overflow-wrap:anywhere}
+@media(max-width:520px){main{padding-left:12px;padding-right:12px}.card{padding:14px}.grid{grid-template-columns:1fr}.row button{flex:1 1 100%}h1{font-size:30px}}
+</style>
+</head>
+<body>
+<main>
+<header><h1>FACT <span>ENGINE</span></h1><p class="sub">Create vertical fact videos in your browser. No account, API key or paid subscription.</p></header>
+
+<section class="card notice">
+<h2>Before you start</h2>
+<p>• The free voice is generated on your device with meSpeak/eSpeak. It is unlimited and does not need an API key, but sounds synthetic.</p>
+<p>• The voice library and voice data are downloaded from jsDelivr the first time. This is one HTML file, not a fully offline app.</p>
+<p>• Images and article text come from Wikipedia and Wikimedia Commons. Check the credits in your video description.</p>
+<p>• Keep Safari open and the screen awake while rendering. 60 FPS depends on your iPhone's performance.</p>
 </section>
-<section id="prog" class="card" hidden><b id="stepname">Starting</b><div id="bar"><i></i></div><p id="info" style="color:var(--sig);font-size:14px;margin:4px 0" hidden></p><div id="err" role="alert" hidden></div></section>
-<section id="out" hidden>
- <div class="card"><h2>Script</h2><p class="mut">Edit any line or its image search words, then press Rebuild.</p><p id="dur" class="mut"></p><div id="lines"></div><h3>Sources</h3><ul id="srcs"></ul></div>
- <div class="card"><h2>Voiceover</h2><audio id="aud" controls></audio><p><a id="dla" class="btn ghost" download="narration.wav">Download audio (WAV)</a></p></div>
- <div class="card"><h2>Storyboard</h2><div id="story" class="strip"></div><p class="mut">Swap or upload, then press Rebuild.</p></div>
- <div class="card"><h2>Final video</h2><video id="vid" controls playsinline></video><div class="row" style="justify-content:center"><a id="dlv" class="btn" download>Download video</a><button id="reb" class="ghost" type="button">Rebuild with my edits</button></div><p id="fmt" class="mut" style="text-align:center"></p></div>
- <div class="card"><h2>YouTube package</h2><div id="pkg"></div><button id="dlp" class="ghost" type="button" style="margin-top:12px">Download package (.txt)</button></div>
-</section></main>
-<canvas id="cv" hidden></canvas>
+
+<section class="card">
+<label>Topic
+<div class="row"><input id="topic" maxlength="120" placeholder="e.g. Octopus"><button id="suggest" class="secondary" type="button">Suggest</button></div>
+</label>
+<div id="chips" class="chips"></div>
+<label>Or paste your own narration (optional)
+<textarea id="own" placeholder="Paste your script here. Each sentence becomes a scene."></textarea>
+</label>
+<div class="grid">
+<label>Voice<select id="voice"><option value="en-us">English US · basic free voice</option><option value="en">English · basic free voice</option><option value="none">No voice · captions only</option></select></label>
+<label>Background music<select id="music"><option value="none">No music</option><option value="file">My own audio file</option></select></label>
+<label>Target length<select id="length"><option value="20">About 20 seconds</option><option value="30">About 30 seconds</option><option value="45" selected>About 45 seconds</option><option value="60">About 60 seconds</option></select></label>
+<label>Frame rate<select id="fps"><option value="60" selected>60 FPS</option><option value="30">30 FPS</option></select></label>
+<label>Resolution<select id="resolution"><option value="720">720 × 1280 · faster</option><option value="1080">1080 × 1920 · sharper</option></select></label>
+<label>Caption size<select id="caption"><option value="normal">Normal</option><option value="large" selected>Large</option></select></label>
+</div>
+<div id="musicbox" class="hidden"><label>Choose music file<input id="musicfile" type="file" accept="audio/*"></label><p id="musicstatus" class="mut"></p></div>
+<button id="go" type="button">✦ Generate Short</button>
+</section>
+
+<section id="progresscard" class="card hidden">
+<strong id="step">Preparing</strong><div id="progress"><i></i></div><p id="status"></p><p id="error" role="alert"></p>
+</section>
+
+<section id="output" class="hidden">
+<div class="card"><h2>✎ Script editor</h2><p class="mut">Edit the narration and image search words before rebuilding.</p><p id="duration" class="mut"></p><div id="lines"></div><h3>Text source</h3><ul id="sources"></ul></div>
+<div class="card"><h2>♫ Voiceover</h2><audio id="audio" controls playsinline></audio><a id="audioDownload" class="btn secondary" download="fact-engine-narration.wav">Download WAV</a></div>
+<div class="card"><h2>▧ Storyboard</h2><div id="story" class="strip"></div><p class="mut">Swap an image or upload your own. Then tap Rebuild video.</p></div>
+<div class="card"><h2>▶ Final video</h2><video id="video" controls playsinline></video><div class="actions"><a id="videoDownload" class="btn" download="fact-engine-short.mp4">Download video</a><button id="rebuild" class="secondary" type="button">Rebuild video</button></div><p id="format" class="mut"></p></div>
+<div class="card"><h2>↗ YouTube package</h2><div id="package"></div><button id="packageDownload" class="secondary" type="button" style="margin-top:10px">Download description package</button></div>
+</section>
+<canvas id="canvas" class="hidden"></canvas>
+</main>
+
 <script>
-const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const TOPICS=['Octopus','Aurora','Placebo','Black hole','Photosynthesis','Great Pyramid of Giza','Bioluminescence','Antikythera mechanism','Dunning–Kruger effect','Tardigrade','Lightning','Rosetta Stone','Mirage','Sleep paralysis','Northern lights','Transistor','Coral reef','Baader–Meinhof phenomenon','Mount Vesuvius','Echolocation','Pareidolia','Plate tectonics','GPS','Honey'];
-const STOP=/^(because|however|between|through|during|another|several|including|usually|against|without|around|called|within|their|which)$/i;
-let S=null,busy=false,mes=null,uctx=null,kw=null,kOk=false,kReady=null,kpct=0,nid=0,useMain=false,mainTTS=null;const pend=new Map(),vcache=new Map(),qcache=new Map();
-const bar=(p,t)=>{$('#bar i').style.width=p+'%';if(t)$('#stepname').textContent=t};
-const lock=b=>{$('#go').disabled=$('#reb').disabled=b};
-const split=t=>(t.replace(/\s+/g,' ').trim().match(/[^.!?]+[.!?]+(?:\s|$)/g)||[t]).map(s=>s.trim()).filter(Boolean);
-$('#sug').onclick=()=>{$('#chips').innerHTML=[...TOPICS].sort(()=>Math.random()-.5).slice(0,6).map(t=>`<button type="button">${esc(t)}</button>`).join('');$('#chips').querySelectorAll('button').forEach(b=>b.onclick=()=>$('#topic').value=b.textContent)};
+(() => {
+'use strict';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const TOPICS=['Octopus','Aurora','Placebo effect','Black hole','Photosynthesis','Antikythera mechanism','Tardigrade','Bioluminescence','Lightning','Rosetta Stone','Mirage','Transistor','Coral reef','Echolocation','Pareidolia','Plate tectonics','GPS','Honeybees','Deep sea'];
+let state=null,busy=false,audioCtx=null,voiceEngine=null,musicBuffer=null,musicCredit='',lastVideoUrl='',lastAudioUrl='';
+const cache=new Map(),imageCache=new Map();
+function progress(p,label){$('#progress i').style.width=Math.max(0,Math.min(100,p))+'%';$('#step').textContent=label}
+function message(t=''){$('#status').textContent=t}
+function splitSentences(t){return (t.replace(/\s+/g,' ').trim().match(/[^.!?]+[.!?]+(?:\s|$)/g)||[t]).map(x=>x.trim()).filter(Boolean)}
+function context(){const C=window.AudioContext||window.webkitAudioContext;if(!C)throw Error('Web Audio is not supported in this browser.');if(!audioCtx)audioCtx=new C();audioCtx.resume().catch(()=>{});return audioCtx}
+const wait=(p,ms,label)=>Promise.race([p,new Promise((_,reject)=>setTimeout(()=>reject(Error(label)),ms))]);
 
-async function buildScript(topic,own,len){
-  const j=async p=>{const r=await fetch('https://en.wikipedia.org/w/api.php?format=json&origin=*&action=query&'+p);if(!r.ok)throw new Error('Wikipedia request failed ('+r.status+')');return r.json()};
-  let page=null;
-  if(topic){const s=await j('list=search&srlimit=1&srsearch='+encodeURIComponent(topic)),id=s.query.search[0]?.pageid;
-    if(id){const p=(await j('prop=extracts&exintro=1&explaintext=1&exchars=5000&pageids='+id)).query.pages[id];page={title:p.title,url:'https://en.wikipedia.org/?curid='+id,text:p.extract||''}}}
-  if(!page&&!own)throw new Error('No Wikipedia article found for that topic. Try a more specific topic or paste your own script.');
-  const title=page?page.title:(topic||own.split(' ').slice(0,3).join(' '));let lines;
-  if(own)lines=split(own);else{
-    const body=split(page.text.replace(/\s*\([^)]*\)/g,'')).filter(s=>s.length>=40&&s.length<=230);
-    lines=[`Here's a quick, fascinating look at ${title}.`];let w=lines[0].split(' ').length;
-    for(const s of body){const n=s.split(' ').length;if(lines.length>=24||w+n>Math.round(len*2.5)-11)break;lines.push(s);w+=n}
-    lines.push("That's the short version, and there's plenty more to discover.")}
-  const T=title,tag=T.replace(/[^A-Za-z0-9]/g,'');
-  return{topic:topic||title,title,page,own:!!own,sources:page&&!own?[{title:page.title,url:page.url,license:'Wikipedia text, CC BY-SA 4.0'}]:[],
-    sents:lines.map((t,i)=>{const kw=(t.match(/[A-Za-z]{6,}/g)||[]).filter(w=>!STOP.test(w)).sort((a,b)=>b.length-a.length)[0];return{text:t,q:i&&i<lines.length-1&&kw?`${title} ${kw}`:title}}),
-    titles:[`${T} in 40 seconds`,`${T}: the quick version`,`Quick facts: ${T}`,`${T} explained fast`,`What is ${T}?`],
-    description:`${lines[1]||lines[0]}\n\nText adapted from Wikipedia (CC BY-SA 4.0). Image credits are listed in the video description package.`,
-    hashtags:['#Shorts','#Facts','#DidYouKnow','#LearnOnYouTube',tag&&'#'+tag].filter(Boolean),
-    thumbnail:`Use the strongest image from the storyboard, full-bleed and slightly darkened. Add 2-3 huge words ("${T}") in white with an amber highlight on one word, placed in the middle third so phone UI does not cover it.`};
-}
-function renderScript(){
-  $('#lines').innerHTML=S.sents.map((x,i)=>`<div class="ln"><textarea rows="2" data-t="${i}">${esc(x.text)}</textarea><label>Image search words<input data-q="${i}" value="${esc(x.q)}"></label></div>`).join('');
-  $('#srcs').innerHTML=S.sources.map(x=>`<li><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a> <small>${esc(x.license)}</small></li>`).join('')||'<li class="mut">Your own script (no sources attached)</li>';
-  $('#pkg').innerHTML=`<h3>Title ideas</h3><ol>${S.titles.map(t=>`<li>${esc(t)}</li>`).join('')}</ol><h3>Description</h3><p>${esc(S.description).replace(/\n/g,'<br>')}</p><p class="mut">${esc(S.hashtags.join(' '))}</p><h3>Thumbnail concept</h3><p>${esc(S.thumbnail)}</p>`}
-function readEdits(){document.querySelectorAll('[data-t]').forEach(t=>{const i=+t.dataset.t,q=document.querySelector(`[data-q="${i}"]`).value.trim()||S.title,x=S.sents[i];x.text=t.value.trim()||x.text;if(q!==x.q){x.q=q;x.cands=null}})}
+$('#suggest').onclick=()=>{$('#chips').innerHTML=[...TOPICS].sort(()=>Math.random()-.5).slice(0,6).map(t=>`<button type="button">${esc(t)}</button>`).join('');$('#chips').querySelectorAll('button').forEach(b=>b.onclick=()=>$('#topic').value=b.textContent)};
+$('#music').onchange=()=>{$('#musicbox').classList.toggle('hidden',$('#music').value!=='file');musicBuffer=null;$('#musicstatus').textContent=''};
+$('#musicfile').onchange=async()=>{const f=$('#musicfile').files[0];if(!f)return;try{const ab=await f.arrayBuffer();musicBuffer=await context().decodeAudioData(ab);musicCredit='User file: '+f.name;$('#musicstatus').textContent=`Loaded ${f.name} (${Math.round(musicBuffer.duration)} sec).`}catch(e){musicBuffer=null;$('#musicstatus').textContent='Could not decode this audio file. Try an MP3, M4A or WAV.'}};
 
-const NOTES=[];function note(m){if(!m)NOTES.length=0;else NOTES.push(m);$('#info').textContent=NOTES.join(' ');$('#info').hidden=!NOTES.length}
-function showLen(){const w=+$('#len').value;$('#dur').textContent=`Video length: ${Math.round(S.total)} s (target ${w} s).`+(!S.own&&S.total<w*.75?" Wikipedia's intro for this topic is short. For a longer video, try a broader topic or paste your own script.":'')}
-const withTimeout=(p,ms,m)=>Promise.race([p,new Promise((_,no)=>setTimeout(()=>no(new Error(m)),ms))]);
-function unlock(){if(!uctx||uctx.state==='closed')uctx=new(window.AudioContext||window.webkitAudioContext)();uctx.resume()}
-const TRUSTED='6A5AA1D4EAFF4E9FB37E23D68491D6F4';
-const K256=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
-function sha256(bytes){
-  const l=bytes.length,plen=(l+9+63&-64),b=new Uint8Array(plen);b.set(bytes);b[l]=128;
-  const dv=new DataView(b.buffer);dv.setUint32(plen-8,Math.floor(l/536870912));dv.setUint32(plen-4,l<<3);
-  const H=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19],w=new Int32Array(64);
-  for(let o=0;o<plen;o+=64){
-    for(let i=0;i<16;i++)w[i]=dv.getUint32(o+i*4);
-    for(let i=16;i<64;i++){const x=w[i-15],y=w[i-2],s0=((x>>>7)^(x<<25)^(x>>>18)^(x<<14)^(x>>>3))|0,s1=((y>>>17)^(y<<15)^(y>>>19)^(y<<13)^(y>>>10))|0;w[i]=(w[i-16]+s0+w[i-7]+s1)|0}
-    let a=H[0],b2=H[1],c=H[2],d=H[3],e=H[4],f=H[5],g=H[6],h=H[7];
-    for(let i=0;i<64;i++){const S1=((e>>>6)^(e<<26)^(e>>>11)^(e<<21)^(e>>>25)^(e<<7))|0,ch=(e&f)^(~e&g),t1=(h+S1+ch+K256[i]+w[i])|0,S0=((a>>>2)^(a<<30)^(a>>>13)^(a<<19)^(a>>>22)^(a<<10))|0,mj=(a&b2)^(a&c)^(b2&c),t2=(S0+mj)|0;h=g;g=f;f=e;e=(d+t1)|0;d=c;c=b2;b2=a;a=(t1+t2)|0}
-    H[0]=H[0]+a|0;H[1]=H[1]+b2|0;H[2]=H[2]+c|0;H[3]=H[3]+d|0;H[4]=H[4]+e|0;H[5]=H[5]+f|0;H[6]=H[6]+g|0;H[7]=H[7]+h|0}
-  const out=new Uint8Array(32);for(let i=0;i<8;i++){out[i*4]=H[i]>>>24&255;out[i*4+1]=H[i]>>>16&255;out[i*4+2]=H[i]>>>8&255;out[i*4+3]=H[i]&255}
-  return out}
-const SW1={w:0xEF0569FB,s:0x76F50F34,p:0xC3EFEA97},SW2={w:0xC31713DB,s:0x1881CE3C,p:0x35BD1EC9},MX1=[0xCF98B111,0x87085B9F,0x12CEB96D,0x257E1D83],MX2=[0xA27416F5,0xD38396FF,0x7C932B89,0xBFA49F69];
-const rol16=v=>(((v<<16)|(v>>>16))>>>0);
-function swapTerm(w,k,m){const sum=(Math.imul(w,k)+Math.imul(rol16(w),m.w))>>>0,q=Math.imul(rol16(sum),m.s)>>>0;return(Math.imul(rol16(q),m.p)+q)>>>0}
-function chain(v,m){for(const x of m)v=Math.imul(rol16(v),x)>>>0;return v}
-const toHex=b=>Array.from(b,x=>x.toString(16).padStart(2,'0')).join('').toUpperCase();
-function secMsGec(){
-  const t=Math.floor(Date.now()/1000)+11644473600,r=t-t%300,wt=r*10000000;
-  const msg=new TextEncoder().encode('Copyright (C) Microsoft Corporation. All rights reserved.'+wt+TRUSTED);
-  const dg=sha256(msg),dav=new DataView(dg.buffer),ka=dav.getUint32(0,true)|1,kb=dav.getUint32(4,true)|1;
-  const pad=new Uint8Array(Math.ceil(msg.length/8)*8);pad.set(msg);
-  const pv=new DataView(pad.buffer);let ss=0,ls=0,mix=0,ms=0;
-  for(let o=0;o<pad.length;o+=8){const fw=pv.getUint32(o,true),sw=pv.getUint32(o+4,true);
-    ls=swapTerm(sw,kb,SW2);ss=(ss+swapTerm(fw,ka,SW1)+ls)>>>0;
-    mix=chain(Math.imul(mix+fw,ka),MX1);ms=(ms+mix)>>>0;
-    mix=chain(Math.imul(mix+sw,kb),MX2);ms=(ms+mix)>>>0}
-  const cs=new Uint8Array(8),cv=new DataView(cs.buffer);cv.setUint32(0,ls^mix,true);cv.setUint32(4,ss^ms,true);
-  return toHex(cs)+'-'+toHex(dg)}
-function edgeDate(){const D=new Date(),d=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],p=n=>String(n).padStart(2,'0');return`${d[D.getUTCDay()]} ${m[D.getUTCMonth()]} ${p(D.getUTCDate())} ${D.getUTCFullYear()} ${p(D.getUTCHours())}:${p(D.getUTCMinutes())}:${p(D.getUTCSeconds())} GMT+0000 (Coordinated Universal Time)`}
-const rid=()=>{try{if(crypto.randomUUID)return crypto.randomUUID().replace(/-/g,'')}catch(e){}return Array.from({length:32},()=>'0123456789abcdef'[Math.floor(Math.random()*16)]).join('')};
-function edgeSpeak(text,voice){
-  return new Promise((ok,no)=>{
-    const cid=rid(),parts=[];let done=false,ws;
-    const fail=m=>{if(done)return;done=true;try{ws.close()}catch(e){};no(new Error(m))};
-    try{ws=new WebSocket(`wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=${TRUSTED}&Sec-MS-GEC=${secMsGec()}&Sec-MS-GEC-Version=2-143.0.3650.96&ConnectionId=${cid}`)}
-    catch(e){return no(new Error('cannot open the voice connection: '+e.message))}
-    ws.binaryType='arraybuffer';
-    ws.onopen=()=>{
-      const dt=edgeDate();
-      ws.send(`X-Timestamp:${dt}\r\nContent-Type:application/json; charset=utf-8\r\nPath:speech.config\r\n\r\n{"context":{"synthesis":{"audio":{"metadataoptions":{"sentenceBoundaryEnabled":"false","wordBoundaryEnabled":"false"},"outputFormat":"audio-24khz-48kbitrate-mono-mp3"}}}}`);
-      const x=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
-      ws.send(`X-RequestId:${cid}\r\nContent-Type:application/ssml+xml\r\nX-Timestamp:${dt}Z\r\nPath:ssml\r\n\r\n<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='${voice.slice(0,5)}'><voice name='${voice}'><prosody pitch='+0Hz' rate='+0%' volume='+0%'>${x(text)}</prosody></voice></speak>`)};
-    ws.onmessage=e=>{
-      if(typeof e.data==='string'){
-        if(e.data.includes('Path:turn.end')){if(done)return;done=true;try{ws.close()}catch(x){}
-          if(!parts.length)no(new Error('the voice service returned no audio'));else ok(new Blob(parts,{type:'audio/mpeg'}))}}
-      else{const u=new Uint8Array(e.data);if(u.length<2)return;const hl=(u[0]<<8)|u[1];if(u.length>hl+2)parts.push(u.slice(hl+2))}};
-    ws.onerror=()=>fail('voice connection failed');
-    ws.onclose=()=>fail('voice connection closed early')});
+async function wiki(topic){
+ const base='https://en.wikipedia.org/w/api.php?format=json&origin=*&action=query&';
+ const get=async q=>{const r=await fetch(base+q);if(!r.ok)throw Error('Wikipedia request failed: '+r.status);return r.json()};
+ const s=await get('list=search&srlimit=1&srsearch='+encodeURIComponent(topic));
+ const id=s.query.search[0]?.pageid;if(!id)throw Error('No Wikipedia article found. Try another topic or paste your own script.');
+ const p=(await get('prop=extracts&exintro=1&explaintext=1&exchars=6000&pageids='+id)).query.pages[id];
+ return {title:p.title,text:p.extract||'',url:'https://en.wikipedia.org/?curid='+id};
 }
-let pollLast=0;
-const sleep=ms=>new Promise(res=>setTimeout(res,ms));
-async function pollTTS(text,voice){
-  const gap=17000-(Date.now()-pollLast);if(gap>0)await sleep(gap);
-  let r;
-  try{r=await fetch('https://text.pollinations.ai/'+encodeURIComponent(String(text).slice(0,2800))+'?model=openai-audio&voice='+encodeURIComponent(voice))}
-  catch(e){throw new Error('API unreachable ('+(e.message||'blocked')+')')}
-  pollLast=Date.now();
-  if(r.status===429)throw new Error('429');
-  const ct=r.headers.get('content-type')||'';
-  if(!r.ok){let m='HTTP '+r.status;try{const j=await r.json();m=(j.error&&(j.error.message||j.error))||j.error||m}catch(e){}throw new Error(m)}
-  if(!/audio|octet-stream/.test(ct))throw new Error('no audio ('+ct+')');
-  return await r.arrayBuffer()}
-const WCODE=`let tts=null;
-self.onmessage=async e=>{const m=e.data;
- try{
-  if(m.type==='load'){let err;
-   for(const u of ['https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/+esm','https://esm.sh/kokoro-js@1.2.1']){
-    try{const {KokoroTTS}=await import(u);
-     tts=await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX',{dtype:'q8',device:'wasm',progress_callback:p=>{if(p.status==='progress')self.postMessage({type:'progress',pct:Math.round(p.progress||0)})}});
-     self.postMessage({type:'ready'});return}catch(x){err=x}}
-   throw err||new Error('load failed')}
-  if(m.type==='gen'){const a=await tts.generate(m.text,{voice:m.voice}),pcm=a.audio.slice();self.postMessage({type:'audio',id:m.id,pcm,sr:a.sampling_rate},[pcm.buffer])}
- }catch(x){self.postMessage({type:'error',id:m.id,msg:String(x&&x.message||x)})}};
-`;
-function startWorker(){
-  const w=new Worker(URL.createObjectURL(new Blob([WCODE],{type:'text/javascript'})),{type:'module'});
-  w.onmessage=e=>{const m=e.data;
-    if(m.type==='progress')kpct=m.pct;
-    else if(m.type==='ready')kReady&&kReady.ok();
-    else if(m.type==='audio'){const p=pend.get(m.id);pend.delete(m.id);p&&p.ok(m)}
-    else if(m.type==='error'){if(m.id!=null){const p=pend.get(m.id);pend.delete(m.id);p&&p.no(new Error(m.msg))}else kReady&&kReady.no(new Error(m.msg))}};
-  w.onerror=e=>{const err=new Error('voice worker error: '+(e.message||'could not start'));kReady&&kReady.no(err);pend.forEach(p=>p.no(err));pend.clear()};
-  return w}
-function killK(){if(kw){kw.terminate();kw=null}kOk=false;const e=new Error('stopped');pend.forEach(p=>p.no(e));pend.clear()}
-function loadTTS(){
-  if(kOk&&kw)return Promise.resolve();
-  const t0=Date.now();kpct=0;
-  const upd=()=>bar(10+20*kpct/100,(kpct<100?`Downloading the on-device voice model ${kpct}%`:'Starting the on-device voice engine (1-3 min on a phone, please wait)')+` · ${Math.round((Date.now()-t0)/1000)} s`);
-  const timer=setInterval(upd,1000);kw=startWorker();
-  const load=new Promise((ok,no)=>{kReady={ok:()=>{kOk=true;ok()},no};kw.postMessage({type:'load'})});
-  return withTimeout(load,300000,'the model download took longer than 5 minutes').catch(e=>{killK();throw e}).finally(()=>clearInterval(timer))}
-async function loadMain(){
-  if(mainTTS)return mainTTS;let err;
-  for(const u of['https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/+esm','https://esm.sh/kokoro-js@1.2.1']){
-    try{const{KokoroTTS}=await import(u);return mainTTS=await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX',{dtype:'q8',device:'wasm',progress_callback:p=>{if(p.status==='progress')bar(10+20*(p.progress||0)/100,'Downloading the on-device voice model '+Math.round(p.progress||0)+'%')}})}catch(e){err=e}}
-  throw err||new Error('load failed')}
-function genKokoro(text,v){
-  if(useMain)return mainTTS.generate(text,{voice:v}).then(a=>({pcm:a.audio.slice(),sr:a.sampling_rate}));
-  return new Promise((ok,no)=>{if(!kw)return no(new Error('voice engine stopped'));const id=++nid,t=setTimeout(()=>{pend.delete(id);no(new Error('one sentence took over 4 minutes'))},240000);
-    pend.set(id,{ok:m=>{clearTimeout(t);ok({pcm:m.pcm,sr:m.sr})},no:e=>{clearTimeout(t);no(e)}});kw.postMessage({type:'gen',id,text,voice:v})})}
-async function genAPI(text,eng){
-  const kind=eng.slice(0,eng.indexOf(':')),pair=eng.slice(eng.indexOf(':')+1).split('|'),voice=kind==='edge'?pair[0]:kind==='poll'?pair[1]:pair[2];
-  let err;
-  for(let a=0;a<4;a++){
-    try{
-      if(kind==='kokoro'){const c=await withTimeout(genKokoro(String(text).slice(0,500),voice),240000,'on-device voice timed out');return c}
-      let ab;
-      if(kind==='edge'){const bl=await edgeSpeak(text,voice);ab=await bl.arrayBuffer()}
-      else ab=await pollTTS(text,voice);
-      unlock();const d=await uctx.decodeAudioData(ab);
-      return{pcm:d.getChannelData(0).slice(),sr:d.sampleRate}}
-    catch(e){err=e;if(kind==='poll'&&String(e.message)==='429')await sleep(15000);
-      else if(a<3)await sleep(700*(a+1))}}
-  throw err}
-async function pickEngine(v){
-  if(v==='none')return'none';
-  if(v!=='basic'){
-    const[ev,pv]=v.split('|');
-    try{bar(6,'Connecting to the Edge neural voice service');await withTimeout(edgeSpeak('Hi.',ev),25000,'timeout');note('');return'edge:'+v}
-    catch(e){}
-    try{bar(8,'Trying the free shared voice API (works on iPhone)');await withTimeout(pollTTS('Hi.',pv),50000,'timeout');note('Using the free shared voice API: up to ~17 s per sentence.');return'poll:'+v}
-    catch(e){if(String(e.message)==='429')return'poll:'+v;note('Shared voice API unavailable ('+e.message+').')}}
-    try{bar(10,'Loading the on-device AI voice (first use downloads ~90 MB, then cached)');
-      try{await withTimeout(loadTTS(),300000,'timeout');note('Using the on-device AI voice: the first video is slow, later ones are faster.');return'kokoro:'+v}
-      catch(e){useMain=true;await withTimeout(loadMain(),300000,'timeout');return'kokoro:'+v}}
-    catch(e){note('On-device voice not available ('+e.message+').')}}
-  try{bar(12,'Loading basic voice');await loadMeSpeak();return'basic'}
-  catch(e){note('Basic voice not available ('+e.message+'). Continuing with captions only.');return'none'}}
+async function makeScript(){
+ const topic=$('#topic').value.trim(),own=$('#own').value.trim(),target=+$('#length').value;
+ if(!topic&&!own)throw Error('Enter a topic or paste a script.');
+ let page=null;if(topic&&!own){progress(4,'Reading Wikipedia');page=await wiki(topic)}
+ const title=page?.title||topic||'Your story';
+ let lines;
+ if(own)lines=splitSentences(own);
+ else{
+  const candidates=splitSentences(page.text.replace(/\s*\([^)]*\)/g,'')).filter(s=>s.length>35&&s.length<260);
+  lines=[`Here is a quick look at ${title}.`];let words=lines[0].split(/\s+/).length;
+  for(const s of candidates){const n=s.split(/\s+/).length;if(lines.length>=22||words+n>target*2.45-8)break;lines.push(s);words+=n}
+  lines.push('And that is the quick version. There is much more to discover.');
+ }
+ if(!lines.length)throw Error('The script is empty.');
+ const cleanTitle=title.replace(/[^A-Za-z0-9]/g,'');
+ state={title,topic:topic||title,page,own:!!own,sentences:lines.map((text,i)=>({text,query:i?title+' '+((text.match(/[A-Za-z]{5,}/g)||[]).sort((a,b)=>b.length-a.length)[0]||title):title,images:null,selected:0})),total:0};
+ state.titleIdeas=[`${title}: the quick version`,`What is ${title}?`,`${title} explained in 45 seconds`];
+ state.description=`A quick introduction to ${title}.\n\n${page?'Text adapted from Wikipedia. See the article link and license details below.':'Narration supplied by the creator.'}\n\nImage credits are listed below.`;
+ state.tags=['#Shorts','#Facts','#DidYouKnow','#LearnOnYouTube','#'+cleanTitle].filter(Boolean);
+ renderEditors();$('#output').classList.remove('hidden');
+}
+function renderEditors(){
+ $('#lines').innerHTML=state.sentences.map((x,i)=>`<div class="line"><textarea data-text="${i}" rows="2">${esc(x.text)}</textarea><label>Image search<input data-query="${i}" value="${esc(x.query)}"></label></div>`).join('');
+ $('#sources').innerHTML=state.page?`<li><a href="${esc(state.page.url)}" target="_blank" rel="noopener">${esc(state.page.title)}</a> · Wikipedia article</li>`:'<li class="mut">Creator-provided script</li>';
+ $('#package').innerHTML=`<h3>Title ideas</h3><ol>${state.titleIdeas.map(t=>`<li>${esc(t)}</li>`).join('')}</ol><h3>Description</h3><p>${esc(state.description).replace(/\n/g,'<br>')}</p><p>${esc(state.tags.join(' '))}</p>`;
+}
+function readEdits(){document.querySelectorAll('[data-text]').forEach(el=>{const i=+el.dataset.text;state.sentences[i].text=el.value.trim()||state.sentences[i].text});document.querySelectorAll('[data-query]').forEach(el=>{const i=+el.dataset.query,q=el.value.trim()||state.title;if(q!==state.sentences[i].query){state.sentences[i].query=q;state.sentences[i].images=null}})}
+
 async function loadMeSpeak(){
-  if(mes)return mes;const b='https://cdn.jsdelivr.net/npm/mespeak@2.0.2/';
-  const go=(async()=>{
-    const m=await import(b+'+esm'),me=m.default||m.meSpeak||m;
-    const j=async p=>{const r=await fetch(b+p);if(!r.ok)throw new Error(p+' '+r.status);return r.json()};
-    const cfg=await j('src/mespeak_config.json'),vd=await j('voices/en/en-us.json');
-    const ok=f=>new Promise(res=>{let d=false;const fin=v=>{if(!d){d=true;res(v)}};try{const r=f(fin);if(typeof r==='boolean')fin(r)}catch(e){fin(false)}});
-    if(!await ok(c=>me.loadConfig(cfg,c)))throw new Error('config failed');
-    if(!await ok(c=>me.loadVoice(vd,c)))throw new Error('voice data failed');
-    return mes=me})();
-  return withTimeout(go,45000,'timeout')}
-const toAB=r=>{if(r instanceof ArrayBuffer)return r;if(ArrayBuffer.isView(r))return r.buffer.slice(r.byteOffset,r.byteOffset+r.byteLength);if(Array.isArray(r))return new Uint8Array(r).buffer;
-  if(typeof r==='string'){const s=atob(r.includes(',')?r.split(',')[1]:r);return Uint8Array.from(s,c=>c.charCodeAt(0)).buffer}throw new Error('unknown audio format from basic voice')};
-async function genBasic(text){const m=await loadMeSpeak();let r=m.speak(text,{rawdata:'arraybuffer'});if(!r)r=m.speak(text,{rawdata:'array'});if(!r)throw new Error('basic voice returned no audio');
-  unlock();const d=await uctx.decodeAudioData(toAB(r));return{pcm:d.getChannelData(0).slice(),sr:d.sampleRate}}
-async function narrate(eng){
-  let at=0,sr=24000,cur=0;const t0=Date.now(),n=S.sents.length;
-  const tick=setInterval(()=>eng!=='none'&&bar(30+15*cur/n,`Recording narration ${cur+1}/${n} · ${Math.round((Date.now()-t0)/1000)} s`+(eng.startsWith('kokoro:')?' (on-device AI voice, slow on phones)':eng.startsWith('poll:')?' (free shared voice, up to 17 s per sentence)':eng!=='none'&&eng!=='basic'?' (free neural voice, fast)':'')),1000);
-  try{
-    for(const[i,x]of S.sents.entries()){cur=i;
-      if(eng==='none'){x.speech=Math.max(1.8,x.text.split(' ').length/2.6);x.pcm=null}
-      else{bar(30+15*i/n,`Recording narration ${i+1}/${n}`);const k=eng+'|'+x.text;
-        if(!vcache.has(k))vcache.set(k,eng==='basic'?await withTimeout(genBasic(x.text),30000,'basic voice timed out'):await withTimeout(genAPI(x.text,eng),eng.startsWith('kokoro:')?260000:eng.startsWith('poll:')?180000:60000,'voice request timed out'));
-        const c=vcache.get(k);x.pcm=c.pcm;sr=c.sr;x.speech=c.pcm.length/c.sr}
-      x.dur=x.speech+.3;x.t0=at;at+=x.dur}
-  }finally{clearInterval(tick)}
-  S.total=at;S.sr=sr;S.hasVoice=eng!=='none';S.engine=eng;
-  if(S.hasVoice){S.pcm=new Float32Array(Math.round(at*sr));S.sents.forEach(x=>S.pcm.set(x.pcm,Math.round(x.t0*sr)));
-    const w=wav(S.pcm,sr);$('#aud').src=$('#dla').href=URL.createObjectURL(w)}else{$('#aud').removeAttribute('src');$('#dla').removeAttribute('href')}
-  S.caps=[];S.sents.forEach(x=>{const ws=x.text.split(/\s+/).filter(Boolean),l=ws.map(w=>w.length+2),tot=l.reduce((a,b)=>a+b,0);let c=x.t0;
-    const words=ws.map((w,k)=>{const d=x.speech*l[k]/tot,o={w,s:c,e:c+d};c+=d;return o});
-    for(let k=0;k<words.length;k+=3)S.caps.push({s:words[k].s,e:k+3>=words.length?x.t0+x.dur:words[k+3].s,w:words.slice(k,k+3)})})}
-async function voice(){
-  if($('#music').value!=='none'&&!MU.buf)throw new Error('Pick a music track first (or set music to None).');
-  let eng=await pickEngine($('#voice').value);
-  if(eng!=='none'&&eng!=='basic'){
-    try{return await narrate(eng)}
-    catch(e){killK();note('Natural voice failed ('+e.message+'). Switching to the basic offline voice.');
-      try{await loadMeSpeak();eng='basic'}catch(e2){eng='none';note('Natural and basic voice both failed. Continuing with captions only.')}}}
-  if(eng==='basic'){try{return await narrate('basic')}catch(e){note('Basic voice failed ('+e.message+'). Continuing with captions only.')}}
-  return narrate('none')}
-const MU={buf:null,credit:'',vol:.16};
-$('#music').onchange=()=>{const v=$('#music').value;$('#mus').hidden=v==='none';$('#mcommons').hidden=v!=='commons';$('#mfile').hidden=v!=='file';MU.buf=null;$('#mstat').textContent=''};
-async function decodeMusic(ab,label,credit){unlock();$('#mstat').textContent='Loading track...';
-  try{const b=await withTimeout(uctx.decodeAudioData(ab),60000,'timed out');MU.buf=b;MU.credit=credit;$('#mstat').textContent=`Selected: ${label} (${Math.round(b.duration)} s, loops to fit the video).`}
-  catch(e){MU.buf=null;$('#mstat').textContent='This audio could not be decoded ('+(e.message||'unsupported')+'). Try an MP3 or WAV.'}}
-$('#mf').onchange=async()=>{const f=$('#mf').files[0];if(f)await decodeMusic(await f.arrayBuffer(),f.name,'Your own file: '+f.name+' (license is your responsibility)')};
-$('#msearch').onclick=async()=>{unlock();const q=$('#mq').value.trim()||'instrumental';$('#mres').textContent='Searching...';
-  try{const r=await fetch('https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=40&prop=imageinfo&iiprop=url|size|mime|extmetadata&gsrsearch='+encodeURIComponent(q+' filetype:audio'));
-    if(!r.ok)throw new Error('search failed ('+r.status+')');
-    const l=Object.values((await r.json()).query?.pages||{}).sort((a,b)=>a.index-b.index).map(p=>{const i=p.imageinfo?.[0],x=i?.extmetadata||{},lic=x.LicenseShortName?.value||'';
-      if(!i||!/mpeg|wav|flac/i.test(i.mime)||i.size>15e6||!/^(cc[ -]?(by|0)|public domain|pd)/i.test(lic))return null;
-      return{url:i.url,name:p.title.replace(/^File:/,''),credit:new DOMParser().parseFromString(x.Artist?.value||'','text/html').body.textContent.trim().slice(0,80)||'Unknown author',license:lic,page:i.descriptionurl}}).filter(Boolean).slice(0,8);
-    $('#mres').innerHTML=l.length?l.map((t,k)=>`<div class="ln"><b>${esc(t.name)}</b><br><small>${esc(t.credit)}, ${esc(t.license)}, <a href="${esc(t.page)}" target="_blank" rel="noopener">file page</a></small><audio controls preload="none" src="${esc(t.url)}"></audio><button class="ghost" type="button" data-m="${k}">Use this track</button></div>`).join(''):'No MP3/WAV/FLAC tracks found. Try other words (piano, electronic, ambient, guitar) or use your own file.';
-    $('#mres').querySelectorAll('[data-m]').forEach(b=>b.onclick=async()=>{const t=l[+b.dataset.m];unlock();try{$('#mstat').textContent='Downloading track...';const f=await fetch(t.url);if(!f.ok)throw new Error('download '+f.status);await decodeMusic(await f.arrayBuffer(),t.name,`${t.name} by ${t.credit} (${t.license}) - ${t.page}`)}catch(e){MU.buf=null;$('#mstat').textContent='Could not use this track ('+e.message+').'}})
-  }catch(e){$('#mres').textContent='Music search failed: '+e.message}};
-
-function wav(f,sr){const b=new ArrayBuffer(44+f.length*2),v=new DataView(b),w=(o,s)=>[...s].forEach((c,i)=>v.setUint8(o+i,c.charCodeAt(0)));
-  w(0,'RIFF');v.setUint32(4,36+f.length*2,true);w(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,f.length*2,true);
-  for(let i=0;i<f.length;i++)v.setInt16(44+i*2,Math.max(-1,Math.min(1,f[i]))*32767,true);return new Blob([b],{type:'audio/wav'})}
-
+ if(voiceEngine)return voiceEngine;
+ message('Loading the free voice engine…');
+ if(!window.meSpeak){
+  await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/mespeak@2.0.2/src/mespeak.js';s.onload=resolve;s.onerror=()=>reject(Error('Could not load the voice library from jsDelivr. Check your internet connection.'));document.head.appendChild(s)});
+ }
+ const root='https://cdn.jsdelivr.net/npm/mespeak@2.0.2/';
+ const get=async path=>{const r=await fetch(root+path);if(!r.ok)throw Error('Could not download voice data ('+r.status+').');return r.json()};
+ const [cfg,voice]=await Promise.all([get('src/mespeak_config.json'),get('voices/en/en-us.json')]);
+ const ok=(fn)=>new Promise((resolve,reject)=>{let settled=false;const done=v=>{if(settled)return;settled=true;v===false?reject(Error('Voice setup failed.')):resolve()};try{const result=fn(done);if(result===true)done(true)}catch(e){reject(e)}});
+ await ok(cb=>window.meSpeak.loadConfig(cfg,cb));
+ await ok(cb=>window.meSpeak.loadVoice(voice,cb));
+ voiceEngine=window.meSpeak;return voiceEngine;
+}
+async function synth(text){
+ const engine=await loadMeSpeak();
+ const raw=engine.speak(text,{rawdata:true,voice:$('#voice').value==='en'?'en':'en/en-us'});
+ if(!raw)throw Error('The voice engine returned no audio.');
+ const ab=raw instanceof ArrayBuffer?raw:raw.buffer.slice(raw.byteOffset,raw.byteOffset+raw.byteLength);
+ const decoded=await context().decodeAudioData(ab.slice(0));
+ return {pcm:decoded.getChannelData(0).slice(),rate:decoded.sampleRate};
+}
+function wav(samples,rate){
+ const b=new ArrayBuffer(44+samples.length*2),v=new DataView(b),put=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+ put(0,'RIFF');v.setUint32(4,36+samples.length*2,true);put(8,'WAVE');put(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,rate,true);v.setUint32(28,rate*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);put(36,'data');v.setUint32(40,samples.length*2,true);
+ for(let i=0;i<samples.length;i++)v.setInt16(44+i*2,Math.max(-1,Math.min(1,samples[i]))*32767,true);
+ return new Blob([b],{type:'audio/wav'});
+}
+async function makeNarration(){
+ const noVoice=$('#voice').value==='none';let cursor=0,rate=22050;
+ for(let i=0;i<state.sentences.length;i++){
+  const x=state.sentences[i];progress(8+22*i/state.sentences.length,`Creating voice ${i+1}/${state.sentences.length}`);
+  if(noVoice){x.audio=null;x.seconds=Math.max(2,x.text.split(/\s+/).length/2.7)}
+  else{
+   const key=$('#voice').value+'|'+x.text;
+   let a=cache.get(key);if(!a){a=await wait(synth(x.text),60000,'Voice generation timed out.');cache.set(key,a)}
+   x.audio=a.pcm;x.rate=a.rate;rate=a.rate;x.seconds=a.pcm.length/a.rate;
+  }
+  x.start=cursor;x.duration=x.seconds+.32;cursor+=x.duration;
+ }
+ state.total=cursor;state.rate=rate;state.hasVoice=!noVoice;
+ if(!noVoice){
+  const all=new Float32Array(Math.ceil(cursor*rate));
+  state.sentences.forEach(x=>all.set(x.audio,Math.round(x.start*rate)));
+  state.pcm=all;
+  if(lastAudioUrl)URL.revokeObjectURL(lastAudioUrl);
+  lastAudioUrl=URL.createObjectURL(wav(all,rate));$('#audio').src=lastAudioUrl;$('#audioDownload').href=lastAudioUrl;
+ }else{$('#audio').removeAttribute('src');$('#audioDownload').removeAttribute('href')}
+ state.captions=[];
+ state.sentences.forEach(x=>{
+  const words=x.text.split(/\s+/).filter(Boolean),weights=words.map(w=>w.length+2),sum=weights.reduce((a,b)=>a+b,0);let t=x.start;
+  const timed=words.map((word,i)=>{const d=x.seconds*weights[i]/sum,o={word,start:t,end:t+d};t+=d;return o});
+  for(let i=0;i<timed.length;i+=3)state.captions.push({start:timed[i].start,end:i+3>=timed.length?x.start+x.duration:timed[i+3].start,words:timed.slice(i,i+3)});
+ });
+ $('#duration').textContent=`Estimated video duration: ${Math.round(state.total)} seconds.`;
+}
 async function commons(q){
-  if(qcache.has(q))return qcache.get(q);
-  const r=await fetch('https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=15&prop=imageinfo&iiprop=url|size|mime|extmetadata&iiurlwidth=1920&gsrsearch='+encodeURIComponent(q+' filetype:bitmap'));
-  if(!r.ok)throw new Error('Wikimedia Commons search failed ('+r.status+')');
-  const out=Object.values((await r.json()).query?.pages||{}).sort((a,b)=>a.index-b.index).map(p=>{const i=p.imageinfo?.[0],m=i?.extmetadata||{},lic=m.LicenseShortName?.value||'';
-    if(!i||!/^image\/(jpeg|png)$/.test(i.mime)||i.width<1000||i.height<700||!/^(cc[ -]?(by|0)|public domain|pd)/i.test(lic)||m.NonFree?.value==='true')return null;
-    return{thumb:i.thumburl||i.url,credit:new DOMParser().parseFromString(m.Artist?.value||'','text/html').body.textContent.trim().slice(0,80)||'Unknown author',license:lic,page:i.descriptionurl,provider:'Wikimedia Commons'}}).filter(Boolean);
-  qcache.set(q,out);return out}
-async function visuals(){const used=new Set(),n=S.sents.length;
-  for(const[i,x]of S.sents.entries()){bar(45+15*i/n,`Finding free images ${i+1}/${n}`);
-    if(!x.cands){let c=await commons(x.q);if(!c.length&&x.q!==S.title)c=await commons(S.title);x.cands=c.slice();x.sel=Math.max(0,c.findIndex(a=>!used.has(a.thumb)))}
-    const a=x.cands[x.sel];if(a)used.add(a.thumb)}}
+ if(imageCache.has(q))return imageCache.get(q);
+ const url='https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=12&prop=imageinfo&iiprop=url|size|mime|extmetadata&iiurlwidth=1400&gsrsearch='+encodeURIComponent(q+' filetype:bitmap');
+ const r=await fetch(url);if(!r.ok)throw Error('Wikimedia image search failed.');
+ const pages=Object.values((await r.json()).query?.pages||{}).sort((a,b)=>a.index-b.index);
+ const list=pages.map(p=>{const im=p.imageinfo?.[0],m=im?.extmetadata||{},lic=m.LicenseShortName?.value||'';if(!im||!/^image\/(jpeg|png)$/.test(im.mime)||im.width<700||im.height<500||!/^(cc[ -]?(by|0)|public domain|pd)/i.test(lic)||m.NonFree?.value==='true')return null;
+ return {url:im.thumburl||im.url,credit:new DOMParser().parseFromString(m.Artist?.value||'','text/html').body.textContent.trim().slice(0,100)||'Unknown author',license:lic,page:im.descriptionurl,provider:'Wikimedia Commons'};}).filter(Boolean);
+ imageCache.set(q,list);return list;
+}
+async function findImages(){
+ for(let i=0;i<state.sentences.length;i++){
+  const x=state.sentences[i];progress(32+13*i/state.sentences.length,`Finding free images ${i+1}/${state.sentences.length}`);
+  if(!x.images){let found=[];try{found=await commons(x.query);if(!found.length&&x.query!==state.title)found=await commons(state.title)}catch(e){message('Image search unavailable. Gradient backgrounds will be used.')}
+   x.images=found;x.selected=0;
+  }
+ }
+ renderStory();
+}
 function renderStory(){
-  $('#story').innerHTML=S.sents.map((x,i)=>{const a=x.cands[x.sel];return`<div class="fr"><div class="im" ${a?`style="background-image:url('${esc(a.thumb)}')"`:''}>${a?'':'No free image found'}</div><p>${a?`<a href="${esc(a.page||'#')}" target="_blank" rel="noopener">${esc(a.provider)}: ${esc(a.credit)}</a><br><small>${esc(a.license)}</small>`:'<small>Gradient background</small>'}</p>${x.cands.length>1?`<button class="ghost" type="button" data-s="${i}">Swap</button>`:''}<label class="btn ghost" style="margin:0">My image<input type="file" accept="image/*" hidden data-f="${i}"></label></div>`}).join('');
-  $('#story').querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{const x=S.sents[+b.dataset.s];x.sel=(x.sel+1)%x.cands.length;renderStory()});
-  $('#story').querySelectorAll('[data-f]').forEach(f=>f.onchange=()=>{if(!f.files[0])return;const x=S.sents[+f.dataset.f],u=URL.createObjectURL(f.files[0]);x.cands.unshift({thumb:u,credit:'You',license:'Your own file',provider:'Local file',page:'',own:true});x.sel=0;renderStory()})}
-const loadImg=u=>new Promise(r=>{const i=new Image();i.crossOrigin='anonymous';i.onload=()=>r(i);i.onerror=()=>r(null);i.src=u});
-
-async function record(){
-  if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream)throw new Error('This browser cannot record video from a canvas. Try recent Chrome, Edge, Firefox or Safari.');
-  bar(60,'Loading images');
-  for(const x of S.sents){const a=x.cands[x.sel];x.img=a?(a.img||(a.img=await loadImg(a.thumb))):null}
-  const R=+$('#res').value,W=R,H=Math.round(R*16/9),cv=$('#cv'),ctx=cv.getContext('2d');cv.width=W;cv.height=H;
-  const mime=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(m=>MediaRecorder.isTypeSupported(m));
-  if(!mime)throw new Error('No supported video recording format in this browser.');
-  const ac=uctx||(uctx=new(window.AudioContext||window.webkitAudioContext)()),dest=ac.createMediaStreamDestination(),oscs=[];
-  if(S.hasVoice){const b=ac.createBuffer(1,S.pcm.length,S.sr);b.copyToChannel(S.pcm,0);S.src=ac.createBufferSource();S.src.buffer=b;S.src.connect(dest)}
-  let mus=null;if($('#music').value!=='none'&&MU.buf){const g=ac.createGain(),ms=ac.createBufferSource();ms.buffer=MU.buf;ms.loop=true;g.gain.value=MU.vol;ms.connect(g);g.connect(dest);mus={g,ms};oscs.push(ms)}
-  const cover=(img,z,pan)=>{const s=Math.max(W/img.width,H/img.height)*z,dw=img.width*s,dh=img.height*s;ctx.drawImage(img,(W-dw)/2+pan*(dw-W)/2,(H-dh)/2,dw,dh)};
-  const scene=(x,f,a,i)=>{ctx.globalAlpha=a;if(x.img)cover(x.img,1+.1*f,(i%2?1:-1)*(f-.5)*.5);else{const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'#2a2a52');g.addColorStop(1,'#121220');ctx.fillStyle=g;ctx.fillRect(0,0,W,H)}ctx.fillStyle='rgba(0,0,0,.28)';ctx.fillRect(0,0,W,H);ctx.globalAlpha=1};
-  const frame=t=>{let i=S.sents.findIndex(x=>t<x.t0+x.dur);if(i<0)i=S.sents.length-1;const x=S.sents[i],l=Math.max(0,t-x.t0);
-    ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
-    if(i>0&&l<.3){scene(S.sents[i-1],1,1,i-1);scene(x,l/x.dur,l/.3,i)}else scene(x,l/x.dur,1,i);
-    const c=S.caps.find(c=>t>=c.s&&t<c.e);if(!c)return;
-    const fs=W*.088;ctx.font=`900 ${fs}px "Arial Black",Impact,system-ui,sans-serif`;ctx.textBaseline='middle';ctx.textAlign='left';ctx.lineJoin='round';ctx.lineWidth=fs*.2;
-    const sp=ctx.measureText(' ').width,ws=c.w.map(o=>({o,t:o.w.toUpperCase()}));ws.forEach(a=>a.m=ctx.measureText(a.t).width);
-    const rows=[[]];let rw=0;ws.forEach(a=>{if(rw+a.m>W*.86&&rows[rows.length-1].length){rows.push([]);rw=0}rows[rows.length-1].push(a);rw+=a.m+sp});
-    const lh=fs*1.25,cy=H*.66,pop=1+.14*Math.max(0,1-(t-c.s)/.18);
-    ctx.save();ctx.translate(W/2,cy);ctx.scale(pop,pop);ctx.translate(-W/2,-cy);
-    rows.forEach((r,k)=>{const tw=r.reduce((s,a)=>s+a.m+sp,0)-sp,y=cy-(rows.length-1)*lh/2+k*lh;let px=(W-tw)/2;r.forEach(a=>{ctx.strokeStyle='#000';ctx.strokeText(a.t,px,y);ctx.fillStyle=t>=a.o.s&&t<a.o.e?'#ffcf5c':'#fff';ctx.fillText(a.t,px,y);px+=a.m+sp})});ctx.restore()};
-  frame(0);
-  const rec=new MediaRecorder(new MediaStream([...cv.captureStream(+$("#fps").value).getVideoTracks(),...dest.stream.getAudioTracks()]),{mimeType:mime,videoBitsPerSecond:(+$("#fps").value>30?1.5:1)*(R>720?8e6:5e6)}),chunks=[];
-  rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);
-  const done=new Promise(r=>rec.onstop=r);
-  await ac.resume();if(ac.state!=='running')throw new Error('Safari blocked audio. Tap the button again and keep the screen on.');const t0=ac.currentTime+.3;if(S.src)S.src.start(t0);if(mus){mus.ms.start(t0);mus.g.gain.setValueAtTime(MU.vol,t0+Math.max(0,S.total-1.5));mus.g.gain.linearRampToValueAtTime(0,t0+S.total)}rec.start();
-  await new Promise(res=>{const tick=()=>{const t=Math.max(0,ac.currentTime-t0);frame(Math.min(t,S.total-.001));bar(60+40*Math.min(1,t/S.total),`Recording video ${Math.round(Math.min(1,t/S.total)*100)}% (keep this tab open)`);t>S.total+.3?res():requestAnimationFrame(tick)};tick()});
-  rec.stop();await done;oscs.forEach(o=>{try{o.stop()}catch(e){}});
-  const ext=mime.startsWith('video/mp4')?'mp4':'webm',url=URL.createObjectURL(new Blob(chunks,{type:mime.split(';')[0]}));
-  $('#vid').src=url;$('#dlv').href=url;$('#dlv').download='fact-engine-short.'+ext;$('#dlv').textContent='Download '+ext.toUpperCase();
-  $('#fmt').textContent=ext==='mp4'?'MP4 recorded by your browser.':'Your browser records WebM, which YouTube accepts. For MP4, use Safari or a recent Chrome, or convert it free in a converter of your choice.';
-  bar(100,'Done')}
-
-async function go(fresh){
-  if(busy)return;busy=true;lock(true);$('#err').hidden=true;$('#prog').hidden=false;note('');
-  try{
-    if(fresh){const topic=$('#topic').value.trim(),own=$('#own').value.trim();if(!topic&&!own){$('#topic').focus();throw new Error('Enter a topic or paste a script.')}
-      bar(3,'Reading Wikipedia');S=await buildScript(topic,own,+$("#len").value);$('#out').hidden=false;$('#vid').removeAttribute('src');renderScript()}
-    else readEdits();
-    await voice();showLen();await visuals();renderStory();await record()
-  }catch(e){const x=$('#err');x.textContent=e.message;x.hidden=false;$('#stepname').textContent='Stopped'}
-  busy=false;lock(false)}
-$('#go').onclick=()=>{unlock();go(true)};$('#reb').onclick=()=>{unlock();go(false)};
-
-$('#dlp').onclick=()=>{const s=S,t=`FACT ENGINE package: ${s.topic}\n\nTITLE IDEAS\n${s.titles.map((x,i)=>`${i+1}. ${x}`).join('\n')}\n\nDESCRIPTION\n${s.description}\n\n${s.hashtags.join(' ')}\n\nTHUMBNAIL CONCEPT\n${s.thumbnail}\n\nSCRIPT\n${s.sents.map(x=>x.text).join(' ')}\n\nSOURCES\n${s.sources.map(x=>`${x.title} - ${x.url} (${x.license})`).join('\n')||'Own script'}\n\nIMAGE CREDITS (add to your description)\n${s.sents.map((x,i)=>{const a=x.cands[x.sel];return a?`Line ${i+1}: ${a.provider} / ${a.credit} - ${a.page||'local file'} (${a.license})`:`Line ${i+1}: gradient`}).join('\n')}\n\nMusic: ${MU.buf&&$('#music').value!=='none'?MU.credit:'none'}\nNarration: ${s.engine==='none'?'none (captions only)':s.engine==='basic'?'basic eSpeak-based voice (meSpeak, GPL-3.0), generated in your browser':(s.engine.startsWith('edge:')?'Microsoft Edge neural voice, free and unlimited':s.engine.startsWith('poll:')?'OpenAI voice via the free shared Pollinations API':s.engine.startsWith('kokoro:')?'Kokoro-82M on-device AI voice (Apache-2.0)':'voice')+', no API key'}\n`;
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'}));a.download='fact-engine-package.txt';a.click()};
-</script></body></html>
+ $('#story').innerHTML=state.sentences.map((x,i)=>{const im=x.images?.[x.selected];return `<div class="frame"><div class="preview" ${im?`style="background-image:url('${esc(im.url)}')"`:''}>${im?'':'No image found'}</div><p>${im?`<a href="${esc(im.page)}" target="_blank" rel="noopener">${esc(im.credit)}</a><br><small>${esc(im.license)}</small>`:'<small>Gradient background</small>'}</p>${x.images?.length>1?`<button class="secondary" data-swap="${i}" type="button">Swap image</button>`:''}<label class="secondary">Upload<input data-file="${i}" type="file" accept="image/*" hidden></label></div>`}).join('');
+ $('#story').querySelectorAll('[data-swap]').forEach(b=>b.onclick=()=>{const x=state.sentences[+b.dataset.swap];x.selected=(x.selected+1)%x.images.length;renderStory()});
+ $('#story').querySelectorAll('[data-file]').forEach(el=>el.onchange=()=>{const f=el.files[0];if(!f)return;const x=state.sentences[+el.dataset.file],url=URL.createObjectURL(f);x.images.unshift({url,credit:'User supplied',license:'Your own image',page:'',provider:'Local file',local:true});x.selected=0;renderStory()});
+}
+function loadImage(url){return new Promise(resolve=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>resolve(im);im.onerror=()=>resolve(null);im.src=url})}
+function wrapWords(ctx,words,maxWidth){const rows=[[]];let width=0;for(const word of words){const w=ctx.measureText(word).width+(rows[rows.length-1].length?ctx.measureText(' ').width:0);if(width+w>maxWidth&&rows[rows.length-1].length){rows.push([]);width=0}rows[rows.length-1].push(word);width+=w}return rows}
+async function recordVideo(){
+ if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream)throw Error('This Safari version does not expose canvas video recording. Try updating iOS and opening the file in Safari.');
+ progress(47,'Preparing images');
+ for(const x of state.sentences){const im=x.images?.[x.selected];x.image=im?await loadImage(im.url):null}
+ const size=+$ ('#resolution').value;
+ const W=size,H=Math.round(size*16/9),canvas=$('#canvas');canvas.width=W;canvas.height=H;
+ const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)throw Error('Could not create the video canvas.');
+ ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+ const mimeTypes=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4;codecs=avc1.42E01E','video/mp4','video/webm;codecs=vp8,opus','video/webm'];
+ const mime=mimeTypes.find(t=>MediaRecorder.isTypeSupported(t));if(!mime)throw Error('Safari did not report a supported video recording format.');
+ const ac=context(),destination=ac.createMediaStreamDestination();let narration=null,music=null;
+ if(state.hasVoice){const buffer=ac.createBuffer(1,state.pcm.length,state.rate);buffer.copyToChannel(state.pcm,0);narration=ac.createBufferSource();narration.buffer=buffer;narration.connect(destination)}
+ if(musicBuffer){const src=ac.createBufferSource(),gain=ac.createGain();src.buffer=musicBuffer;src.loop=true;gain.gain.value=.14;src.connect(gain);gain.connect(destination);music={src,gain}}
+ const drawScene=(x,progressValue,alpha,index)=>{
+  ctx.save();ctx.globalAlpha=alpha;
+  if(x.image){const scale=Math.max(W/x.image.width,H/x.image.height)*(1+.09*progressValue),dw=x.image.width*scale,dh=x.image.height*scale;const pan=(index%2?1:-1)*(progressValue-.5)*.035;ctx.drawImage(x.image,(W-dw)/2+pan*dw,(H-dh)/2,dw,dh)}
+  else{const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'#38335f');g.addColorStop(1,'#10101c');ctx.fillStyle=g;ctx.fillRect(0,0,W,H)}
+  ctx.fillStyle='rgba(5,5,15,.42)';ctx.fillRect(0,0,W,H);ctx.restore();
+ };
+ const draw=(time)=>{
+  let index=state.sentences.findIndex(x=>time<x.start+x.duration);if(index<0)index=state.sentences.length-1;
+  const x=state.sentences[index],local=Math.max(0,time-x.start);
+  ctx.fillStyle='#10101c';ctx.fillRect(0,0,W,H);
+  if(index>0&&local<.28){drawScene(state.sentences[index-1],1,1,index-1);drawScene(x,local/x.duration,local/.28,index)}
+  else drawScene(x,local/x.duration,1,index);
+  const cap=state.captions.find(c=>time>=c.start&&time<c.end);if(!cap)return;
+  const fs=W*($('#caption').value==='large'?.085:.068);ctx.font=`900 ${fs}px -apple-system,BlinkMacSystemFont,Arial,sans-serif`;ctx.textBaseline='middle';ctx.textAlign='center';ctx.lineJoin='round';ctx.lineWidth=fs*.18;
+  const rows=wrapWords(ctx,cap.words.map(w=>w.word.toUpperCase()),W*.86),line=fs*1.22,centerY=H*.66;
+  rows.forEach((row,r)=>{const y=centerY-(rows.length-1)*line/2+r*line;const text=row.join(' ');ctx.strokeStyle='#000';ctx.strokeText(text,W/2,y);ctx.fillStyle='#fff';ctx.fillText(text,W/2,y)});
+ };
+ draw(0);
+ const fps=+$ ('#fps').value,canvasStream=canvas.captureStream(fps),tracks=[...canvasStream.getVideoTracks(),...destination.stream.getAudioTracks()];
+ const stream=new MediaStream(tracks);
+ const recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:(size>720?8_000_000:5_000_000)});
+ const chunks=[];recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+ const stopped=new Promise((resolve,reject)=>{recorder.onstop=resolve;recorder.onerror=()=>reject(Error('Video recording failed in Safari.'))});
+ await ac.resume();if(ac.state!=='running')throw Error('Safari paused audio. Tap Generate again and keep the page active.');
+ const start=ac.currentTime+.25;if(narration)narration.start(start);if(music){music.src.start(start);music.gain.gain.setValueAtTime(.14,start+Math.max(0,state.total-1.4));music.gain.gain.linearRampToValueAtTime(0,start+state.total)}
+ recorder.start();
+ await new Promise((resolve,reject)=>{
+  let previous=0;const tick=()=>{const t=Math.max(0,ac.currentTime-start);draw(Math.min(t,state.total-.001));progress(50+49*Math.min(1,t/state.total),`Rendering video · ${Math.round(100*Math.min(1,t/state.total))}% · keep Safari open`);
+   if(t>=state.total+.2){resolve();return}
+   requestAnimationFrame(tick);
+  };requestAnimationFrame(tick);
+ });
+ recorder.stop();await stopped;
+ try{canvasStream.getTracks().forEach(t=>t.stop());destination.stream.getTracks().forEach(t=>t.stop());if(narration)narration.disconnect();if(music)music.src.stop()}catch(e){}
+ const ext=mime.startsWith('video/mp4')?'mp4':'webm',blob=new Blob(chunks,{type:mime.split(';')[0]});
+ if(!blob.size)throw Error('Safari produced an empty video. Please try 720p at 30 FPS.');
+ if(lastVideoUrl)URL.revokeObjectURL(lastVideoUrl);lastVideoUrl=URL.createObjectURL(blob);
+ $('#video').src=lastVideoUrl;$('#videoDownload').href=lastVideoUrl;$('#videoDownload').download='fact-engine-short.'+ext;$('#videoDownload').textContent='Download '+ext.toUpperCase();
+ $('#format').textContent=`Recorded as ${ext.toUpperCase()} at ${fps} FPS setting and ${size} × ${H}. Actual frame rate depends on device performance.`;
+ progress(100,'Done ✓');
+}
+function packageText(){
+ const s=state;return `FACT ENGINE · ${s.title}\n\nTITLE IDEAS\n${s.titleIdeas.map((x,i)=>(i+1)+'. '+x).join('\n')}\n\nDESCRIPTION\n${s.description}\n\n${s.tags.join(' ')}\n\nSCRIPT\n${s.sentences.map(x=>x.text).join(' ')}\n\nTEXT SOURCE\n${s.page?s.page.title+' - '+s.page.url+' (Wikipedia; see article license)':'Creator supplied script'}\n\nIMAGE CREDITS\n${s.sentences.map((x,i)=>{const im=x.images?.[x.selected];return im?`Scene ${i+1}: ${im.credit} - ${im.page||'local image'} (${im.license})`:`Scene ${i+1}: gradient background`}).join('\n')}\n\nMUSIC\n${musicBuffer?musicCredit:'None'}\n\nVOICE\n${s.hasVoice?'meSpeak/eSpeak synthetic voice, generated locally in browser':'Captions only'}\n`;
+}
+$('#packageDownload').onclick=()=>{const a=document.createElement('a'),u=URL.createObjectURL(new Blob([packageText()],{type:'text/plain;charset=utf-8'}));a.href=u;a.download='fact-engine-youtube-package.txt';a.click();setTimeout(()=>URL.revokeObjectURL(u),2000)};
+async function run(newScript){
+ if(busy)return;busy=true;$('#go').disabled=$('#rebuild').disabled=true;$('#progresscard').classList.remove('hidden');$('#error').textContent='';message('');
+ try{
+  if(newScript)await makeScript();else readEdits();
+  await makeNarration();await findImages();await recordVideo();
+ }catch(e){$('#error').textContent=e?.message||String(e);$('#step').textContent='Could not finish';}
+ finally{busy=false;$('#go').disabled=$('#rebuild').disabled=false}
+}
+$('#go').onclick=()=>{try{context()}catch(e){$('#error').textContent=e.message;$('#progresscard').classList.remove('hidden');return}run(true)};
+$('#rebuild').onclick=()=>{try{context()}catch(e){$('#error').textContent=e.message;return}run(false)};
+})();
+</script>
+</body>
+</html>
