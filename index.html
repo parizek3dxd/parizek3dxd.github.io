@@ -21,18 +21,22 @@ button.ghost,.btn.ghost{background:transparent;color:var(--tx);border:1px solid 
 .fr a{color:var(--ac)}.fr p{margin:4px 0}.fr button,.fr .btn{padding:6px 10px;font-size:12px;margin:0 4px 4px 0}
 video{width:min(100%,360px);aspect-ratio:9/16;background:#000;border-radius:14px;display:block;margin:0 auto 12px}audio{width:100%}
 a{color:var(--ac)}ul,ol{padding-left:20px;margin:4px 0}[hidden]{display:none!important}@media(max-width:480px){.grid2{grid-template-columns:1fr}}
-</style></head><body><main>
+</style><script src="https://js.puter.com/v2/" async></script></head><body><main>
 <header><h1>FACT ENGINE</h1><p class="sub">Runs entirely in your browser. No account, no API keys, no server.</p></header>
 <section class="card note"><h2>Read this first</h2>
 <p>Script: built from the intro of a Wikipedia article (CC BY-SA, credited below), or from a script you paste. There is no AI writer without a key, so it is extractive, not original. Edit any line.</p>
-<p>Voice: free AI voice (Kokoro) runs on your device. First use downloads about 90 MB, then it is cached. Slow on phones: on iPhone the basic voice is preselected.</p>
+<p>Voice: default is a neural Amazon Polly voice through Puter.js (no API key). A free Puter account sign-in pops up once (allow popups in Safari). Puter gives each account a free monthly allowance, which is not unlimited. Your script text is sent to Puter/AWS to make the audio. On-device options are slower or robotic.</p>
 <p>Images: Wikimedia Commons only (free licenses, credited). No stock video without keys. You can add your own image per line.</p>
 <p>Video: recorded live in your browser, so it takes as long as the video and the tab must stay open and visible. Output is MP4 where your browser supports it, otherwise WebM.</p></section>
 <section class="card">
   <label style="margin:0">Topic<div class="row"><input id="topic" placeholder="e.g. Octopus" maxlength="120"><button id="sug" class="ghost" type="button">Suggest topics</button></div></label>
   <div id="chips" class="chips"></div>
   <label>Or paste your own script (optional, you are responsible for its accuracy)<textarea id="own" rows="3"></textarea></label>
-  <div class="grid2"><label>Voice<select id="voice"><option value="af_heart">Heart (US, female)</option><option value="af_bella">Bella (US, female)</option><option value="am_michael">Michael (US, male)</option><option value="bf_emma">Emma (UK, female)</option><option value="bm_george">George (UK, male)</option><option value="basic">Basic robotic voice (tiny, works everywhere)</option><option value="none">No voice (captions only)</option></select></label>
+  <div class="grid2"><label>Voice<select id="voice"><optgroup label="My own free Kokoro server (Hugging Face Space)"><option value="space:af_heart">Heart (US, female)</option><option value="space:am_michael">Michael (US, male)</option><option value="space:bf_emma">Emma (UK, female)</option><option value="space:bm_george">George (UK, male)</option></optgroup><optgroup label="Free cloud voices (Puter account)"><option value="puter:Joanna">Joanna (US, female)</option><option value="puter:Matthew">Matthew (US, male)</option><option value="puter:Amy">Amy (UK, female)</option><option value="puter:Brian">Brian (UK, male)</option></optgroup><optgroup label="On this device"><option value="af_heart">Kokoro AI (desktop, slow)</option><option value="basic">Basic robotic voice</option><option value="none">No voice (captions only)</option></optgroup></select></label>
+  <div id="spacebox" style="grid-column:1/-1;border:1px solid var(--line);border-radius:10px;padding:12px"><b>Your own free voice server (1 minute, once)</b>
+  <ol style="font-size:14px;color:var(--mut)"><li>Make a free account at huggingface.co</li><li>Open <a href="https://huggingface.co/spaces/hexgrad/Kokoro-TTS" target="_blank" rel="noopener">hexgrad/Kokoro-TTS</a>, tap the three dots, choose <i>Duplicate this Space</i></li><li>Set Visibility to <b>Public</b> and Hardware to <b>CPU basic (free)</b>, then Duplicate</li><li>When it says Running, copy its address (ends with .hf.space) and paste it here</li></ol>
+  <div class="row"><input id="spaceurl" placeholder="https://yourname-kokoro-tts.hf.space" inputmode="url" autocapitalize="off"><button id="spacetest" class="ghost" type="button">Test</button></div>
+  <p id="spacemsg" class="mut" style="font-size:13px;margin:6px 0 0"></p></div>
   <label>Background music<select id="music"><option value="none">None</option><option value="commons">Free tracks from Wikimedia Commons</option><option value="file">My own file (e.g. from Pixabay Music)</option></select></label>
   <label>Length<select id="len"><option value="20">About 20 seconds</option><option value="30">About 30 seconds</option><option value="45" selected>About 45 seconds</option><option value="60">About 60 seconds</option></select></label>
   <label>Smoothness<select id="fps"><option value="60">60 fps (smoothest)</option><option value="30">30 fps (safer on old phones)</option></select></label>
@@ -145,9 +149,35 @@ const toAB=r=>{if(r instanceof ArrayBuffer)return r;if(ArrayBuffer.isView(r))ret
   if(typeof r==='string'){const s=atob(r.includes(',')?r.split(',')[1]:r);return Uint8Array.from(s,c=>c.charCodeAt(0)).buffer}throw new Error('unknown audio format from basic voice')};
 async function genBasic(text){const m=await loadMeSpeak();let r=m.speak(text,{rawdata:'arraybuffer'});if(!r)r=m.speak(text,{rawdata:'array'});if(!r)throw new Error('basic voice returned no audio');
   unlock();const d=await uctx.decodeAudioData(toAB(r));return{pcm:d.getChannelData(0).slice(),sr:d.sampleRate}}
+let signInP=null;
+const errMsg=e=>(e&&(e.message||(e.error&&e.error.message)||e.msg))||(typeof e==='string'?e:JSON.stringify(e));
+function preAuth(){signInP=null;if($('#voice').value.startsWith('puter:')&&window.puter&&puter.auth&&!puter.auth.isSignedIn()){signInP=puter.auth.signIn();signInP.catch(()=>{})}}
+async function ensurePuter(){if(!window.puter)throw new Error('the Puter script did not load (ad blocker or offline)');if(!puter.auth.isSignedIn()){if(!signInP)throw new Error('sign-in popup did not open, tap Generate again');await signInP}}
+async function genPuter(text,v){const uk=v==='Amy'||v==='Brian';
+  const a=await withTimeout(puter.ai.txt2speech(text,{provider:'aws-polly',engine:'neural',voice:v,language:uk?'en-GB':'en-US'}),60000,'Puter voice timed out');
+  const r=await fetch(a.src);if(!r.ok)throw new Error('could not read the audio ('+r.status+')');
+  const c=uctx||(uctx=new(window.AudioContext||window.webkitAudioContext)()),d=await c.decodeAudioData(await r.arrayBuffer());return{pcm:d.getChannelData(0).slice(),sr:d.sampleRate}}
+const lsGet=k=>{try{return localStorage.getItem(k)||''}catch(e){return''}},lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+function spaceBase(){let u=($('#spaceurl').value||'').trim().replace(/\/+$/,'');if(!u)return'';if(!/^https?:\/\//i.test(u))u='https://'+u;
+  const m=u.match(/^https?:\/\/huggingface\.co\/spaces\/([^\/]+)\/([^\/?#]+)/i);if(m)return('https://'+m[1]+'-'+m[2]+'.hf.space').toLowerCase().replace(/_/g,'-');
+  const k=u.match(/^https?:\/\/[^\/]+\.hf\.space/i);return k?k[0].toLowerCase().replace(/^http:/,'https:'):u}
+async function genSpace(text,v){
+  const b=spaceBase();if(!/^https:\/\/[^\/]+\.hf\.space$/.test(b))throw new Error('the Space address must look like https://name-space.hf.space');
+  const net=e=>new Error(/Failed to fetch|Load failed|NetworkError/i.test(e.message)?'cannot reach the Space (sleeping, not Public, or wrong address). Open its address once, wait until it says Running, then try again':e.message);
+  let p;try{p=await withTimeout(fetch(b+'/gradio_api/call/generate_first',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:[text,v,1,false]})}),90000,'the Space did not answer (it may be waking up, wait 2 minutes)')}catch(e){throw net(e)}
+  if(!p.ok)throw new Error('the Space answered '+p.status+' (make sure it is Public and says Running)');
+  const{event_id}=await p.json();let t;
+  try{t=await withTimeout(fetch(b+'/gradio_api/call/generate_first/'+event_id).then(r=>r.text()),180000,'the Space took too long')}catch(e){throw net(e)}
+  const blk=t.split(/\n\n+/).map(s=>s.trim()).find(s=>/^event: (complete|error)/m.test(s));if(!blk)throw new Error('the Space returned no audio');
+  const dl=blk.split('\n').find(l=>l.startsWith('data:')),d=dl?dl.slice(5).trim():'null';
+  if(/^event: error/m.test(blk))throw new Error('Space error: '+d.slice(0,120));
+  const o=JSON.parse(d)[0],r=await fetch(o.url||(b+'/gradio_api/file='+o.path));if(!r.ok)throw new Error('could not download the audio ('+r.status+')');
+  const c=uctx||(uctx=new(window.AudioContext||window.webkitAudioContext)()),a=await c.decodeAudioData(await r.arrayBuffer());return{pcm:a.getChannelData(0).slice(),sr:a.sampleRate}}
 async function pickEngine(v){
   if(v==='none')return'none';
-  if(v!=='basic'){$('#skipv').hidden=false;
+  if(v.startsWith('space:')){if(spaceBase())return v;note('No Space address yet, so the basic voice is used. Paste your Space address for the natural voice.');v='basic'}
+  if(v.startsWith('puter:')){try{bar(10,'Connecting to Puter voice');await ensurePuter();return v}catch(e){note('Puter voice not available ('+errMsg(e)+'). Switched to the basic voice.')}}
+  else if(v!=='basic'){$('#skipv').hidden=false;
     try{await loadTTS();$('#skipv').hidden=true;return v}
     catch(e){$('#skipv').hidden=true;
       if(e.message!=='skipped by you'){try{note('Background voice mode failed ('+e.message+'); trying the slower mode, the page may freeze for a minute.');useMain=true;await loadMain();note('');return v}catch(e2){useMain=false;note('Natural voice not available ('+e2.message+').')}}
@@ -156,13 +186,13 @@ async function pickEngine(v){
   catch(e){note('Basic voice not available ('+e.message+'). Continuing with captions only.');return'none'}}
 async function narrate(eng){
   let at=0,sr=24000,cur=0;const t0=Date.now(),n=S.sents.length;
-  $('#skipv').hidden=eng==='none'||eng==='basic';
-  const tick=setInterval(()=>eng!=='none'&&bar(30+15*cur/n,`Recording narration ${cur+1}/${n} · ${Math.round((Date.now()-t0)/1000)} s`+(eng!=='basic'?' (natural voice is slow on phones)':'')),1000);
+  $('#skipv').hidden=eng==='none'||eng==='basic'||eng.startsWith('puter:')||eng.startsWith('space:');
+  const tick=setInterval(()=>eng!=='none'&&bar(30+15*cur/n,`Recording narration ${cur+1}/${n} · ${Math.round((Date.now()-t0)/1000)} s`+(eng==='basic'||eng.startsWith('puter:')?'':eng.startsWith('space:')?' (your Space may need a minute to wake up)':' (natural voice is slow on phones)')),1000);
   try{
     for(const[i,x]of S.sents.entries()){cur=i;
       if(eng==='none'){x.speech=Math.max(1.8,x.text.split(' ').length/2.6);x.pcm=null}
       else{bar(30+15*i/n,`Recording narration ${i+1}/${n}`);const k=eng+'|'+x.text;
-        if(!vcache.has(k))vcache.set(k,eng==='basic'?await withTimeout(genBasic(x.text),30000,'basic voice timed out'):await genKokoro(x.text,eng));
+        if(!vcache.has(k))vcache.set(k,eng==='basic'?await withTimeout(genBasic(x.text),30000,'basic voice timed out'):eng.startsWith('puter:')?await genPuter(x.text,eng.slice(7)):eng.startsWith('space:')?await genSpace(x.text,eng.slice(6)):await genKokoro(x.text,eng));
         const c=vcache.get(k);x.pcm=c.pcm;sr=c.sr;x.speech=c.pcm.length/c.sr}
       x.dur=x.speech+.3;x.t0=at;at+=x.dur}
   }finally{clearInterval(tick);$('#skipv').hidden=true}
@@ -262,8 +292,13 @@ async function go(fresh){
     await voice();showLen();await visuals();renderStory();await record()
   }catch(e){const x=$('#err');x.textContent=e.message;x.hidden=false;$('#stepname').textContent='Stopped'}
   busy=false;lock(false)}
-$('#go').onclick=()=>{unlock();go(true)};$('#reb').onclick=()=>{unlock();go(false)};
-if(/iPhone|iPad|iPod/.test(navigator.userAgent)||(/Mac/.test(navigator.userAgent)&&navigator.maxTouchPoints>1))$('#voice').value='basic';
-$('#dlp').onclick=()=>{const s=S,t=`FACT ENGINE package: ${s.topic}\n\nTITLE IDEAS\n${s.titles.map((x,i)=>`${i+1}. ${x}`).join('\n')}\n\nDESCRIPTION\n${s.description}\n\n${s.hashtags.join(' ')}\n\nTHUMBNAIL CONCEPT\n${s.thumbnail}\n\nSCRIPT\n${s.sents.map(x=>x.text).join(' ')}\n\nSOURCES\n${s.sources.map(x=>`${x.title} - ${x.url} (${x.license})`).join('\n')||'Own script'}\n\nIMAGE CREDITS (add to your description)\n${s.sents.map((x,i)=>{const a=x.cands[x.sel];return a?`Line ${i+1}: ${a.provider} / ${a.credit} - ${a.page||'local file'} (${a.license})`:`Line ${i+1}: gradient`}).join('\n')}\n\nMusic: ${MU.buf&&$('#music').value!=='none'?MU.credit:'none'}\nNarration: ${s.engine==='none'?'none (captions only)':s.engine==='basic'?'basic eSpeak-based voice (meSpeak, GPL-3.0), generated in your browser':'Kokoro-82M AI voice (Apache-2.0), generated in your browser'}\n`;
+$('#go').onclick=()=>{unlock();preAuth();go(true)};$('#reb').onclick=()=>{unlock();preAuth();go(false)};
+$('#dlp').onclick=()=>{const s=S,t=`FACT ENGINE package: ${s.topic}\n\nTITLE IDEAS\n${s.titles.map((x,i)=>`${i+1}. ${x}`).join('\n')}\n\nDESCRIPTION\n${s.description}\n\n${s.hashtags.join(' ')}\n\nTHUMBNAIL CONCEPT\n${s.thumbnail}\n\nSCRIPT\n${s.sents.map(x=>x.text).join(' ')}\n\nSOURCES\n${s.sources.map(x=>`${x.title} - ${x.url} (${x.license})`).join('\n')||'Own script'}\n\nIMAGE CREDITS (add to your description)\n${s.sents.map((x,i)=>{const a=x.cands[x.sel];return a?`Line ${i+1}: ${a.provider} / ${a.credit} - ${a.page||'local file'} (${a.license})`:`Line ${i+1}: gradient`}).join('\n')}\n\nMusic: ${MU.buf&&$('#music').value!=='none'?MU.credit:'none'}\nNarration: ${s.engine==='none'?'none (captions only)':s.engine==='basic'?'basic eSpeak-based voice (meSpeak), generated in your browser':s.engine.startsWith('puter:')?'Amazon Polly neural voice '+s.engine.slice(7)+' via Puter.js (AI-generated)':'Kokoro-82M AI voice (Apache-2.0), generated in your browser'}\n`;
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'}));a.download='fact-engine-package.txt';a.click()};
+
+$('#spaceurl').value=lsGet('fe_space');
+const tgSpace=()=>{$('#spacebox').hidden=!$('#voice').value.startsWith('space:')};
+$('#voice').addEventListener('change',tgSpace);if(lsGet('fe_space'))$('#voice').value='space:af_heart';tgSpace();
+$('#spaceurl').addEventListener('input',()=>lsSet('fe_space',$('#spaceurl').value.trim()));
+$('#spacetest').onclick=async()=>{unlock();const m=$('#spacemsg');m.textContent='Testing... (a sleeping Space can need up to 2 minutes)';try{const a=await genSpace('Hello, this is a voice test.','af_heart');m.textContent='Works! Got '+(a.pcm.length/a.sr).toFixed(1)+' s of audio.'}catch(e){m.textContent='Failed: '+e.message}};
 </script></body></html>
