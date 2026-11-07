@@ -25,7 +25,7 @@ a{color:var(--ac)}ul,ol{padding-left:20px;margin:4px 0}[hidden]{display:none!imp
 <header><h1>FACT ENGINE</h1><p class="sub">Runs entirely in your browser. No account, no API keys, no server.</p></header>
 <section class="card note"><h2>Read this first</h2>
 <p>Script: built from the intro of a Wikipedia article (CC BY-SA, credited below), or from a script you paste. There is no AI writer without a key, so it is extractive, not original. Edit any line.</p>
-<p>Voice: free AI voice (Kokoro) runs on your device. First use downloads about 90 MB, then it is cached. Slow on old phones.</p>
+<p>Voice: free AI voice (Kokoro) runs on your device. First use downloads about 90 MB, then it is cached. Slow on phones: on iPhone the basic voice is preselected.</p>
 <p>Images: Wikimedia Commons only (free licenses, credited). No stock video without keys. You can add your own image per line.</p>
 <p>Video: recorded live in your browser, so it takes as long as the video and the tab must stay open and visible. Output is MP4 where your browser supports it, otherwise WebM.</p></section>
 <section class="card">
@@ -51,7 +51,7 @@ a{color:var(--ac)}ul,ol{padding-left:20px;margin:4px 0}[hidden]{display:none!imp
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const TOPICS=['Octopus','Aurora','Placebo','Black hole','Photosynthesis','Great Pyramid of Giza','Bioluminescence','Antikythera mechanism','Dunning–Kruger effect','Tardigrade','Lightning','Rosetta Stone','Mirage','Sleep paralysis','Northern lights','Transistor','Coral reef','Baader–Meinhof phenomenon','Mount Vesuvius','Echolocation','Pareidolia','Plate tectonics','GPS','Honey'];
 const STOP=/^(because|however|between|through|during|another|several|including|usually|against|without|around|called|within|their|which)$/i;
-let S=null,busy=false,tts=null,mes=null,dctx=null,skipRes=null;const vcache=new Map(),qcache=new Map();
+let S=null,busy=false,mes=null,uctx=null,skipRes=null,kw=null,kOk=false,kReady=null,kpct=0,nid=0;const pend=new Map();const vcache=new Map(),qcache=new Map();
 const bar=(p,t)=>{$('#bar i').style.width=p+'%';if(t)$('#stepname').textContent=t};
 const lock=b=>{$('#go').disabled=$('#reb').disabled=b};
 const split=t=>(t.replace(/\s+/g,' ').trim().match(/[^.!?]+[.!?]+(?:\s|$)/g)||[t]).map(s=>s.trim()).filter(Boolean);
@@ -85,20 +85,37 @@ function readEdits(){document.querySelectorAll('[data-t]').forEach(t=>{const i=+
 
 function note(m){$('#info').textContent=m;$('#info').hidden=!m}
 function showLen(){const w=+$('#len').value;$('#dur').textContent=`Video length: ${Math.round(S.total)} s (target ${w} s).`+(!S.own&&S.total<w*.75?" Wikipedia's intro for this topic is short. For a longer video, try a broader topic or paste your own script.":'')}
+const WCODE=`let tts=null;
+self.onmessage=async e=>{const m=e.data;
+ try{
+  if(m.type==='load'){let err;
+   for(const u of ['https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/+esm','https://esm.sh/kokoro-js@1.2.1']){
+    try{const {KokoroTTS}=await import(u);
+     tts=await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX',{dtype:'q8',device:'wasm',progress_callback:p=>{if(p.status==='progress')self.postMessage({type:'progress',pct:Math.round(p.progress||0)})}});
+     self.postMessage({type:'ready'});return}catch(x){err=x}}
+   throw err||new Error('load failed')}
+  if(m.type==='gen'){const a=await tts.generate(m.text,{voice:m.voice}),pcm=a.audio.slice();self.postMessage({type:'audio',id:m.id,pcm,sr:a.sampling_rate},[pcm.buffer])}
+ }catch(x){self.postMessage({type:'error',id:m.id,msg:String(x&&x.message||x)})}};`;
+const withTimeout=(p,ms,m)=>Promise.race([p,new Promise((_,no)=>setTimeout(()=>no(new Error(m)),ms))]);
+function unlock(){if(!uctx||uctx.state==='closed')uctx=new(window.AudioContext||window.webkitAudioContext)();uctx.resume()}
+function startWorker(){
+  const w=new Worker(URL.createObjectURL(new Blob([WCODE],{type:'text/javascript'})),{type:'module'});
+  w.onmessage=e=>{const m=e.data;
+    if(m.type==='progress')kpct=m.pct;
+    else if(m.type==='ready')kReady&&kReady.ok();
+    else if(m.type==='audio'){const p=pend.get(m.id);pend.delete(m.id);p&&p.ok(m)}
+    else if(m.type==='error'){if(m.id!=null){const p=pend.get(m.id);pend.delete(m.id);p&&p.no(new Error(m.msg))}else kReady&&kReady.no(new Error(m.msg))}};
+  w.onerror=e=>{const err=new Error('voice worker error: '+(e.message||'could not start'));kReady&&kReady.no(err);pend.forEach(p=>p.no(err));pend.clear()};
+  return w}
+function killK(){if(kw){kw.terminate();kw=null}kOk=false;const e=new Error('skipped by you');pend.forEach(p=>p.no(e));pend.clear()}
 function loadTTS(){
-  if(tts)return Promise.resolve(tts);
-  const t0=Date.now();let label='Downloading voice model',pct=0,dl=true;
-  const upd=()=>bar(10+20*pct/100,`${label}${dl?' '+pct+'%':''} · ${Math.round((Date.now()-t0)/1000)} s`);
-  const timer=setInterval(upd,1000);
-  const load=(async()=>{let err;
-    for(const u of['https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/+esm','https://esm.sh/kokoro-js@1.2.1']){
-      try{const{KokoroTTS}=await import(u);
-        return tts=await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX',{dtype:'q8',device:'wasm',progress_callback:p=>{if(p.status==='progress'){pct=Math.round(p.progress||0);dl=pct<100;label=dl?'Downloading voice model':'Starting voice engine (1-3 min on a phone, please wait)';upd()}}})}
-      catch(e){err=e}}
-    throw new Error('could not load it ('+(err&&err.message||err)+')')})();
+  if(kOk&&kw)return Promise.resolve();
+  const t0=Date.now();kpct=0;
+  const upd=()=>bar(10+20*kpct/100,(kpct<100?`Downloading voice model ${kpct}%`:'Starting voice engine (1-3 min on a phone, please wait)')+` · ${Math.round((Date.now()-t0)/1000)} s`);
+  const timer=setInterval(upd,1000);kw=startWorker();
+  const load=new Promise((ok,no)=>{kReady={ok:()=>{kOk=true;ok()},no};kw.postMessage({type:'load'})});
   const skip=new Promise((_,no)=>{skipRes=()=>no(new Error('skipped by you'))});
-  const limit=new Promise((_,no)=>setTimeout(()=>no(new Error('it took longer than 4 minutes')),240000));
-  return Promise.race([load,skip,limit]).finally(()=>clearInterval(timer))}
+  return withTimeout(Promise.race([load,skip]),300000,'it took longer than 5 minutes').catch(e=>{killK();throw e}).finally(()=>clearInterval(timer))}
 async function loadMeSpeak(){
   if(mes)return mes;const b='https://cdn.jsdelivr.net/npm/mespeak@2.0.2/';
   const go=(async()=>{
@@ -106,9 +123,10 @@ async function loadMeSpeak(){
     const cb=f=>new Promise((ok,no)=>f((s,m)=>s?ok():no(new Error(m||'load failed'))));
     await cb(c=>window.meSpeak.loadConfig(b+'mespeak-config.json',c));await cb(c=>window.meSpeak.loadVoice(b+'voices/en/en-us.json',c));return mes=window.meSpeak})();
   return Promise.race([go,new Promise((_,no)=>setTimeout(()=>no(new Error('timeout')),30000))])}
-async function genKokoro(text,v){const a=await(await loadTTS()).generate(text,{voice:v});return{pcm:a.audio,sr:a.sampling_rate}}
+function genKokoro(text,v){return new Promise((ok,no)=>{if(!kw)return no(new Error('voice engine stopped'));const id=++nid,t=setTimeout(()=>{pend.delete(id);no(new Error('one sentence took over 3 minutes'))},180000);
+  pend.set(id,{ok:m=>{clearTimeout(t);ok({pcm:m.pcm,sr:m.sr})},no:e=>{clearTimeout(t);no(e)}});kw.postMessage({type:'gen',id,text,voice:v})})}
 async function genBasic(text){const m=await loadMeSpeak(),r=m.speak(text,{rawdata:'arraybuffer',speed:150,pitch:50});if(!r)throw new Error('basic voice failed');
-  const ab=r instanceof ArrayBuffer?r:new Uint8Array(r).buffer,c=dctx||(dctx=new(window.AudioContext||window.webkitAudioContext)()),d=await c.decodeAudioData(ab.slice(0));return{pcm:d.getChannelData(0).slice(),sr:d.sampleRate}}
+  const ab=r instanceof ArrayBuffer?r:new Uint8Array(r).buffer,c=uctx||(uctx=new(window.AudioContext||window.webkitAudioContext)()),d=await c.decodeAudioData(ab.slice(0));return{pcm:d.getChannelData(0).slice(),sr:d.sampleRate}}
 async function pickEngine(v){
   if(v==='none')return'none';
   if(v!=='basic'){$('#skipv').hidden=false;
@@ -116,21 +134,33 @@ async function pickEngine(v){
     catch(e){$('#skipv').hidden=true;note('Natural voice not available ('+e.message+'). Switched to the basic voice.')}}
   try{bar(12,'Loading basic voice');await loadMeSpeak();return'basic'}
   catch(e){note('Basic voice not available ('+e.message+'). Continuing with captions only.');return'none'}}
-async function voice(){
-  const eng=await pickEngine($('#voice').value);let at=0,sr=24000;S.engine=eng;
-  for(const[i,x]of S.sents.entries()){
-    if(eng==='none'){x.speech=Math.max(1.8,x.text.split(' ').length/2.6);x.pcm=null}
-    else{bar(30+15*i/S.sents.length,`Recording narration ${i+1}/${S.sents.length}`);const k=eng+'|'+x.text;
-      if(!vcache.has(k))vcache.set(k,eng==='basic'?await genBasic(x.text):await genKokoro(x.text,eng));
-      const c=vcache.get(k);x.pcm=c.pcm;sr=c.sr;x.speech=c.pcm.length/c.sr}
-    x.dur=x.speech+.3;x.t0=at;at+=x.dur}
-  S.total=at;S.sr=sr;S.hasVoice=eng!=='none';
+async function narrate(eng){
+  let at=0,sr=24000,cur=0;const t0=Date.now(),n=S.sents.length;
+  $('#skipv').hidden=eng==='none'||eng==='basic';
+  const tick=setInterval(()=>eng!=='none'&&bar(30+15*cur/n,`Recording narration ${cur+1}/${n} · ${Math.round((Date.now()-t0)/1000)} s`+(eng!=='basic'?' (natural voice is slow on phones)':'')),1000);
+  try{
+    for(const[i,x]of S.sents.entries()){cur=i;
+      if(eng==='none'){x.speech=Math.max(1.8,x.text.split(' ').length/2.6);x.pcm=null}
+      else{bar(30+15*i/n,`Recording narration ${i+1}/${n}`);const k=eng+'|'+x.text;
+        if(!vcache.has(k))vcache.set(k,eng==='basic'?await withTimeout(genBasic(x.text),30000,'basic voice timed out'):await genKokoro(x.text,eng));
+        const c=vcache.get(k);x.pcm=c.pcm;sr=c.sr;x.speech=c.pcm.length/c.sr}
+      x.dur=x.speech+.3;x.t0=at;at+=x.dur}
+  }finally{clearInterval(tick);$('#skipv').hidden=true}
+  S.total=at;S.sr=sr;S.hasVoice=eng!=='none';S.engine=eng;
   if(S.hasVoice){S.pcm=new Float32Array(Math.round(at*sr));S.sents.forEach(x=>S.pcm.set(x.pcm,Math.round(x.t0*sr)));
     const w=wav(S.pcm,sr);$('#aud').src=$('#dla').href=URL.createObjectURL(w)}else{$('#aud').removeAttribute('src');$('#dla').removeAttribute('href')}
   S.caps=[];S.sents.forEach(x=>{const ws=x.text.split(/\s+/).filter(Boolean),l=ws.map(w=>w.length+2),tot=l.reduce((a,b)=>a+b,0);let c=x.t0;
     const words=ws.map((w,k)=>{const d=x.speech*l[k]/tot,o={w,s:c,e:c+d};c+=d;return o});
     for(let k=0;k<words.length;k+=3)S.caps.push({s:words[k].s,e:k+3>=words.length?x.t0+x.dur:words[k+3].s,w:words.slice(k,k+3)})})}
-$('#skipv').onclick=()=>skipRes&&skipRes();
+async function voice(){
+  let eng=await pickEngine($('#voice').value);
+  if(eng!=='none'&&eng!=='basic'){
+    try{return await narrate(eng)}
+    catch(e){killK();note('Natural voice failed ('+e.message+'). Switched to the basic voice.');
+      try{await loadMeSpeak();eng='basic'}catch(e2){eng='none';note('Natural and basic voice both failed. Continuing with captions only.')}}}
+  if(eng==='basic'){try{return await narrate('basic')}catch(e){note('Basic voice failed ('+e.message+'). Continuing with captions only.')}}
+  return narrate('none')}
+$('#skipv').onclick=()=>{skipRes&&skipRes();killK()};
 function wav(f,sr){const b=new ArrayBuffer(44+f.length*2),v=new DataView(b),w=(o,s)=>[...s].forEach((c,i)=>v.setUint8(o+i,c.charCodeAt(0)));
   w(0,'RIFF');v.setUint32(4,36+f.length*2,true);w(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,f.length*2,true);
   for(let i=0;i<f.length;i++)v.setInt16(44+i*2,Math.max(-1,Math.min(1,f[i]))*32767,true);return new Blob([b],{type:'audio/wav'})}
@@ -160,10 +190,10 @@ async function record(){
   const R=+$('#res').value,W=R,H=Math.round(R*16/9),cv=$('#cv'),ctx=cv.getContext('2d');cv.width=W;cv.height=H;
   const mime=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(m=>MediaRecorder.isTypeSupported(m));
   if(!mime)throw new Error('No supported video recording format in this browser.');
-  const ac=new(window.AudioContext||window.webkitAudioContext)(),dest=ac.createMediaStreamDestination();
+  const ac=uctx||(uctx=new(window.AudioContext||window.webkitAudioContext)()),dest=ac.createMediaStreamDestination(),oscs=[];
   if(S.hasVoice){const b=ac.createBuffer(1,S.pcm.length,S.sr);b.copyToChannel(S.pcm,0);S.src=ac.createBufferSource();S.src.buffer=b;S.src.connect(dest)}
-  if($('#music').value==='1'){const g=ac.createGain(),lp=ac.createBiquadFilter(),lfo=ac.createOscillator(),lg=ac.createGain();g.gain.value=.025;lp.type='lowpass';lp.frequency.value=700;lfo.frequency.value=.2;lg.gain.value=.015;lfo.connect(lg);lg.connect(g.gain);lfo.start();
-    [110,164.81,220,277.18].forEach(f=>{const o=ac.createOscillator();o.frequency.value=f;o.connect(lp);o.start()});lp.connect(g);g.connect(dest)}
+  if($('#music').value==='1'){const g=ac.createGain(),lp=ac.createBiquadFilter(),lfo=ac.createOscillator(),lg=ac.createGain();g.gain.value=.025;lp.type='lowpass';lp.frequency.value=700;lfo.frequency.value=.2;lg.gain.value=.015;lfo.connect(lg);lg.connect(g.gain);lfo.start();oscs.push(lfo);
+    [110,164.81,220,277.18].forEach(f=>{const o=ac.createOscillator();o.frequency.value=f;o.connect(lp);o.start();oscs.push(o)});lp.connect(g);g.connect(dest)}
   const cover=(img,z,pan)=>{const s=Math.max(W/img.width,H/img.height)*z,dw=img.width*s,dh=img.height*s;ctx.drawImage(img,(W-dw)/2+pan*(dw-W)/2,(H-dh)/2,dw,dh)};
   const scene=(x,f,a,i)=>{ctx.globalAlpha=a;if(x.img)cover(x.img,1+.1*f,(i%2?1:-1)*(f-.5)*.8);else{const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'#2a2a52');g.addColorStop(1,'#121220');ctx.fillStyle=g;ctx.fillRect(0,0,W,H)}ctx.fillStyle='rgba(0,0,0,.28)';ctx.fillRect(0,0,W,H);ctx.globalAlpha=1};
   const frame=t=>{let i=S.sents.findIndex(x=>t<x.t0+x.dur);if(i<0)i=S.sents.length-1;const x=S.sents[i],l=Math.max(0,t-x.t0);
@@ -180,9 +210,9 @@ async function record(){
   const rec=new MediaRecorder(new MediaStream([...cv.captureStream(30).getVideoTracks(),...dest.stream.getAudioTracks()]),{mimeType:mime,videoBitsPerSecond:R>720?8e6:5e6}),chunks=[];
   rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);
   const done=new Promise(r=>rec.onstop=r);
-  await ac.resume();const t0=ac.currentTime+.3;if(S.src)S.src.start(t0);rec.start();
+  await ac.resume();if(ac.state!=='running')throw new Error('Safari blocked audio. Tap the button again and keep the screen on.');const t0=ac.currentTime+.3;if(S.src)S.src.start(t0);rec.start();
   await new Promise(res=>{const tick=()=>{const t=Math.max(0,ac.currentTime-t0);frame(Math.min(t,S.total-.001));bar(60+40*Math.min(1,t/S.total),`Recording video ${Math.round(Math.min(1,t/S.total)*100)}% (keep this tab open)`);t>S.total+.3?res():requestAnimationFrame(tick)};tick()});
-  rec.stop();await done;ac.close();
+  rec.stop();await done;oscs.forEach(o=>{try{o.stop()}catch(e){}});
   const ext=mime.startsWith('video/mp4')?'mp4':'webm',url=URL.createObjectURL(new Blob(chunks,{type:mime.split(';')[0]}));
   $('#vid').src=url;$('#dlv').href=url;$('#dlv').download='fact-engine-short.'+ext;$('#dlv').textContent='Download '+ext.toUpperCase();
   $('#fmt').textContent=ext==='mp4'?'MP4 recorded by your browser.':'Your browser records WebM, which YouTube accepts. For MP4, use Safari or a recent Chrome, or convert it free in a converter of your choice.';
@@ -197,7 +227,8 @@ async function go(fresh){
     await voice();showLen();await visuals();renderStory();await record()
   }catch(e){const x=$('#err');x.textContent=e.message;x.hidden=false;$('#stepname').textContent='Stopped'}
   busy=false;lock(false)}
-$('#go').onclick=()=>go(true);$('#reb').onclick=()=>go(false);
+$('#go').onclick=()=>{unlock();go(true)};$('#reb').onclick=()=>{unlock();go(false)};
+if(/iPhone|iPad|iPod/.test(navigator.userAgent)||(/Mac/.test(navigator.userAgent)&&navigator.maxTouchPoints>1))$('#voice').value='basic';
 $('#dlp').onclick=()=>{const s=S,t=`FACT ENGINE package: ${s.topic}\n\nTITLE IDEAS\n${s.titles.map((x,i)=>`${i+1}. ${x}`).join('\n')}\n\nDESCRIPTION\n${s.description}\n\n${s.hashtags.join(' ')}\n\nTHUMBNAIL CONCEPT\n${s.thumbnail}\n\nSCRIPT\n${s.sents.map(x=>x.text).join(' ')}\n\nSOURCES\n${s.sources.map(x=>`${x.title} - ${x.url} (${x.license})`).join('\n')||'Own script'}\n\nIMAGE CREDITS (add to your description)\n${s.sents.map((x,i)=>{const a=x.cands[x.sel];return a?`Line ${i+1}: ${a.provider} / ${a.credit} - ${a.page||'local file'} (${a.license})`:`Line ${i+1}: gradient`}).join('\n')}\n\nMusic: ${$('#music').value==='1'?'generated ambient pad (original, no license needed)':'none'}\nNarration: ${s.engine==='none'?'none (captions only)':s.engine==='basic'?'basic eSpeak-based voice (meSpeak, GPL-3.0), generated in your browser':'Kokoro-82M AI voice (Apache-2.0), generated in your browser'}\n`;
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'}));a.download='fact-engine-package.txt';a.click()};
 </script></body></html>
