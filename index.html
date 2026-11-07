@@ -21,21 +21,21 @@ button.ghost,.btn.ghost{background:transparent;color:var(--tx);border:1px solid 
 .fr a{color:var(--ac)}.fr p{margin:4px 0}.fr button,.fr .btn{padding:6px 10px;font-size:12px;margin:0 4px 4px 0}
 video{width:min(100%,360px);aspect-ratio:9/16;background:#000;border-radius:14px;display:block;margin:0 auto 12px}audio{width:100%}
 a{color:var(--ac)}ul,ol{padding-left:20px;margin:4px 0}[hidden]{display:none!important}@media(max-width:480px){.grid2{grid-template-columns:1fr}}
-</style></head><body><main>
-<header><h1>FACT ENGINE</h1><p class="sub">Runs entirely in your browser. No account, no API keys, no server.</p></header>
+</style><script src="https://js.puter.com/v2/"></script></head><body><main>
+<header><h1>FACT ENGINE</h1><p class="sub">Runs in your browser. No account, no API keys, no server. Voiceover: free AI voice via a no-key API.</p></header>
 <section class="card note"><h2>Read this first</h2>
 <p>Script: built from the intro of a Wikipedia article (CC BY-SA, credited below), or from a script you paste. There is no AI writer without a key, so it is extractive, not original. Edit any line.</p>
-<p>Voice: free AI voice (Kokoro) runs on your device. First use downloads about 90 MB, then it is cached. Slow on phones: on iPhone the basic voice is preselected.</p>
+<p>Voice: free AI voiceover via the Puter.js API (Amazon Polly neural + OpenAI voices). No API key, no account, no 90 MB download, fast on every phone including iPhone. Needs internet; an offline basic voice is the automatic fallback.</p>
 <p>Images: Wikimedia Commons only (free licenses, credited). No stock video without keys. You can add your own image per line.</p>
 <p>Video: recorded live in your browser, so it takes as long as the video and the tab must stay open and visible. Output is MP4 where your browser supports it, otherwise WebM.</p></section>
 <section class="card">
   <label style="margin:0">Topic<div class="row"><input id="topic" placeholder="e.g. Octopus" maxlength="120"><button id="sug" class="ghost" type="button">Suggest topics</button></div></label>
   <div id="chips" class="chips"></div>
   <label>Or paste your own script (optional, you are responsible for its accuracy)<textarea id="own" rows="3"></textarea></label>
-  <div class="grid2"><label>Voice<select id="voice"><option value="af_heart">Heart (US, female)</option><option value="af_bella">Bella (US, female)</option><option value="am_michael">Michael (US, male)</option><option value="bf_emma">Emma (UK, female)</option><option value="bm_george">George (UK, male)</option><option value="basic">Basic robotic voice (tiny, works everywhere)</option><option value="none">No voice (captions only)</option></select></label>
+  <div class="grid2"><label>Voice<select id="voice"><option value="Joanna">Joanna (US, female, natural)</option><option value="Matthew">Matthew (US, male, natural)</option><option value="Amy">Amy (UK, female, natural)</option><option value="Emma">Emma (UK, female, natural)</option><option value="Brian">Brian (UK, male, natural)</option><option value="oa:alloy">Alloy (OpenAI, neutral)</option><option value="oa:nova">Nova (OpenAI, female)</option><option value="oa:echo">Echo (OpenAI, male)</option><option value="oa:onyx">Onyx (OpenAI, deep male)</option><option value="basic">Basic robotic voice (offline fallback)</option><option value="none">No voice (captions only)</option></select></label>
   <label>Background music<select id="music"><option value="none">None</option><option value="commons">Free tracks from Wikimedia Commons</option><option value="file">My own file (e.g. from Pixabay Music)</option></select></label>
   <label>Length<select id="len"><option value="20">About 20 seconds</option><option value="30">About 30 seconds</option><option value="45" selected>About 45 seconds</option><option value="60">About 60 seconds</option></select></label>
-  <label>Smoothness<select id="fps"><option value="60">60 fps (smoothest)</option><option value="30">30 fps (safer on old phones)</option></select></label>
+  <label>Smoothness<select id="fps"><option value="60" selected>60 fps (smoothest)</option><option value="30">30 fps (safer on old phones)</option></select></label>
   <label>Quality<select id="res"><option value="720">720x1280 (faster)</option><option value="1080">1080x1920 (heavier)</option></select></label></div>
   <div id="mus" hidden style="margin-top:12px">
   <div id="mcommons" hidden><div class="row"><input id="mq" value="upbeat instrumental"><button id="msearch" class="ghost" type="button">Search music</button></div><div id="mres"></div></div>
@@ -43,7 +43,7 @@ a{color:var(--ac)}ul,ol{padding-left:20px;margin:4px 0}[hidden]{display:none!imp
   <p id="mstat" class="mut" style="font-size:14px"></p></div>
   <button id="go" type="button">Generate Short</button>
 </section>
-<section id="prog" class="card" hidden><b id="stepname">Starting</b><div id="bar"><i></i></div><p id="info" style="color:var(--sig);font-size:14px;margin:4px 0" hidden></p><button id="skipv" class="ghost" type="button" hidden>Skip to basic voice</button><div id="err" role="alert" hidden></div></section>
+<section id="prog" class="card" hidden><b id="stepname">Starting</b><div id="bar"><i></i></div><p id="info" style="color:var(--sig);font-size:14px;margin:4px 0" hidden></p><div id="err" role="alert" hidden></div></section>
 <section id="out" hidden>
  <div class="card"><h2>Script</h2><p class="mut">Edit any line or its image search words, then press Rebuild.</p><p id="dur" class="mut"></p><div id="lines"></div><h3>Sources</h3><ul id="srcs"></ul></div>
  <div class="card"><h2>Voiceover</h2><audio id="aud" controls></audio><p><a id="dla" class="btn ghost" download="narration.wav">Download audio (WAV)</a></p></div>
@@ -56,7 +56,7 @@ a{color:var(--ac)}ul,ol{padding-left:20px;margin:4px 0}[hidden]{display:none!imp
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const TOPICS=['Octopus','Aurora','Placebo','Black hole','Photosynthesis','Great Pyramid of Giza','Bioluminescence','Antikythera mechanism','Dunning–Kruger effect','Tardigrade','Lightning','Rosetta Stone','Mirage','Sleep paralysis','Northern lights','Transistor','Coral reef','Baader–Meinhof phenomenon','Mount Vesuvius','Echolocation','Pareidolia','Plate tectonics','GPS','Honey'];
 const STOP=/^(because|however|between|through|during|another|several|including|usually|against|without|around|called|within|their|which)$/i;
-let S=null,busy=false,mes=null,uctx=null,skipRes=null,useMain=false,mainTTS=null,kw=null,kOk=false,kReady=null,kpct=0,nid=0;const pend=new Map();const vcache=new Map(),qcache=new Map();
+let S=null,busy=false,mes=null,uctx=null;const vcache=new Map(),qcache=new Map();
 const bar=(p,t)=>{$('#bar i').style.width=p+'%';if(t)$('#stepname').textContent=t};
 const lock=b=>{$('#go').disabled=$('#reb').disabled=b};
 const split=t=>(t.replace(/\s+/g,' ').trim().match(/[^.!?]+[.!?]+(?:\s|$)/g)||[t]).map(s=>s.trim()).filter(Boolean);
@@ -90,37 +90,32 @@ function readEdits(){document.querySelectorAll('[data-t]').forEach(t=>{const i=+
 
 const NOTES=[];function note(m){if(!m)NOTES.length=0;else NOTES.push(m);$('#info').textContent=NOTES.join(' ');$('#info').hidden=!NOTES.length}
 function showLen(){const w=+$('#len').value;$('#dur').textContent=`Video length: ${Math.round(S.total)} s (target ${w} s).`+(!S.own&&S.total<w*.75?" Wikipedia's intro for this topic is short. For a longer video, try a broader topic or paste your own script.":'')}
-const WCODE=`let tts=null;
-self.onmessage=async e=>{const m=e.data;
- try{
-  if(m.type==='load'){let err;
-   for(const u of ['https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/+esm','https://esm.sh/kokoro-js@1.2.1']){
-    try{const {KokoroTTS}=await import(u);
-     tts=await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX',{dtype:'q8',device:'wasm',progress_callback:p=>{if(p.status==='progress')self.postMessage({type:'progress',pct:Math.round(p.progress||0)})}});
-     self.postMessage({type:'ready'});return}catch(x){err=x}}
-   throw err||new Error('load failed')}
-  if(m.type==='gen'){const a=await tts.generate(m.text,{voice:m.voice}),pcm=a.audio.slice();self.postMessage({type:'audio',id:m.id,pcm,sr:a.sampling_rate},[pcm.buffer])}
- }catch(x){self.postMessage({type:'error',id:m.id,msg:String(x&&x.message||x)})}};`;
 const withTimeout=(p,ms,m)=>Promise.race([p,new Promise((_,no)=>setTimeout(()=>no(new Error(m)),ms))]);
 function unlock(){if(!uctx||uctx.state==='closed')uctx=new(window.AudioContext||window.webkitAudioContext)();uctx.resume()}
-function startWorker(){
-  const w=new Worker(URL.createObjectURL(new Blob([WCODE],{type:'text/javascript'})),{type:'module'});
-  w.onmessage=e=>{const m=e.data;
-    if(m.type==='progress')kpct=m.pct;
-    else if(m.type==='ready')kReady&&kReady.ok();
-    else if(m.type==='audio'){const p=pend.get(m.id);pend.delete(m.id);p&&p.ok(m)}
-    else if(m.type==='error'){if(m.id!=null){const p=pend.get(m.id);pend.delete(m.id);p&&p.no(new Error(m.msg))}else kReady&&kReady.no(new Error(m.msg))}};
-  w.onerror=e=>{const err=new Error('voice worker error: '+(e.message||'could not start'));kReady&&kReady.no(err);pend.forEach(p=>p.no(err));pend.clear()};
-  return w}
-function killK(){if(kw){kw.terminate();kw=null}kOk=false;const e=new Error('skipped by you');pend.forEach(p=>p.no(e));pend.clear()}
-function loadTTS(){
-  if(kOk&&kw)return Promise.resolve();
-  const t0=Date.now();kpct=0;
-  const upd=()=>bar(10+20*kpct/100,(kpct<100?`Downloading voice model ${kpct}%`:'Starting voice engine (1-3 min on a phone, please wait)')+` · ${Math.round((Date.now()-t0)/1000)} s`);
-  const timer=setInterval(upd,1000);kw=startWorker();
-  const load=new Promise((ok,no)=>{kReady={ok:()=>{kOk=true;ok()},no};kw.postMessage({type:'load'})});
-  const skip=new Promise((_,no)=>{skipRes=()=>no(new Error('skipped by you'))});
-  return withTimeout(Promise.race([load,skip]),300000,'it took longer than 5 minutes').catch(e=>{killK();throw e}).finally(()=>clearInterval(timer))}
+async function genAPI(text,v){
+  const pol=()=>v.startsWith('oa:')?{provider:'openai',voice:v.slice(3),model:'gpt-4o-mini-tts'}:{provider:'aws-polly',voice:v,engine:'neural',language:'en-US'};
+  let err;
+  for(let a=0;a<3;a++){
+    try{
+      const el=await puter.ai.txt2speech(String(text).slice(0,2900),pol());
+      const src=el&&el.src||'';
+      if(!src)throw new Error('no audio returned');
+      const r=await fetch(src);if(!r.ok)throw new Error('audio download failed ('+r.status+')');
+      unlock();const d=await uctx.decodeAudioData(await r.arrayBuffer());
+      return{pcm:d.getChannelData(0).slice(),sr:d.sampleRate}
+    }catch(e){err=e;if(a<2)await new Promise(res=>setTimeout(res,700*(a+1)))}
+  }
+  throw err}
+async function pickEngine(v){
+  if(v==='none')return'none';
+  if(typeof puter!=='undefined'){
+    try{bar(8,'Checking the free voice API');
+      const pol=v.startsWith('oa:')?{provider:'openai',voice:v.slice(3),model:'gpt-4o-mini-tts'}:{provider:'aws-polly',voice:v,engine:'neural',language:'en-US'};
+      await withTimeout(puter.ai.txt2speech('Hi.',pol),25000,'API check timed out');return v}
+    catch(e){note('Free voice API failed ('+(e&&(e.message||e.error&&e.error.message)||e)+'). Trying the basic offline voice.')}}
+  else note('Voice API not loaded (offline or blocked). Trying the basic offline voice.');
+  try{bar(12,'Loading basic voice');await loadMeSpeak();return'basic'}
+  catch(e){note('Basic voice not available ('+e.message+'). Continuing with captions only.');return'none'}}
 async function loadMeSpeak(){
   if(mes)return mes;const b='https://cdn.jsdelivr.net/npm/mespeak@2.0.2/';
   const go=(async()=>{
@@ -132,40 +127,21 @@ async function loadMeSpeak(){
     if(!await ok(c=>me.loadVoice(vd,c)))throw new Error('voice data failed');
     return mes=me})();
   return withTimeout(go,45000,'timeout')}
-async function loadMain(){
-  if(mainTTS)return mainTTS;let err;
-  for(const u of['https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/+esm','https://esm.sh/kokoro-js@1.2.1']){
-    try{const{KokoroTTS}=await import(u);return mainTTS=await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX',{dtype:'q8',device:'wasm',progress_callback:p=>{if(p.status==='progress')bar(10+20*(p.progress||0)/100,'Downloading voice model '+Math.round(p.progress||0)+'%')}})}catch(e){err=e}}
-  throw err||new Error('load failed')}
-function genKokoro(text,v){
-  if(useMain)return mainTTS.generate(text,{voice:v}).then(a=>({pcm:a.audio,sr:a.sampling_rate}));
-  return new Promise((ok,no)=>{if(!kw)return no(new Error('voice engine stopped'));const id=++nid,t=setTimeout(()=>{pend.delete(id);no(new Error('one sentence took over 3 minutes'))},180000);
-    pend.set(id,{ok:m=>{clearTimeout(t);ok({pcm:m.pcm,sr:m.sr})},no:e=>{clearTimeout(t);no(e)}});kw.postMessage({type:'gen',id,text,voice:v})})}
 const toAB=r=>{if(r instanceof ArrayBuffer)return r;if(ArrayBuffer.isView(r))return r.buffer.slice(r.byteOffset,r.byteOffset+r.byteLength);if(Array.isArray(r))return new Uint8Array(r).buffer;
   if(typeof r==='string'){const s=atob(r.includes(',')?r.split(',')[1]:r);return Uint8Array.from(s,c=>c.charCodeAt(0)).buffer}throw new Error('unknown audio format from basic voice')};
 async function genBasic(text){const m=await loadMeSpeak();let r=m.speak(text,{rawdata:'arraybuffer'});if(!r)r=m.speak(text,{rawdata:'array'});if(!r)throw new Error('basic voice returned no audio');
   unlock();const d=await uctx.decodeAudioData(toAB(r));return{pcm:d.getChannelData(0).slice(),sr:d.sampleRate}}
-async function pickEngine(v){
-  if(v==='none')return'none';
-  if(v!=='basic'){$('#skipv').hidden=false;
-    try{await loadTTS();$('#skipv').hidden=true;return v}
-    catch(e){$('#skipv').hidden=true;
-      if(e.message!=='skipped by you'){try{note('Background voice mode failed ('+e.message+'); trying the slower mode, the page may freeze for a minute.');useMain=true;await loadMain();note('');return v}catch(e2){useMain=false;note('Natural voice not available ('+e2.message+').')}}
-      note('Switched to the basic voice.')}}
-  try{bar(12,'Loading basic voice');await loadMeSpeak();return'basic'}
-  catch(e){note('Basic voice not available ('+e.message+'). Continuing with captions only.');return'none'}}
 async function narrate(eng){
   let at=0,sr=24000,cur=0;const t0=Date.now(),n=S.sents.length;
-  $('#skipv').hidden=eng==='none'||eng==='basic';
-  const tick=setInterval(()=>eng!=='none'&&bar(30+15*cur/n,`Recording narration ${cur+1}/${n} · ${Math.round((Date.now()-t0)/1000)} s`+(eng!=='basic'?' (natural voice is slow on phones)':'')),1000);
+  const tick=setInterval(()=>eng!=='none'&&bar(30+15*cur/n,`Recording narration ${cur+1}/${n} · ${Math.round((Date.now()-t0)/1000)} s`+(eng!=='basic'?' (free AI voice, fast)':'')),1000);
   try{
     for(const[i,x]of S.sents.entries()){cur=i;
       if(eng==='none'){x.speech=Math.max(1.8,x.text.split(' ').length/2.6);x.pcm=null}
       else{bar(30+15*i/n,`Recording narration ${i+1}/${n}`);const k=eng+'|'+x.text;
-        if(!vcache.has(k))vcache.set(k,eng==='basic'?await withTimeout(genBasic(x.text),30000,'basic voice timed out'):await genKokoro(x.text,eng));
+        if(!vcache.has(k))vcache.set(k,eng==='basic'?await withTimeout(genBasic(x.text),30000,'basic voice timed out'):await withTimeout(genAPI(x.text,eng),60000,'voice request timed out'));
         const c=vcache.get(k);x.pcm=c.pcm;sr=c.sr;x.speech=c.pcm.length/c.sr}
       x.dur=x.speech+.3;x.t0=at;at+=x.dur}
-  }finally{clearInterval(tick);$('#skipv').hidden=true}
+  }finally{clearInterval(tick)}
   S.total=at;S.sr=sr;S.hasVoice=eng!=='none';S.engine=eng;
   if(S.hasVoice){S.pcm=new Float32Array(Math.round(at*sr));S.sents.forEach(x=>S.pcm.set(x.pcm,Math.round(x.t0*sr)));
     const w=wav(S.pcm,sr);$('#aud').src=$('#dla').href=URL.createObjectURL(w)}else{$('#aud').removeAttribute('src');$('#dla').removeAttribute('href')}
@@ -177,7 +153,7 @@ async function voice(){
   let eng=await pickEngine($('#voice').value);
   if(eng!=='none'&&eng!=='basic'){
     try{return await narrate(eng)}
-    catch(e){killK();note('Natural voice failed ('+e.message+'). Switched to the basic voice.');
+    catch(e){note('Natural voice failed ('+e.message+'). Switching to the basic offline voice.');
       try{await loadMeSpeak();eng='basic'}catch(e2){eng='none';note('Natural and basic voice both failed. Continuing with captions only.')}}}
   if(eng==='basic'){try{return await narrate('basic')}catch(e){note('Basic voice failed ('+e.message+'). Continuing with captions only.')}}
   return narrate('none')}
@@ -196,7 +172,7 @@ $('#msearch').onclick=async()=>{unlock();const q=$('#mq').value.trim()||'instrum
     $('#mres').innerHTML=l.length?l.map((t,k)=>`<div class="ln"><b>${esc(t.name)}</b><br><small>${esc(t.credit)}, ${esc(t.license)}, <a href="${esc(t.page)}" target="_blank" rel="noopener">file page</a></small><audio controls preload="none" src="${esc(t.url)}"></audio><button class="ghost" type="button" data-m="${k}">Use this track</button></div>`).join(''):'No MP3/WAV/FLAC tracks found. Try other words (piano, electronic, ambient, guitar) or use your own file.';
     $('#mres').querySelectorAll('[data-m]').forEach(b=>b.onclick=async()=>{const t=l[+b.dataset.m];unlock();try{$('#mstat').textContent='Downloading track...';const f=await fetch(t.url);if(!f.ok)throw new Error('download '+f.status);await decodeMusic(await f.arrayBuffer(),t.name,`${t.name} by ${t.credit} (${t.license}) - ${t.page}`)}catch(e){MU.buf=null;$('#mstat').textContent='Could not use this track ('+e.message+').'}})
   }catch(e){$('#mres').textContent='Music search failed: '+e.message}};
-$('#skipv').onclick=()=>{skipRes&&skipRes();killK()};
+
 function wav(f,sr){const b=new ArrayBuffer(44+f.length*2),v=new DataView(b),w=(o,s)=>[...s].forEach((c,i)=>v.setUint8(o+i,c.charCodeAt(0)));
   w(0,'RIFF');v.setUint32(4,36+f.length*2,true);w(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,f.length*2,true);
   for(let i=0;i<f.length;i++)v.setInt16(44+i*2,Math.max(-1,Math.min(1,f[i]))*32767,true);return new Blob([b],{type:'audio/wav'})}
@@ -263,7 +239,7 @@ async function go(fresh){
   }catch(e){const x=$('#err');x.textContent=e.message;x.hidden=false;$('#stepname').textContent='Stopped'}
   busy=false;lock(false)}
 $('#go').onclick=()=>{unlock();go(true)};$('#reb').onclick=()=>{unlock();go(false)};
-if(/iPhone|iPad|iPod/.test(navigator.userAgent)||(/Mac/.test(navigator.userAgent)&&navigator.maxTouchPoints>1))$('#voice').value='basic';
-$('#dlp').onclick=()=>{const s=S,t=`FACT ENGINE package: ${s.topic}\n\nTITLE IDEAS\n${s.titles.map((x,i)=>`${i+1}. ${x}`).join('\n')}\n\nDESCRIPTION\n${s.description}\n\n${s.hashtags.join(' ')}\n\nTHUMBNAIL CONCEPT\n${s.thumbnail}\n\nSCRIPT\n${s.sents.map(x=>x.text).join(' ')}\n\nSOURCES\n${s.sources.map(x=>`${x.title} - ${x.url} (${x.license})`).join('\n')||'Own script'}\n\nIMAGE CREDITS (add to your description)\n${s.sents.map((x,i)=>{const a=x.cands[x.sel];return a?`Line ${i+1}: ${a.provider} / ${a.credit} - ${a.page||'local file'} (${a.license})`:`Line ${i+1}: gradient`}).join('\n')}\n\nMusic: ${MU.buf&&$('#music').value!=='none'?MU.credit:'none'}\nNarration: ${s.engine==='none'?'none (captions only)':s.engine==='basic'?'basic eSpeak-based voice (meSpeak, GPL-3.0), generated in your browser':'Kokoro-82M AI voice (Apache-2.0), generated in your browser'}\n`;
+
+$('#dlp').onclick=()=>{const s=S,t=`FACT ENGINE package: ${s.topic}\n\nTITLE IDEAS\n${s.titles.map((x,i)=>`${i+1}. ${x}`).join('\n')}\n\nDESCRIPTION\n${s.description}\n\n${s.hashtags.join(' ')}\n\nTHUMBNAIL CONCEPT\n${s.thumbnail}\n\nSCRIPT\n${s.sents.map(x=>x.text).join(' ')}\n\nSOURCES\n${s.sources.map(x=>`${x.title} - ${x.url} (${x.license})`).join('\n')||'Own script'}\n\nIMAGE CREDITS (add to your description)\n${s.sents.map((x,i)=>{const a=x.cands[x.sel];return a?`Line ${i+1}: ${a.provider} / ${a.credit} - ${a.page||'local file'} (${a.license})`:`Line ${i+1}: gradient`}).join('\n')}\n\nMusic: ${MU.buf&&$('#music').value!=='none'?MU.credit:'none'}\nNarration: ${s.engine==='none'?'none (captions only)':s.engine==='basic'?'basic eSpeak-based voice (meSpeak, GPL-3.0), generated in your browser':'AI voice via the free Puter.js TTS API (no key, no account), '+(s.engine.startsWith('oa:')?'OpenAI engine':'Amazon Polly neural engine')}\n`;
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'}));a.download='fact-engine-package.txt';a.click()};
 </script></body></html>
