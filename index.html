@@ -126,44 +126,62 @@ function renderEditors(){
 }
 function readEdits(){document.querySelectorAll('[data-text]').forEach(el=>{const i=+el.dataset.text;state.sentences[i].text=el.value.trim()||state.sentences[i].text});document.querySelectorAll('[data-query]').forEach(el=>{const i=+el.dataset.query,q=el.value.trim()||state.title;if(q!==state.sentences[i].query){state.sentences[i].query=q;state.sentences[i].images=null}})}
 
+let voiceLoadPromise=null;
 async function loadMeSpeak(){
- if(voiceEngine)return voiceEngine;
- message('Loading the free voice engine…');
- const root='https://cdn.jsdelivr.net/gh/btopro/mespeak@master/';
- if(!window.meSpeak){
-  await new Promise((resolve,reject)=>{
-   const s=document.createElement('script');
-   s.src=root+'mespeak.full.js';
-   s.async=true;
-   s.onload=()=>window.meSpeak?resolve():reject(Error('The voice script loaded, but did not expose the meSpeak engine.'));
-   s.onerror=()=>reject(Error('Could not load the voice engine. Check your connection, then reload the page.'));
-   document.head.appendChild(s);
-  });
- }
- const get=async path=>{
-  const r=await fetch(root+path,{cache:'force-cache'});
-  if(!r.ok)throw Error('Could not download voice data ('+r.status+'): '+path);
-  return r.json();
- };
- const [cfg,voice]=await Promise.all([
-  get('mespeak_config.json'),
-  get('voices/en/en-us.json')
- ]);
- const ok=(fn)=>new Promise((resolve,reject)=>{
-  let settled=false;
-  const done=v=>{if(settled)return;settled=true;v===false?reject(Error('meSpeak rejected its configuration or voice data.')):resolve()};
-  try{const result=fn(done);if(result===true)done(true)}catch(e){reject(e)}
- });
- await ok(cb=>window.meSpeak.loadConfig(cfg,cb));
- await ok(cb=>window.meSpeak.loadVoice(voice,cb));
- voiceEngine=window.meSpeak;
- return voiceEngine;
+ if(voiceEngine && window.meSpeak && window.meSpeak.isConfigLoaded() && window.meSpeak.isVoiceLoaded()) return voiceEngine;
+ if(voiceLoadPromise) return voiceLoadPromise;
+
+ voiceLoadPromise=(async()=>{
+  message('Loading the free voice engine…');
+  const root='https://cdn.jsdelivr.net/gh/btopro/mespeak@master/';
+  const timeout=(promise,ms,label)=>Promise.race([
+   promise,
+   new Promise((_,reject)=>setTimeout(()=>reject(Error(label)),ms))
+  ]);
+
+  if(!window.meSpeak){
+   await timeout(new Promise((resolve,reject)=>{
+    const s=document.createElement('script');
+    s.src=root+'mespeak.full.js';
+    s.async=true;
+    s.onload=()=>window.meSpeak?resolve():reject(Error('meSpeak script loaded but its API is missing.'));
+    s.onerror=()=>reject(Error('Safari could not download the meSpeak script. Check the connection or content blocker.'));
+    document.head.appendChild(s);
+   }),20000,'Timed out downloading the meSpeak script.');
+  }
+
+  const get=async path=>{
+   const r=await timeout(fetch(root+path,{cache:'force-cache'}),20000,'Timed out downloading '+path);
+   if(!r.ok)throw Error('Voice file request failed ('+r.status+'): '+path);
+   return r.json();
+  };
+
+  const [cfg,voice]=await Promise.all([
+   get('mespeak_config.json'),
+   get('voices/en/en-us.json')
+  ]);
+
+  // When JSON objects are supplied, meSpeak initializes synchronously.
+  // Its callback is intended for URL-based loading and may never fire here.
+  window.meSpeak.loadConfig(cfg);
+  if(!window.meSpeak.isConfigLoaded()) throw Error('meSpeak configuration did not initialize.');
+
+  window.meSpeak.loadVoice(voice);
+  if(!window.meSpeak.isVoiceLoaded()) throw Error('The English voice data did not initialize.');
+
+  voiceEngine=window.meSpeak;
+  return voiceEngine;
+ })();
+
+ try{return await voiceLoadPromise}
+ catch(e){voiceLoadPromise=null;voiceEngine=null;throw e}
 }
 async function synth(text){
  const engine=await loadMeSpeak();
  const raw=engine.speak(text,{rawdata:true,voice:'en/en-us'});
- if(!raw)throw Error('The voice engine returned no audio.');
- const ab=raw instanceof ArrayBuffer?raw:raw.buffer.slice(raw.byteOffset,raw.byteOffset+raw.byteLength);
+ if(!raw)throw Error('meSpeak returned no audio. Check that the English voice loaded correctly.');
+ const ab=raw instanceof ArrayBuffer?raw:(ArrayBuffer.isView(raw)?raw.buffer.slice(raw.byteOffset,raw.byteOffset+raw.byteLength):null);
+ if(!ab)throw Error('meSpeak returned an unsupported audio format.');
  const decoded=await context().decodeAudioData(ab.slice(0));
  return {pcm:decoded.getChannelData(0).slice(),rate:decoded.sampleRate};
 }
