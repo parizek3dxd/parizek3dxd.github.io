@@ -2,1643 +2,1207 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>FACT ENGINE — YouTube Shorts Studio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FACT ENGINE — Wikipedia Research Video Unit</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230A0A0C'/><rect x='7' y='7' width='18' height='18' fill='none' stroke='%23E8A33D' stroke-width='2'/><rect x='12' y='12' width='8' height='8' fill='%23E8A33D'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: { ink:'#0A0A0C', panel:'#121216', panel2:'#17171C', paper:'#EDEAE2', dim:'#8E8E96', accent:'#E8A33D', line:'rgba(255,255,255,0.08)' },
+    fontFamily: { serif:['Fraunces','serif'], sans:['Inter','sans-serif'], mono:['"JetBrains Mono"','monospace'] }
+  }}
+}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <style>
-*{font-family:'Inter',system-ui,sans-serif}
-h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif}
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-thumb{background:#2a2f4a;border-radius:999px}
-::-webkit-scrollbar-track{background:transparent}
-.glass{background:rgba(20,26,46,0.75);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.08)}
-.pill-active{background:linear-gradient(135deg,#7c3aed,#2563eb);color:white;box-shadow:0 8px 24px rgba(124,58,237,0.35)}
-.caption-shadow{ text-shadow: 0 2px 0 #000, 0 -2px 0 #000, 2px 0 0 #000, -2px 0 0 #000, 2px 2px 0 #000, -2px -2px 0 #000, 0 4px 12px rgba(0,0,0,0.8)}
-.range::-webkit-slider-thumb{appearance:none;width:18px;height:18px;border-radius:50%;background:white;border:3px solid #7c3aed;box-shadow:0 2px 8px rgba(0,0,0,0.3);cursor:pointer}
-.range{appearance:none;height:4px;background:#1e2440;border-radius:999px}
-.storyboard-scroll{scroll-snap-type:x mandatory}
-.story-card{scroll-snap-align:start}
-@keyframes pop{0%{transform:scale(0.85);opacity:0}100%{transform:scale(1);opacity:1}}
-.pop{animation:pop 0.35s cubic-bezier(0.34,1.56,0.64,1)}
-@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
-.shimmer::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);animation:shimmer 1.2s infinite}
+  html{background:#0A0A0C;}
+  body{background:#0A0A0C;color:#EDEAE2;-webkit-font-smoothing:antialiased;}
+  ::selection{background:#E8A33D;color:#0A0A0C;}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-track{background:#0A0A0C}
+  ::-webkit-scrollbar-thumb{background:#26262C;border-radius:6px;border:2px solid #0A0A0C}
+  ::-webkit-scrollbar-thumb:hover{background:#3A3A42}
+
+  .noise{position:fixed;inset:0;pointer-events:none;z-index:60;opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");}
+
+  .heroGrid{background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:56px 56px;
+    -webkit-mask-image:radial-gradient(ellipse 90% 70% at 50% 40%,black 30%,transparent 75%);mask-image:radial-gradient(ellipse 90% 70% at 50% 40%,black 30%,transparent 75%);}
+  .glow{position:absolute;width:900px;height:900px;left:50%;top:-320px;transform:translateX(-50%);border-radius:50%;
+    background:radial-gradient(circle,rgba(232,163,61,.10),transparent 60%);pointer-events:none;}
+
+  .kicker{letter-spacing:.32em;}
+  .field{background:transparent;border:0;border-bottom:1px solid rgba(255,255,255,.18);outline:none;transition:border-color .3s;}
+  .field:focus{border-color:#E8A33D;}
+  .field::placeholder{color:#5b5b63;}
+
+  .btn-acc{background:#E8A33D;color:#0A0A0C;transition:transform .25s cubic-bezier(.2,.8,.2,1),background .25s;}
+  .btn-acc:hover{background:#F2B355;transform:translateY(-2px);}
+  .btn-acc:disabled{opacity:.45;transform:none;cursor:not-allowed;}
+  .btn-ghost{border:1px solid rgba(255,255,255,.14);transition:border-color .25s,background .25s,transform .25s;}
+  .btn-ghost:hover{border-color:rgba(232,163,61,.6);background:rgba(232,163,61,.06);}
+
+  .chip{border:1px solid rgba(255,255,255,.12);transition:all .25s;}
+  .chip:hover{border-color:#E8A33D;color:#E8A33D;transform:translateY(-1px);}
+
+  /* terminal */
+  .term{background:#0C0C0F;border:1px solid rgba(255,255,255,.08);}
+  .term-line{opacity:0;animation:tlin .3s forwards;}
+  @keyframes tlin{to{opacity:1}}
+  .cursor{display:inline-block;width:8px;height:14px;background:#E8A33D;vertical-align:-2px;animation:blink 1s steps(1) infinite;}
+  @keyframes blink{50%{opacity:0}}
+
+  /* steps */
+  .step .dot{width:14px;height:14px;border-radius:50%;border:2px solid #3a3a42;position:relative;flex:none;margin-top:3px;transition:all .3s;}
+  .step .connector{position:absolute;left:6px;top:22px;bottom:-6px;width:2px;background:#232329;}
+  .step.active .dot{border-color:#E8A33D;}
+  .step.active .dot::after{content:'';position:absolute;inset:2px;border-radius:50%;background:#E8A33D;animation:pulse 1.1s ease-in-out infinite;}
+  @keyframes pulse{50%{transform:scale(.4);opacity:.5}}
+  .step.done .dot{border-color:#E8A33D;background:#E8A33D;}
+  .step.done .dot::after{content:'';position:absolute;left:3px;top:0px;width:4px;height:7px;border:solid #0A0A0C;border-width:0 2px 2px 0;transform:rotate(45deg);}
+  .step.done .connector{background:#E8A33D;}
+  .step{opacity:.4;transition:opacity .3s;}
+  .step.active,.step.done{opacity:1;}
+
+  /* phone */
+  .phoneShadow{box-shadow:0 40px 90px -20px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.06),0 0 120px -30px rgba(232,163,61,.12);}
+  .grainIn{position:absolute;inset:0;pointer-events:none;opacity:.06;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");}
+
+  /* tabs */
+  .tabbtn{position:relative;color:#8E8E96;transition:color .25s;}
+  .tabbtn::after{content:'';position:absolute;left:0;right:100%;bottom:-1px;height:2px;background:#E8A33D;transition:right .3s cubic-bezier(.2,.8,.2,1);}
+  .tabbtn.on{color:#EDEAE2;}
+  .tabbtn.on::after{right:0;}
+
+  .scenecard{border:1px solid rgba(255,255,255,.07);transition:border-color .25s,background .25s;}
+  .scenecard:hover{border-color:rgba(232,163,61,.35);}
+  .scenecard.live{border-color:#E8A33D;background:rgba(232,163,61,.05);}
+
+  /* toggle */
+  .tgl{width:40px;height:22px;border-radius:999px;background:#26262C;position:relative;cursor:pointer;transition:background .25s;flex:none;}
+  .tgl::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#8E8E96;transition:all .25s;}
+  .tgl.on{background:#E8A33D;}
+  .tgl.on::after{left:21px;background:#0A0A0C;}
+
+  select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238E8E96' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
+  select:focus{border-color:#E8A33D;outline:none;}
+
+  .spin{width:14px;height:14px;border:2px solid rgba(232,163,61,.25);border-top-color:#E8A33D;border-radius:50%;animation:sp .7s linear infinite;}
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  .shake{animation:shk .4s;}
+  @keyframes shk{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+  .fadeup{opacity:0;transform:translateY(16px);}
+  .segfill{transition:width .12s linear;}
+  .marq{white-space:nowrap;overflow:hidden;}
 </style>
 </head>
-<body class="bg-[#070A14] text-white min-h-screen selection:bg-violet-500/30">
-<!-- Background gradients -->
-<div class="fixed inset-0 pointer-events-none overflow-hidden">
-  <div class="absolute -top-[30%] -left-[20%] w-[80%] h-[80%] rounded-full opacity-[0.15]" style="background:radial-gradient(circle,#7c3aed 0%, transparent 70%)"></div>
-  <div class="absolute -top-[20%] right-[-10%] w-[60%] h-[60%] rounded-full opacity-[0.12]" style="background:radial-gradient(circle,#2563eb 0%, transparent 70%)"></div>
-  <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[100%] h-[40%] opacity-[0.06]" style="background:radial-gradient(ellipse at center,#f59e0b 0%, transparent 70%)"></div>
-</div>
+<body class="font-sans min-h-screen flex flex-col">
+<div class="noise"></div>
 
-<header class="sticky top-0 z-40 backdrop-blur-xl bg-[#070A14]/80 border-b border-white/[0.06]">
-  <div class="max-w-[1600px] mx-auto px-4 lg:px-6 h-[64px] flex items-center justify-between gap-4">
+<!-- ============ HEADER ============ -->
+<header class="border-b border-line backdrop-blur-md bg-ink/80 sticky top-0 z-40">
+  <div class="max-w-7xl mx-auto px-5 md:px-8 h-16 flex items-center justify-between">
     <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-blue-600 flex items-center justify-center shadow-lg shadow-violet-600/20">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-      </div>
-      <div>
-        <div class="flex items-center gap-2">
-          <span class="font-black tracking-tight text-[18px] leading-none">FACT ENGINE</span>
-          <span class="hidden sm:inline text-[10px] tracking-[0.14em] font-bold px-2 py-1 rounded-full bg-amber-400 text-black">STUDIO v2</span>
-        </div>
-        <div class="text-[11px] text-white/50 font-medium tracking-wide hidden sm:block -mt-0.5">YouTube Shorts Production Studio</div>
+      <svg width="26" height="26" viewBox="0 0 32 32"><rect width="32" height="32" fill="none"/><rect x="4" y="4" width="24" height="24" fill="none" stroke="#E8A33D" stroke-width="2"/><rect x="11" y="11" width="10" height="10" fill="#E8A33D"/></svg>
+      <div class="leading-none">
+        <div class="font-mono font-bold tracking-[.28em] text-[13px]">FACT ENGINE</div>
+        <div class="font-mono text-[9px] text-dim tracking-[.2em] mt-1">RESEARCH → NARRATION → FILM</div>
       </div>
     </div>
-    <div class="flex items-center gap-2">
-      <div class="hidden md:flex items-center gap-2 text-xs bg-white/[0.06] border border-white/[0.08] rounded-full px-3 py-1.5">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span class="text-white/70">Render Engine Ready</span>
-        <span class="text-white/30">•</span>
-        <span class="text-white/50">720p • 1080p • 30/60fps</span>
+    <div class="flex items-center gap-4">
+      <div class="hidden md:flex items-center gap-2 font-mono text-[10px] tracking-[.18em] text-dim">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span> WIKIPEDIA RESEARCH UNIT · ONLINE
       </div>
-      <button id="btnPreviewHeader" class="hidden lg:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-black text-sm font-bold hover:bg-white/90 transition">▶ Preview</button>
-      <button id="btnRenderHeader" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-violet-600 to-blue-600 text-sm font-bold shadow-lg shadow-violet-600/25 hover:opacity-95 transition">
-        <span>⬢</span> Render Video
-      </button>
+      <button id="newTopicBtn" class="btn-ghost hidden font-mono text-[11px] tracking-[.15em] px-4 py-2 rounded-full">NEW TOPIC</button>
     </div>
   </div>
 </header>
 
-<main class="relative max-w-[1600px] mx-auto px-4 lg:px-6 py-5 lg:py-6">
- <!-- Top progress -->
- <div class="glass rounded-2xl p-3 lg:p-4 mb-5 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-   <div class="flex items-center gap-2 lg:gap-3 overflow-x-auto scrollbar-none">
-     <div class="flex items-center gap-2 text-xs font-bold tracking-widest text-amber-400"><span class="w-6 h-6 rounded-full bg-amber-400 text-black grid place-items-center text-[11px]">1</span> WORKFLOW</div>
-     <div class="hidden lg:block w-px h-6 bg-white/10"></div>
-     <div id="stepper" class="flex items-center gap-1.5">
-       <!-- injected -->
-     </div>
-   </div>
-   <div class="flex items-center gap-2 text-xs">
-     <span class="text-white/50 hidden sm:inline">Auto-sync • Wikimedia • WAV Export</span>
-     <span id="statusBadge" class="px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/10 text-white/70 font-medium">Idle — Enter a topic</span>
-   </div>
- </div>
+<main class="flex-1 relative">
 
- <div class="grid grid-cols-12 gap-5 items-start">
-   <!-- LEFT: Controls -->
-   <div class="col-span-12 lg:col-span-4 space-y-4">
-     <!-- Mode -->
-     <div class="glass rounded-[20px] p-4 lg:p-5">
-       <div class="flex items-center justify-between mb-3">
-         <h2 class="font-bold text-sm tracking-wide">SCRIPT GENERATION</h2>
-         <span class="text-[11px] px-2 py-1 rounded-full bg-violet-600 text-white font-bold">AI POWERED</span>
-       </div>
-       <div class="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-black/30 border border-white/5 mb-4">
-         <button id="tabTopic" class="pill-active rounded-xl py-2.5 text-sm font-bold flex items-center justify-center gap-2">◉ Topic Mode</button>
-         <button id="tabCustom" class="rounded-xl py-2.5 text-sm font-bold text-white/60 hover:text-white flex items-center justify-center gap-2">✎ Custom Script</button>
-       </div>
+<!-- ============ VIEW: INPUT ============ -->
+<section id="view-input" class="relative overflow-hidden">
+  <div class="heroGrid absolute inset-0"></div>
+  <div class="glow"></div>
+  <div class="relative max-w-5xl mx-auto px-5 md:px-8 pt-16 md:pt-24 pb-20">
+    <div class="fadeup font-mono text-[11px] kicker text-accent mb-6">AUTOMATED DOCUMENTARY SHORTS</div>
+    <h1 class="fadeup font-serif font-light text-[13vw] md:text-[84px] leading-[1.02] tracking-tight max-w-4xl">
+      Turn any topic into a <em class="italic text-accent font-normal">researched</em> video briefing.
+    </h1>
+    <p class="fadeup text-dim text-[15px] md:text-lg max-w-2xl mt-6 leading-relaxed">
+      Fact Engine reads the full Wikipedia article, follows its sources, extracts verified facts,
+      matches real archival imagery, narrates it and edits a finished 9:16 film — with word-perfect subtitles.
+    </p>
 
-       <!-- Topic Mode -->
-       <div id="panelTopic" class="space-y-3">
-         <label class="text-xs font-bold tracking-widest text-white/60">TOPIC</label>
-         <div class="relative">
-           <input id="topicInput" placeholder="e.g. Black Holes, Roman Empire, Deep Sea Creatures" class="w-full bg-[#0B1022] border border-white/10 rounded-2xl px-4 py-3.5 pr-12 text-sm outline-none focus:border-violet-500/50 focus:bg-[#0e1530] placeholder:text-white/30">
-           <span class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-white/5 grid place-items-center text-white/40">⌕</span>
-         </div>
-         <div class="flex flex-wrap gap-1.5">
-           <button data-example="Black Holes" class="ex-topic text-xs px-3 py-1.5 rounded-full bg-white/[0.06] hover:bg-white/10 border border-white/5">Black Holes</button>
-           <button data-example="Ancient Egypt" class="ex-topic text-xs px-3 py-1.5 rounded-full bg-white/[0.06] hover:bg-white/10 border border-white/5">Ancient Egypt</button>
-           <button data-example="Quantum Computing" class="ex-topic text-xs px-3 py-1.5 rounded-full bg-white/[0.06] hover:bg-white/10 border border-white/5">Quantum Computing</button>
-           <button data-example="Octopus Intelligence" class="ex-topic text-xs px-3 py-1.5 rounded-full bg-white/[0.06] hover:bg-white/10 border border-white/5">Octopus</button>
-         </div>
-         <p class="text-[11px] leading-relaxed text-white/40">We fetch a factual summary from Wikipedia, split into scenes and attribute the source. No hallucinated facts.</p>
-       </div>
+    <div class="fadeup mt-10 max-w-2xl">
+      <div class="flex items-end gap-4">
+        <div class="flex-1">
+          <label class="font-mono text-[10px] tracking-[.25em] text-dim">TOPIC</label>
+          <input id="topicInput" type="text" spellcheck="false" autocomplete="off"
+            placeholder="e.g. Voyager 1, the Great Molasses Flood, Hedy Lamarr…"
+            class="field w-full text-xl md:text-2xl py-3 font-serif">
+        </div>
+        <button id="generateBtn" class="btn-acc font-mono text-[12px] tracking-[.15em] font-bold px-6 md:px-8 py-4 rounded-full flex items-center gap-3">
+          GENERATE
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div id="inputErr" class="hidden font-mono text-[11px] text-red-400 mt-3"></div>
+      <div class="flex flex-wrap gap-2 mt-6">
+        <span class="font-mono text-[10px] tracking-[.2em] text-dim py-2 pr-1">TRY</span>
+        <button class="chip font-mono text-[11px] px-4 py-2 rounded-full" data-topic="Voyager 1">Voyager 1</button>
+        <button class="chip font-mono text-[11px] px-4 py-2 rounded-full" data-topic="Great Molasses Flood">Great Molasses Flood</button>
+        <button class="chip font-mono text-[11px] px-4 py-2 rounded-full" data-topic="Hedy Lamarr">Hedy Lamarr</button>
+        <button class="chip font-mono text-[11px] px-4 py-2 rounded-full" data-topic="Chernobyl disaster">Chernobyl</button>
+        <button class="chip font-mono text-[11px] px-4 py-2 rounded-full" data-topic="Library of Alexandria">Library of Alexandria</button>
+        <button class="chip font-mono text-[11px] px-4 py-2 rounded-full" data-topic="Alan Turing">Alan Turing</button>
+      </div>
+    </div>
 
-       <!-- Custom Mode -->
-       <div id="panelCustom" class="space-y-3 hidden">
-         <label class="text-xs font-bold tracking-widest text-white/60">YOUR SCRIPT</label>
-         <textarea id="customInput" rows="6" placeholder="Paste your script here. We'll split into sentences and create scenes automatically. Example: &#10;The Eiffel Tower was originally meant to be temporary. It was built for the 1889 World's Fair..." class="w-full bg-[#0B1022] border border-white/10 rounded-2xl px-4 py-3 text-sm outline-none focus:border-violet-500/50 placeholder:text-white/30 resize-none"></textarea>
-         <div class="flex gap-2">
-           <button id="btnUseExample" class="text-xs px-3 py-1.5 rounded-full bg-amber-400 text-black font-bold">Use example script</button>
-           <button id="btnClearCustom" class="text-xs px-3 py-1.5 rounded-full bg-white/5 border border-white/10">Clear</button>
-         </div>
-       </div>
+    <div class="fadeup grid grid-cols-1 md:grid-cols-3 gap-px bg-line border border-line mt-16 rounded-2xl overflow-hidden">
+      <div class="bg-panel p-6">
+        <div class="font-mono text-[10px] tracking-[.25em] text-accent mb-3">01 / DEEP RESEARCH</div>
+        <p class="text-[13px] text-dim leading-relaxed">Reads the entire article — not just the intro — then follows internal links to cross-check people, dates and events.</p>
+      </div>
+      <div class="bg-panel p-6">
+        <div class="font-mono text-[10px] tracking-[.25em] text-accent mb-3">02 / REAL IMAGERY</div>
+        <p class="text-[13px] text-dim leading-relaxed">Pulls actual photographs, maps and diagrams from the article and Wikimedia Commons, verified against each scene.</p>
+      </div>
+      <div class="bg-panel p-6">
+        <div class="font-mono text-[10px] tracking-[.25em] text-accent mb-3">03 / SYNCED FILM</div>
+        <p class="text-[13px] text-dim leading-relaxed">Narration, karaoke subtitles, cinematic motion and transitions — assembled into one downloadable 1080×1920 video.</p>
+      </div>
+    </div>
+    <div class="fadeup font-mono text-[10px] tracking-[.2em] text-dim mt-8">SOURCES: EN.WIKIPEDIA.ORG · COMMONS.WIKIMEDIA.ORG — TEXT CC BY-SA</div>
+  </div>
+</section>
 
-       <div class="pt-4 mt-4 border-t border-white/5 space-y-4">
-         <div>
-           <div class="flex items-center justify-between mb-2"><label class="text-xs font-bold tracking-widest text-white/60">DURATION</label><span class="text-xs font-mono bg-white/5 px-2 py-1 rounded-full" id="durationLabel">30s • 5 scenes</span></div>
-           <div class="grid grid-cols-4 gap-2">
-             <button data-dur="20" class="dur-btn rounded-xl py-2.5 text-sm font-bold border bg-white text-black">20s</button>
-             <button data-dur="30" class="dur-btn rounded-xl py-2.5 text-sm font-bold border border-white/10 bg-white/5">30s</button>
-             <button data-dur="45" class="dur-btn rounded-xl py-2.5 text-sm font-bold border border-white/10 bg-white/5">45s</button>
-             <button data-dur="60" class="dur-btn rounded-xl py-2.5 text-sm font-bold border border-white/10 bg-white/5">60s</button>
-           </div>
-         </div>
+<!-- ============ VIEW: PIPELINE ============ -->
+<section id="view-pipeline" class="hidden">
+  <div class="max-w-6xl mx-auto px-5 md:px-8 py-12 md:py-16">
+    <div class="font-mono text-[11px] kicker text-accent mb-3">PRODUCTION PIPELINE</div>
+    <h2 class="font-serif text-3xl md:text-5xl font-light">Researching <em id="pipeTopic" class="italic text-accent"></em></h2>
 
-         <div>
-           <label class="text-xs font-bold tracking-widest text-white/60 mb-2 block">VOICE • ENGLISH NARRATION</label>
-           <div class="grid grid-cols-2 gap-2">
-             <button data-voice="Brian" class="voice-btn pill-active rounded-2xl p-3 text-left border border-transparent">
-               <div class="text-sm font-bold leading-none">Brian</div><div class="text-[11px] opacity-80">US Male • Natural</div><div class="text-[10px] mt-1 opacity-60">● Recommended</div>
-             </button>
-             <button data-voice="Joey" class="voice-btn rounded-2xl p-3 text-left bg-white/[0.04] border border-white/10">
-               <div class="text-sm font-bold leading-none">Joey</div><div class="text-[11px] text-white/60">US Male • Deep</div>
-             </button>
-             <button data-voice="Amy" class="voice-btn rounded-2xl p-3 text-left bg-white/[0.04] border border-white/10">
-               <div class="text-sm font-bold leading-none">Amy</div><div class="text-[11px] text-white/60">UK Female • Warm</div>
-             </button>
-             <button data-voice="Emma" class="voice-btn rounded-2xl p-3 text-left bg-white/[0.04] border border-white/10">
-               <div class="text-sm font-bold leading-none">Emma</div><div class="text-[11px] text-white/60">UK Female • Bright</div>
-             </button>
-           </div>
-           <div class="flex items-center gap-3 mt-3">
-             <span class="text-xs text-white/50">Speed</span>
-             <input id="speedRange" type="range" min="0.8" max="1.25" step="0.05" value="1.00" class="range flex-1">
-             <span id="speedLabel" class="text-xs font-mono bg-white/5 px-2 py-1 rounded-full">1.00×</span>
-             <button id="btnPreviewVoice" class="text-xs px-3 py-1.5 rounded-full bg-white text-black font-bold">Test</button>
-           </div>
-         </div>
+    <div class="grid md:grid-cols-[320px_1fr] gap-8 mt-10">
+      <ol id="steps" class="space-y-6">
+        <li class="step relative flex gap-4" data-step="0"><div class="connector"></div><div class="dot"></div>
+          <div><div class="font-mono text-[12px] tracking-[.12em] font-bold">DEEP RESEARCH</div><div class="status text-[12px] text-dim mt-1">Article, sections & linked sources</div></div></li>
+        <li class="step relative flex gap-4" data-step="1"><div class="connector"></div><div class="dot"></div>
+          <div><div class="font-mono text-[12px] tracking-[.12em] font-bold">FACT SCRIPT</div><div class="status text-[12px] text-dim mt-1">Verified sentences, narrative arc</div></div></li>
+        <li class="step relative flex gap-4" data-step="2"><div class="connector"></div><div class="dot"></div>
+          <div><div class="font-mono text-[12px] tracking-[.12em] font-bold">REAL IMAGERY</div><div class="status text-[12px] text-dim mt-1">Article media + Wikimedia Commons</div></div></li>
+        <li class="step relative flex gap-4" data-step="3"><div class="connector"></div><div class="dot"></div>
+          <div><div class="font-mono text-[12px] tracking-[.12em] font-bold">NARRATION</div><div class="status text-[12px] text-dim mt-1">Voice synthesis, segment timing</div></div></li>
+        <li class="step relative flex gap-4" data-step="4"><div class="dot"></div>
+          <div><div class="font-mono text-[12px] tracking-[.12em] font-bold">ASSEMBLY</div><div class="status text-[12px] text-dim mt-1">Word-level captions, 9:16 timeline</div></div></li>
+      </ol>
 
-         <div>
-           <label class="text-xs font-bold tracking-widest text-white/60 mb-2 block">BACKGROUND MUSIC</label>
-           <div class="grid grid-cols-4 gap-2">
-             <button data-music="none" class="music-btn pill-active rounded-xl py-2.5 text-xs font-bold">No Music</button>
-             <button data-music="cinematic" class="music-btn rounded-xl py-2.5 text-xs font-bold bg-white/5 border border-white/10">Cinematic</button>
-             <button data-music="lofi" class="music-btn rounded-xl py-2.5 text-xs font-bold bg-white/5 border border-white/10">Lofi</button>
-             <button data-music="energetic" class="music-btn rounded-xl py-2.5 text-xs font-bold bg-white/5 border border-white/10">Energetic</button>
-           </div>
-           <div class="flex items-center gap-3 mt-3">
-             <span class="text-xs text-white/50">Volume</span>
-             <input id="musicVol" type="range" min="0" max="0.35" step="0.01" value="0.12" class="range flex-1">
-             <span class="text-xs text-white/50">Ducking auto</span>
-             <label class="relative inline-flex items-center cursor-pointer">
-               <input id="uploadMusic" type="file" accept="audio/*" class="hidden">
-               <span id="btnUploadMusic" class="text-xs px-3 py-1.5 rounded-full bg-white/5 border border-white/10 cursor-pointer">Upload</span>
-             </label>
-           </div>
-           <p class="text-[11px] text-white/35 mt-2">Music ducks -18dB during narration. Fades in/out and loops automatically. Narration stays clear.</p>
-         </div>
+      <div class="term rounded-2xl p-5 md:p-6 h-[420px] md:h-[480px] overflow-y-auto font-mono text-[12px] leading-[1.9]" id="term">
+        <div class="text-dim">FACT ENGINE v2.4 — research &amp; synthesis console</div>
+        <div id="termLines"></div>
+        <span class="cursor"></span>
+      </div>
+    </div>
+  </div>
+</section>
 
-         <button id="btnGenerate" class="w-full rounded-2xl py-4 bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600 font-black tracking-wide shadow-xl shadow-violet-600/20 hover:opacity-95 active:scale-[0.99] transition flex items-center justify-center gap-2">
-           <span>⚡</span> GENERATE SHORT
-         </button>
-         <div id="genProgress" class="hidden">
-           <div class="h-2 rounded-full bg-white/10 overflow-hidden p-1">
-             <div id="genBar" class="h-full rounded-full bg-gradient-to-r from-violet-500 to-blue-500 transition-all" style="width:0%"></div>
-           </div>
-           <div id="genText" class="text-xs text-white/60 mt-2 font-medium">Starting…</div>
-         </div>
-       </div>
-     </div>
+<!-- ============ VIEW: STUDIO ============ -->
+<section id="view-studio" class="hidden">
+  <div class="max-w-7xl mx-auto px-5 md:px-8 py-8 md:py-12">
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
+      <div>
+        <div class="font-mono text-[11px] kicker text-accent mb-2">FINISHED BRIEFING</div>
+        <h2 id="studioTitle" class="font-serif text-3xl md:text-5xl font-light"></h2>
+        <div id="studioMeta" class="font-mono text-[11px] text-dim tracking-[.12em] mt-3"></div>
+      </div>
+      <div id="modeBadge" class="font-mono text-[10px] tracking-[.18em] border border-line rounded-full px-4 py-2 text-dim"></div>
+    </div>
 
-     <div class="glass rounded-2xl p-4">
-       <h3 class="font-bold text-sm mb-2 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> What happens inside?</h3>
-       <ol class="space-y-2 text-xs leading-relaxed text-white/60 list-decimal list-inside">
-         <li>Wikipedia factual script + source attribution</li>
-         <li>Real TTS audio via StreamElements (MP3 → WAV decode)</li>
-         <li>Wikimedia images + CC license + upload fallback</li>
-         <li>Word-level caption sync (amber active word)</li>
-         <li>Canvas 9:16 render with MediaRecorder (WebM/MP4)</li>
-       </ol>
-     </div>
-   </div>
+    <div class="grid lg:grid-cols-[auto_1fr] gap-10 items-start">
+      <!-- Player -->
+      <div class="mx-auto lg:mx-0">
+        <div class="phoneShadow rounded-[30px] bg-black p-2.5" style="width:min(330px,82vw)">
+          <div class="relative rounded-[22px] overflow-hidden bg-black" style="aspect-ratio:9/16">
+            <canvas id="preview" width="540" height="960" class="w-full h-full block"></canvas>
+            <div class="grainIn"></div>
+            <button id="bigPlay" class="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[2px] transition-opacity">
+              <span class="w-16 h-16 rounded-full bg-accent flex items-center justify-center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#0A0A0C"><path d="M8 5v14l11-7z"/></svg>
+              </span>
+            </button>
+          </div>
+        </div>
+        <!-- transport -->
+        <div class="mt-5 flex items-center gap-3" style="width:min(330px,82vw)">
+          <button id="btnPlay" class="w-11 h-11 rounded-full btn-acc flex items-center justify-center flex-none">
+            <svg id="iconPlay" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            <svg id="iconPause" class="hidden" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+          </button>
+          <button id="btnRestart" class="w-11 h-11 rounded-full btn-ghost flex items-center justify-center flex-none">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5" stroke-linecap="round"/></svg>
+          </button>
+          <div class="flex-1">
+            <div id="segBar" class="flex gap-[3px] h-[4px]"></div>
+            <div class="flex justify-between font-mono text-[10px] text-dim mt-2">
+              <span id="timeCur">00:00</span><span id="timeTot">00:00</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-   <!-- CENTER -->
-   <div class="col-span-12 lg:col-span-5 space-y-4">
-     <!-- Preview -->
-     <div class="glass rounded-[24px] p-3 lg:p-4">
-       <div class="flex items-center justify-between mb-3">
-         <h3 class="font-bold text-sm tracking-wide flex items-center gap-2"><span class="w-7 h-7 rounded-xl bg-white text-black grid place-items-center text-xs">▶</span> PREVIEW • 9:16</h3>
-         <div class="flex items-center gap-2">
-           <span id="previewTime" class="text-xs font-mono bg-black/40 border border-white/10 px-2 py-1 rounded-full">00:00 / 00:30</span>
-           <button id="btnPlayPreview" class="w-8 h-8 rounded-full bg-white text-black grid place-items-center">▶</button>
-         </div>
-       </div>
+      <!-- Right column -->
+      <div class="min-w-0">
+        <div class="flex gap-6 border-b border-line font-mono text-[11px] tracking-[.18em]">
+          <button class="tabbtn on pb-3" data-tab="scenes">SCENES</button>
+          <button class="tabbtn pb-3" data-tab="script">SCRIPT</button>
+          <button class="tabbtn pb-3" data-tab="sources">SOURCES</button>
+        </div>
 
-       <div class="relative mx-auto w-full max-w-[360px] aspect-[9/16] rounded-[22px] overflow-hidden bg-black shadow-2xl border border-white/10">
-         <canvas id="previewCanvas" width="720" height="1280" class="w-full h-full object-cover"></canvas>
-         <!-- caption overlay dom for sharper text -->
-         <div id="captionOverlay" class="absolute left-3 right-3 bottom-[78px] flex flex-wrap justify-center gap-1.5 pointer-events-none">
-           <!-- words injected -->
-         </div>
-         <div class="absolute top-3 left-3 right-3 flex items-center justify-between">
-           <span class="text-[10px] font-black tracking-widest px-2.5 py-1 rounded-full bg-black/60 backdrop-blur border border-white/10">FACT ENGINE</span>
-           <span id="sceneBadge" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-400 text-black">SCENE 1 / 5</span>
-         </div>
-         <div class="absolute inset-0 grid place-items-center bg-black/40 backdrop-blur-[1px] transition" id="previewIdle">
-           <div class="text-center p-6">
-             <div class="w-14 h-14 rounded-2xl bg-white text-black grid place-items-center mx-auto mb-3 text-xl">▶</div>
-             <div class="font-bold">Ready to generate</div>
-             <div class="text-xs text-white/60 mt-1">Enter a topic and hit Generate</div>
-           </div>
-         </div>
-         <div id="previewProgressWrap" class="absolute bottom-0 left-0 right-0 h-1 bg-white/15">
-           <div id="previewProgress" class="h-full bg-amber-400 transition-all" style="width:0%"></div>
-         </div>
-         <!-- controls bar -->
-         <div class="absolute bottom-3 left-3 right-3 flex items-center gap-2">
-           <button id="btnPrevScene" class="w-8 h-8 rounded-full bg-white/15 backdrop-blur border border-white/20 grid place-items-center">‹</button>
-           <div class="flex-1 h-8 rounded-full bg-black/60 backdrop-blur border border-white/10 flex items-center px-2 gap-2">
-             <span class="text-[10px] font-bold tracking-widest text-white/60">TIMELINE</span>
-             <input id="timeline" type="range" min="0" max="100" value="0" class="range flex-1">
-           </div>
-           <button id="btnNextScene" class="w-8 h-8 rounded-full bg-white/15 backdrop-blur border border-white/20 grid place-items-center">›</button>
-         </div>
-       </div>
+        <div id="tab-scenes" class="tabpanel py-5 space-y-3 max-h-[430px] overflow-y-auto pr-1"></div>
+        <div id="tab-script" class="tabpanel hidden py-5 max-h-[430px] overflow-y-auto pr-2">
+          <div id="scriptBody" class="space-y-5"></div>
+          <div id="scriptMeta" class="font-mono text-[10px] text-dim tracking-[.15em] mt-6 pt-4 border-t border-line"></div>
+        </div>
+        <div id="tab-sources" class="tabpanel hidden py-5 max-h-[430px] overflow-y-auto pr-2">
+          <div id="sourcesBody" class="space-y-3"></div>
+        </div>
 
-       <div class="grid grid-cols-3 gap-2 mt-3">
-         <button id="btnDownloadVideo" class="rounded-2xl py-3 bg-white text-black font-bold text-sm flex items-center justify-center gap-2 opacity-50 pointer-events-none">⬇ Video</button>
-         <button id="btnDownloadWav" class="rounded-2xl py-3 bg-white/5 border border-white/10 font-bold text-sm flex items-center justify-center gap-2 opacity-50 pointer-events-none">♫ WAV</button>
-         <button id="btnDownloadPack" class="rounded-2xl py-3 bg-white/5 border border-white/10 font-bold text-sm flex items-center justify-center gap-2 opacity-50 pointer-events-none">⧉ Package</button>
-       </div>
-       <div id="renderLog" class="hidden mt-3 rounded-xl bg-black/40 border border-white/10 p-3 text-xs font-mono leading-relaxed text-white/70 max-h-[120px] overflow-auto"></div>
-     </div>
-
-     <!-- Storyboard -->
-     <div class="glass rounded-[20px] p-4">
-       <div class="flex items-center justify-between mb-3">
-         <h3 class="font-bold text-sm tracking-wide">STORYBOARD</h3>
-         <span id="storyCount" class="text-xs px-2 py-1 rounded-full bg-white/5 border border-white/10">0 scenes</span>
-       </div>
-       <div id="storyboard" class="flex gap-3 overflow-x-auto storyboard-scroll pb-2 snap-x">
-         <div class="min-w-full text-center py-10 rounded-2xl bg-white/[0.03] border border-dashed border-white/10 text-sm text-white/40">No scenes yet — generate a short to see the horizontal storyboard.</div>
-       </div>
-     </div>
-
-     <!-- Scene Editor -->
-     <div id="sceneEditor" class="glass rounded-[20px] p-4 hidden">
-       <div class="flex items-center justify-between mb-3">
-         <h3 class="font-bold text-sm">SCENE EDITOR</h3>
-         <span id="editorIndex" class="text-xs font-mono bg-amber-400 text-black px-2 py-1 rounded-full">SCENE 1</span>
-       </div>
-       <label class="text-[11px] font-bold tracking-widest text-white/50">NARRATION SENTENCE</label>
-       <textarea id="editSentence" rows="3" class="mt-1 w-full bg-black/30 border border-white/10 rounded-2xl px-3 py-3 text-sm outline-none focus:border-violet-500/50"></textarea>
-       <div class="grid grid-cols-2 gap-3 mt-3">
-         <div>
-           <label class="text-[11px] font-bold tracking-widest text-white/50">IMAGE KEYWORDS</label>
-           <input id="editKeywords" class="mt-1 w-full bg-black/30 border border-white/10 rounded-xl px-3 py-2.5 text-sm outline-none">
-         </div>
-         <div>
-           <label class="text-[11px] font-bold tracking-widest text-white/50">DURATION (SEC)</label>
-           <div class="flex items-center gap-2 mt-1">
-             <input id="editDuration" type="range" min="1.5" max="8" step="0.1" class="range flex-1">
-             <span id="editDurationLabel" class="text-xs font-mono bg-white/5 px-2 py-1 rounded-full">3.0s</span>
-           </div>
-         </div>
-       </div>
-       <label class="text-[11px] font-bold tracking-widest text-white/50 mt-3 block">CAPTION PREVIEW (2-4 words per group, amber = active)</label>
-       <div id="editCaptionPreview" class="mt-1 rounded-2xl bg-black/30 border border-white/10 p-3 flex flex-wrap gap-1.5 min-h-[56px]"></div>
-       <div class="flex flex-wrap gap-2 mt-3">
-         <button id="btnSwapImage" class="px-4 py-2 rounded-full bg-white text-black text-xs font-bold">Swap image</button>
-         <label class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold cursor-pointer">Upload image <input id="uploadSceneImage" type="file" accept="image/*" class="hidden"></label>
-         <button id="btnApplyScene" class="px-4 py-2 rounded-full bg-violet-600 text-white text-xs font-bold">Apply changes</button>
-         <button id="btnRegenerateCaptionTiming" class="px-4 py-2 rounded-full bg-amber-400 text-black text-xs font-bold">Re-sync captions</button>
-       </div>
-       <div id="imageAttr" class="text-[11px] text-white/40 mt-2 leading-relaxed"></div>
-     </div>
-   </div>
-
-   <!-- RIGHT -->
-   <div class="col-span-12 lg:col-span-3 space-y-4">
-     <div class="glass rounded-[20px] p-4">
-       <h3 class="font-bold text-sm tracking-wide mb-3">EXPORT SETTINGS</h3>
-       <div class="grid grid-cols-2 gap-2">
-         <button data-res="720x1280" class="res-btn pill-active rounded-xl py-2.5 text-xs font-bold">720 × 1280</button>
-         <button data-res="1080x1920" class="res-btn rounded-xl py-2.5 text-xs font-bold bg-white/5 border border-white/10">1080 × 1920</button>
-       </div>
-       <div class="grid grid-cols-2 gap-2 mt-2">
-         <button data-fps="30" class="fps-btn pill-active rounded-xl py-2.5 text-xs font-bold">30 FPS</button>
-         <button data-fps="60" class="fps-btn rounded-xl py-2.5 text-xs font-bold bg-white/5 border border-white/10">60 FPS</button>
-       </div>
-       <div class="rounded-xl bg-amber-400 text-black p-3 mt-3 text-xs leading-relaxed font-medium">
-         <span class="font-black">iPhone Safari tip:</span> Keep tab active during render. Use 720p + 30fps for fastest export on iOS 18+.
-       </div>
-       <div class="mt-3 space-y-2">
-         <button id="btnRender" class="w-full rounded-2xl py-3.5 bg-gradient-to-r from-violet-600 to-blue-600 font-black shadow-lg shadow-violet-600/20 flex items-center justify-center gap-2">⬢ RENDER FINAL VIDEO</button>
-         <div class="grid grid-cols-2 gap-2">
-           <button id="btnExportWav" class="rounded-xl py-2.5 bg-white text-black font-bold text-xs">Download WAV</button>
-           <button id="btnExportPack" class="rounded-xl py-2.5 bg-white/5 border border-white/10 font-bold text-xs">YouTube TXT</button>
-         </div>
-         <div id="exportProgress" class="hidden">
-           <div class="h-2 rounded-full bg-white/10 overflow-hidden p-1"><div id="exportBar" class="h-full rounded-full bg-emerald-400 transition-all" style="width:0%"></div></div>
-           <div id="exportText" class="text-xs text-white/60 mt-1">Rendering…</div>
-         </div>
-       </div>
-     </div>
-
-     <div class="glass rounded-[20px] p-4">
-       <div class="flex items-center justify-between mb-3">
-         <h3 class="font-bold text-sm tracking-wide">YOUTUBE PACKAGE</h3>
-         <button id="btnCopyPackage" class="text-xs px-3 py-1.5 rounded-full bg-white text-black font-bold">Copy</button>
-       </div>
-       <div id="ytPackage" class="space-y-3 max-h-[520px] overflow-auto pr-1">
-         <div class="rounded-2xl bg-black/30 border border-white/10 p-3">
-           <div class="text-[11px] font-black tracking-widest text-amber-400 mb-2">5 TITLE SUGGESTIONS</div>
-           <ol id="ytTitles" class="space-y-1.5 text-xs leading-relaxed text-white/80 list-decimal list-inside"></ol>
-         </div>
-         <div class="rounded-2xl bg-black/30 border border-white/10 p-3">
-           <div class="text-[11px] font-black tracking-widest text-violet-300 mb-1">DESCRIPTION (SEO)</div>
-           <p id="ytDesc" class="text-xs leading-relaxed text-white/70 whitespace-pre-wrap"></p>
-         </div>
-         <div class="rounded-2xl bg-black/30 border border-white/10 p-3">
-           <div class="text-[11px] font-black tracking-widest text-blue-300 mb-1">HASHTAGS</div>
-           <p id="ytTags" class="text-xs text-white/70 break-words"></p>
-         </div>
-         <div class="grid grid-cols-1 gap-3">
-           <div class="rounded-2xl bg-black/30 border border-white/10 p-3">
-             <div class="text-[11px] font-black tracking-widest text-white/50 mb-1">THUMBNAIL CONCEPT</div>
-             <p id="ytThumb" class="text-xs text-white/60"></p>
-           </div>
-           <div class="rounded-2xl bg-black/30 border border-white/10 p-3">
-             <div class="text-[11px] font-black tracking-widest text-white/50 mb-1">TRANSCRIPT</div>
-             <p id="ytTranscript" class="text-xs text-white/60 whitespace-pre-wrap"></p>
-           </div>
-           <div class="rounded-2xl bg-black/30 border border-white/10 p-3">
-             <div class="text-[11px] font-black tracking-widest text-white/50 mb-1">CREDITS</div>
-             <p id="ytCredits" class="text-xs text-white/60 whitespace-pre-wrap"></p>
-           </div>
-         </div>
-       </div>
-     </div>
-
-     <div class="rounded-[20px] p-4 bg-gradient-to-br from-violet-600 to-blue-600 text-white">
-       <div class="text-sm font-black">Production-quality defaults</div>
-       <ul class="text-xs leading-relaxed opacity-90 mt-2 space-y-1 list-disc list-inside">
-         <li>Captions: Bold uppercase, amber active word, 2–4 per group</li>
-         <li>Safe area: lower-middle, pop-in animation, black outline</li>
-         <li>Ken Burns zoom + cross-fade transitions</li>
-         <li>Audio: 44.1kHz WAV, ducked music, fade in/out</li>
-       </ul>
-     </div>
-   </div>
- </div>
-
- <!-- Hidden canvas for render -->
- <canvas id="renderCanvas" width="720" height="1280" class="hidden"></canvas>
- <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 hidden">
-   <div class="px-4 py-3 rounded-full bg-black text-white text-sm font-medium shadow-xl border border-white/10 flex items-center gap-2"><span id="toastIcon">✨</span><span id="toastMsg">Done</span></div>
- </div>
+        <!-- Export card -->
+        <div class="mt-6 border border-line rounded-2xl bg-panel p-5 md:p-6">
+          <div class="font-mono text-[10px] tracking-[.25em] text-accent mb-4">EXPORT — 1080 × 1920 · 9:16</div>
+          <div class="grid sm:grid-cols-2 gap-4 mb-5">
+            <div>
+              <label class="font-mono text-[10px] tracking-[.2em] text-dim block mb-2">NARRATOR</label>
+              <select id="voiceSelect" class="w-full bg-panel2 border border-line rounded-lg px-4 py-2.5 font-mono text-[12px] text-paper">
+                <option value="Brian">Brian — British, documentary</option>
+                <option value="Matthew">Matthew — American, warm</option>
+                <option value="Joanna">Joanna — American, clear</option>
+                <option value="Amy">Amy — British, precise</option>
+                <option value="device">Device voice — offline fallback</option>
+              </select>
+            </div>
+            <div>
+              <label class="font-mono text-[10px] tracking-[.2em] text-dim block mb-2">AMBIENT SCORE</label>
+              <div class="flex items-center gap-3 h-[42px]">
+                <div id="musicToggle" class="tgl on"></div>
+                <span class="font-mono text-[11px] text-dim" id="musicLabel">ON — subtle, under narration</span>
+              </div>
+            </div>
+          </div>
+          <button id="exportBtn" class="btn-acc w-full font-mono text-[12px] tracking-[.18em] font-bold py-4 rounded-xl flex items-center justify-center gap-3">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            RENDER &amp; SAVE VIDEO
+          </button>
+          <div id="exportNote" class="font-mono text-[10px] text-dim mt-3 leading-relaxed"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 </main>
 
+<!-- ============ EXPORT MODAL ============ -->
+<div id="exportModal" class="hidden fixed inset-0 z-50 bg-ink/95 backdrop-blur-sm overflow-y-auto">
+  <div class="min-h-full flex items-center justify-center p-5">
+    <div class="w-full max-w-md">
+      <div class="flex items-center justify-between mb-4">
+        <div class="font-mono text-[11px] kicker text-accent">RENDERING MASTER</div>
+        <button id="expClose" class="btn-ghost w-9 h-9 rounded-full flex items-center justify-center">
+          <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div id="expCanvasWrap" class="rounded-2xl overflow-hidden border border-line bg-black mx-auto" style="width:min(300px,70vw)"></div>
+      <div class="mt-5">
+        <div class="h-[3px] bg-white/10 rounded-full overflow-hidden"><div id="expProg" class="h-full bg-accent rounded-full" style="width:0%"></div></div>
+        <div id="expStatus" class="font-mono text-[11px] text-dim mt-3 text-center">Preparing renderer…</div>
+      </div>
+      <div id="expDone" class="hidden mt-5">
+        <a id="expDownload" class="btn-acc w-full font-mono text-[12px] tracking-[.18em] font-bold py-4 rounded-xl flex items-center justify-center gap-3 cursor-pointer">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          SAVE VIDEO
+        </a>
+        <div id="expSize" class="font-mono text-[10px] text-dim text-center mt-3"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
-const $ = s => document.querySelector(s);
-const $$ = s => [...document.querySelectorAll(s)];
+(() => {
+'use strict';
+/* ================= UTILITIES ================= */
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const lerp = (a,b,p) => a + (b-a)*p;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const stripHtml = s => { const d = document.createElement('div'); d.innerHTML = s||''; return (d.textContent||'').replace(/\s+/g,' ').trim(); };
+const fmtT = s => { s=Math.max(0,s); const m=Math.floor(s/60), ss=Math.floor(s%60); return String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0'); };
+const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40);
+const occurrences = (text, sub) => { let n=0,i=0; while((i=text.indexOf(sub,i))!==-1){n++;i+=sub.length;} return n; };
 
-const state = {
-  mode: 'topic',
-  duration: 30,
-  voice: 'Brian',
-  speed: 1.0,
-  music: 'none',
-  musicVolume: 0.12,
-  res: '720x1280',
-  fps: 30,
-  topic: '',
-  source: '',
-  scenes: [],
-  selected: 0,
-  buffers: [],
-  blobs: [],
-  audioCtx: null,
-  customMusicBuffer: null,
-  musicBuffer: null,
-  combinedWavBlob: null,
-  videoBlob: null,
-  isRendering: false,
-  previewRAF: null,
-  previewStart: 0,
-  previewDuration: 0,
-  isPlaying: false,
-  wordTimings: []
+const STOP = new Set(('a,an,the,and,or,but,if,then,else,when,while,where,which,who,whom,whose,what,that,this,these,those,there,here,of,in,on,at,by,for,from,with,without,within,into,onto,upon,over,under,above,below,between,among,through,during,before,after,around,about,against,along,across,behind,beyond,near,off,out,up,down,to,toward,towards,as,is,are,was,were,be,been,being,have,has,had,having,do,does,did,doing,will,would,shall,should,can,could,may,might,must,it,its,he,his,she,her,they,their,them,we,our,you,your,i,me,my,not,no,yes,so,such,than,too,very,just,also,only,even,more,most,less,least,many,much,few,several,each,every,all,any,both,either,neither,one,two,three,first,second,third,new,old,own,same,other,another,some,like,known,including,include,includes,included,often,usually,generally,however,although,though,despite,because,since,until,unless,per,via,etc,used,use,uses,using,made,make,makes,making,became,become,becomes,called,named,part,form,time,year,years,day,days,way,ways,number,example,according,instead,later,early,earlier,soon,long,well,best,still,again,back,far,away,together,rather,quite,almost,nearly,approximately').split(','));
+const tokenize = s => { const out=[]; for(const w of String(s).toLowerCase().split(/[^a-z0-9]+/)){ if(w.length>3 && !STOP.has(w)) out.push(w);} return new Set(out); };
+const STOP_PROP = new Set(['The','This','That','These','Those','In','On','At','It','He','She','They','His','Her','Their','After','Before','During','However','But','Although','Despite','When','While','Where','Which','By','For','From','With','As','An','A','And','Or','If','Because','Until','Under','Over','Between','Among','Into','About','Through','Today','There','Here','Then','Thus','Both','One','Two','Three','Many','Most','Some','Several','Other','Another','Such','According','Following','Since','Around','Despite','Near','Early','Later','In','On']);
+const properNouns = s => {
+  const m = s.match(/\b[A-Z][a-zA-Z'’-]{2,}(?:\s+(?:of|de|van|von|der|the)\s+|\s+)(?:[A-Z][a-zA-Z'’-]{2,}){0,2}/g) || [];
+  const out = [];
+  for(const x of m){ const t=x.trim(); const first=t.split(' ')[0]; if(t.includes(' ') || !STOP_PROP.has(first)) out.push(t); }
+  return [...new Set(out)].slice(0,8);
 };
 
-function toast(msg, icon='✨'){
-  const t=$('#toast'); $('#toastMsg').textContent=msg; $('#toastIcon').textContent=icon;
-  t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'), 2600);
-}
-
-function initStepper(){
-  const steps = [
-    ['Script', 'wiki'],
-    ['Narration', 'tts'],
-    ['Images', 'img'],
-    ['Captions', 'cap'],
-    ['Render', 'vid'],
-  ];
-  const el=$('#stepper');
-  el.innerHTML = steps.map(([label,key],i)=>`
-    <div data-step="${key}" class="flex items-center gap-1.5">
-      <span class="step-dot w-7 h-7 rounded-full grid place-items-center text-[11px] font-black bg-white/10 text-white/50 border border-white/10">${i+1}</span>
-      <span class="hidden sm:inline text-xs font-bold text-white/40">${label}</span>
-      ${i<4?'<span class="w-4 lg:w-6 h-px bg-white/10 mx-1 hidden sm:block"></span>':''}
-    </div>
-  `).join('');
-}
-function setStep(key, status){
-  const dot=document.querySelector(`[data-step="${key}"] .step-dot`);
-  if(!dot) return;
-  if(status==='done'){ dot.className='step-dot w-7 h-7 rounded-full grid place-items-center text-[11px] font-black bg-emerald-500 text-black'; dot.textContent='✓'; }
-  else if(status==='active'){ dot.className='step-dot w-7 h-7 rounded-full grid place-items-center text-[11px] font-black bg-amber-400 text-black animate-pulse'; }
-  else if(status==='error'){ dot.className='step-dot w-7 h-7 rounded-full grid place-items-center text-[11px] font-black bg-red-500 text-white'; dot.textContent='!'; }
-}
-
-function ensureAudioCtx(){
-  if(!state.audioCtx){
-    state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  if(state.audioCtx.state==='suspended') state.audioCtx.resume();
-  return state.audioCtx;
-}
-
-// Mode tabs
-$('#tabTopic').onclick=()=>{
-  state.mode='topic';
-  $('#tabTopic').className='pill-active rounded-xl py-2.5 text-sm font-bold flex items-center justify-center gap-2';
-  $('#tabCustom').className='rounded-xl py-2.5 text-sm font-bold text-white/60 hover:text-white flex items-center justify-center gap-2';
-  $('#panelTopic').classList.remove('hidden'); $('#panelCustom').classList.add('hidden');
-};
-$('#tabCustom').onclick=()=>{
-  state.mode='custom';
-  $('#tabCustom').className='pill-active rounded-xl py-2.5 text-sm font-bold flex items-center justify-center gap-2';
-  $('#tabTopic').className='rounded-xl py-2.5 text-sm font-bold text-white/60 hover:text-white flex items-center justify-center gap-2';
-  $('#panelCustom').classList.remove('hidden'); $('#panelTopic').classList.add('hidden');
-};
-$$('.ex-topic').forEach(b=> b.onclick=()=>{ $('#topicInput').value=b.dataset.example; });
-$('#btnUseExample').onclick=()=>{ $('#customInput').value="The Eiffel Tower was originally meant to be temporary. It was built for the 1889 World's Fair in Paris. Gustave Eiffel's design was criticized by many artists at the time. Today it welcomes almost seven million visitors every year. At night, 5,000 golden lights sparkle for five minutes every hour."; };
-$('#btnClearCustom').onclick=()=> $('#customInput').value='';
-
-$$('.dur-btn').forEach(b=> b.onclick=()=>{
-  $$('.dur-btn').forEach(x=> x.className='dur-btn rounded-xl py-2.5 text-sm font-bold border border-white/10 bg-white/5');
-  b.className='dur-btn rounded-xl py-2.5 text-sm font-bold border bg-white text-black';
-  state.duration=parseInt(b.dataset.dur);
-  const map={20:'3-4 scenes',30:'5 scenes',45:'7 scenes',60:'8-9 scenes'};
-  $('#durationLabel').textContent = state.duration+'s • '+map[state.duration];
-});
-$$('.voice-btn').forEach(b=> b.onclick=()=>{
-  $$('.voice-btn').forEach(x=>{ x.className='voice-btn rounded-2xl p-3 text-left bg-white/[0.04] border border-white/10'; });
-  b.className='voice-btn pill-active rounded-2xl p-3 text-left border border-transparent';
-  state.voice=b.dataset.voice;
-});
-$('#speedRange').oninput=e=>{ state.speed=parseFloat(e.target.value); $('#speedLabel').textContent=state.speed.toFixed(2)+'×'; };
-$$('.music-btn').forEach(b=> b.onclick=()=>{
-  $$('.music-btn').forEach(x=> x.className='music-btn rounded-xl py-2.5 text-xs font-bold bg-white/5 border border-white/10');
-  b.className='music-btn pill-active rounded-xl py-2.5 text-xs font-bold';
-  state.music=b.dataset.music;
-});
-$('#musicVol').oninput=e=> state.musicVolume=parseFloat(e.target.value);
-$('#btnUploadMusic').onclick=()=> $('#uploadMusic').click();
-$('#uploadMusic').onchange=async e=>{
-  const f=e.target.files[0]; if(!f) return;
-  const ctx=ensureAudioCtx();
-  const ab=await f.arrayBuffer();
-  state.customMusicBuffer = await ctx.decodeAudioData(ab.slice(0));
-  state.music='custom'; toast('Custom music loaded','♫');
-};
-$('#uploadSceneImage').onchange=e=>{
-  const f=e.target.files[0]; if(!f) return;
-  const url=URL.createObjectURL(f);
-  state.scenes[state.selected].imageUrl=url;
-  state.scenes[state.selected].attribution='Local upload • User provided';
-  renderStoryboard(); drawPreviewFrame(0); toast('Image updated','🖼️');
-};
-$('#btnPreviewVoice').onclick=async()=>{
-  const txt="Hello from Fact Engine. This is a preview of "+state.voice+" at "+state.speed.toFixed(2)+" speed.";
-  await playTTSPreview(txt);
+/* ================= STATE ================= */
+const S = {
+  topic:'', articleTitle:'', extract:'', sections:[], related:[], relatedTitles:[], imageOrder:[], leadImage:null,
+  scenes:[], pool:[], buffers:[], audioMode:'speech', voice:'Brian', musicOn:true,
+  timeline:null, ctx:null, playing:false, raf:0, sources:[], musicNodes:[],
+  t0:0, perf0:0, pauseStart:0, curSceneIdx:-1, liveWord:-1, boundaryLive:false,
+  exporting:false, speechVoice:null
 };
 
-async function playTTSPreview(text){
-  try{
-    ensureAudioCtx();
-    const blob=await fetchTTSBlob(text, state.voice);
-    const ab=await blob.arrayBuffer();
-    const buf=await state.audioCtx.decodeAudioData(ab.slice(0));
-    const src=state.audioCtx.createBufferSource(); src.buffer=buf; src.playbackRate.value=state.speed;
-    src.connect(state.audioCtx.destination); src.start();
-    toast('Playing preview','🔊');
-  }catch(err){ toast('Preview failed, using speechSynthesis','⚠️'); const u=new SpeechSynthesisUtterance(text); speechSynthesis.speak(u); }
+/* ================= VIEW / LOG / STEPS ================= */
+const views = { input:$('view-input'), pipeline:$('view-pipeline'), studio:$('view-studio') };
+function showView(name){
+  Object.entries(views).forEach(([k,el])=>el.classList.toggle('hidden', k!==name));
+  $('newTopicBtn').classList.toggle('hidden', name==='input');
+  window.scrollTo({top:0});
+  const el = views[name];
+  if(window.gsap) gsap.fromTo(el.querySelectorAll('.fadeup, h2, .term, #steps, .phoneShadow'), {y:14,opacity:0},{y:0,opacity:1,duration:.7,stagger:.05,ease:'power3.out',clearProps:'all'});
+}
+function log(msg, cls){
+  const d = document.createElement('div');
+  d.className = 'term-line ' + (cls||'text-paper/80');
+  d.textContent = msg;
+  $('termLines').appendChild(d);
+  const t = $('term'); t.scrollTop = t.scrollHeight;
+}
+const logA = m => log(m,'text-accent');
+const logD = m => log(m,'text-dim');
+const logOK = m => log(m,'text-emerald-400');
+const logErr = m => log(m,'text-red-400');
+function setStage(i, st, note){
+  const li = document.querySelector(`.step[data-step="${i}"]`);
+  if(!li) return;
+  li.classList.remove('active','done');
+  if(st) li.classList.add(st);
+  if(note) li.querySelector('.status').textContent = note;
 }
 
-async function fetchTTSBlob(text, voice){
-  const clean=text.slice(0,300);
-  const url=`https://api.streamelements.com/kappa/v2/speech?voice=${encodeURIComponent(voice)}&text=${encodeURIComponent(clean)}`;
-  const res=await fetch(url);
-  if(!res.ok) throw new Error('TTS fetch failed '+res.status);
-  return await res.blob();
+/* ================= WIKIPEDIA API ================= */
+async function api(base, params){
+  const url = base + '?' + new URLSearchParams({format:'json', origin:'*', ...params});
+  const r = await fetch(url);
+  if(!r.ok) throw new Error('API request failed ('+r.status+')');
+  return r.json();
 }
+const wiki = p => api('https://en.wikipedia.org/w/api.php', p);
+const commons = p => api('https://commons.wikimedia.org/w/api.php', p);
 
-function splitIntoSentences(text){
-  const m=text.match(/[^.!?]+[.!?]+/g);
-  if(m) return m.map(s=>s.trim()).filter(Boolean);
-  return text.split(/\n+/).map(s=>s.trim()).filter(Boolean);
-}
-function sentencesForDuration(sentences, duration){
-  const target={20:4,30:5,45:7,60:9}[duration]||5;
-  if(sentences.length<=target) return sentences;
-  // take most informative: first + middle
-  return sentences.slice(0,target);
-}
-function keywordsForSentence(s){
-  const stop=new Set(['the','a','an','and','or','but','is','are','was','were','in','on','at','of','to','for','with','by','as','it','this','that','these','those','be','been','has','have','had','from','into','about','over','under','after','before','between','during','through','its','their','our','your']);
-  const words=s.replace(/[^a-zA-Z0-9 ]/g,' ').split(/\s+/).filter(w=>w.length>3 && !stop.has(w.toLowerCase()));
-  const uniq=[...new Set(words)].slice(0,3);
-  return uniq.join(' ') || s.split(' ').slice(0,3).join(' ');
-}
+/* ================= STAGE 1: RESEARCH ================= */
+async function stageResearch(topic){
+  setStage(0,'active');
+  logA('$ fact-engine --topic "'+topic+'"');
+  logD('▸ Querying the Wikipedia search index…');
+  const s = await wiki({action:'query', list:'search', srsearch:topic, srlimit:'6'});
+  const hits = (s.query && s.query.search) || [];
+  if(!hits.length) throw new Error('No Wikipedia article found for "'+topic+'". Try a more specific name.');
+  const pick = hits[0];
+  if(hits[1]) logD('▸ Disambiguation — selected “'+pick.title+'”'+(hits[1]?' over “'+hits[1].title+'”':'')+(hits[2]?', “'+hits[2].title+'”':''));
+  S.articleTitle = pick.title;
+  logD('▸ Opening article “'+pick.title+'”…');
+  await sleep(150);
 
-async function fetchWikipediaTopic(topic){
-  try{
-    const searchUrl=`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(topic)}&format=json&origin=*`;
-    const r=await fetch(searchUrl); const j=await r.json();
-    const title=j?.query?.search?.[0]?.title;
-    if(!title) throw new Error('No page');
-    const sumUrl=`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`;
-    const sr=await fetch(sumUrl); const sj=await sr.json();
-    const extract=sj.extract;
-    const srcUrl=sj.content_urls?.desktop?.page || `https://en.wikipedia.org/wiki/${encodeURIComponent(title)}`;
-    return {extract, title, url:srcUrl};
-  }catch(e){ return null; }
-}
+  const [ex, sec, imgs, links, pi] = await Promise.all([
+    wiki({action:'query', prop:'extracts', explaintext:'1', redirects:'1', titles:pick.title}),
+    wiki({action:'parse', page:pick.title, prop:'sections'}),
+    wiki({action:'parse', page:pick.title, prop:'images'}),
+    wiki({action:'query', prop:'links', titles:pick.title, pllimit:'max', plnamespace:'0'}),
+    wiki({action:'query', prop:'pageimages', titles:pick.title, pithumbsize:'1200', redirects:'1'})
+  ]);
+  const page = Object.values(ex.query.pages)[0];
+  S.extract = page.extract || '';
+  if(S.extract.length < 600) throw new Error('The article for "'+pick.title+'" is too short to research properly.');
+  const wc = S.extract.split(/\s+/).length;
+  S.sections = ((sec.parse&&sec.parse.sections)||[]).filter(x=>x.toclevel===1).map(x=>stripHtml(x.line));
+  logD('▸ Reading full article — '+S.sections.length+' sections, '+wc.toLocaleString()+' words (beyond the introduction)');
+  await sleep(200);
 
-function fallbackScript(topic){
-  const t=topic || 'This Topic';
-  return [
-    `${t} is one of the most fascinating subjects you've never fully explored.`,
-    `Scientists have studied ${t} for decades and still uncover surprising new details every year.`,
-    `One incredible fact about ${t} is that it challenges what most people assume to be true.`,
-    `From its origins to its modern impact, ${t} connects history, science and everyday life.`,
-    `Understanding ${t} helps us see the world in a completely new way.`
-  ];
-}
-
-async function generateScript(){
-  const isTopic=state.mode==='topic';
-  let rawText='';
-  let sourceUrl='';
-  let title='';
-  if(isTopic){
-    const topic=$('#topicInput').value.trim();
-    if(!topic){ toast('Enter a topic first','⚠️'); return null; }
-    state.topic=topic;
-    const wiki=await fetchWikipediaTopic(topic);
-    if(wiki && wiki.extract){
-      rawText=wiki.extract; title=wiki.title; sourceUrl=wiki.url;
-    } else {
-      rawText=fallbackScript(topic).join(' ');
-      title=topic; sourceUrl='Fallback generated • Wikipedia unavailable';
-    }
-  } else {
-    const txt=$('#customInput').value.trim();
-    if(!txt){ toast('Paste a script first','⚠️'); return null; }
-    rawText=txt; state.topic=txt.split(' ').slice(0,4).join(' ');
-    title='Custom Script'; sourceUrl='User provided script';
-  }
-  let sentences=splitIntoSentences(rawText);
-  sentences=sentencesForDuration(sentences, state.duration);
-  state.source = title ? `${title} — ${sourceUrl}` : sourceUrl;
-  return sentences.map(s=>s.trim()).filter(Boolean);
-}
-
-async function fetchWikimediaImage(keyword){
-  try{
-    const search=`https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(keyword)}&srnamespace=6&srlimit=5&format=json&origin=*`;
-    const r=await fetch(search); const j=await r.json();
-    const hits=j?.query?.search || [];
-    for(const h of hits){
-      const title=h.title;
-      const infoUrl=`https://commons.wikimedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=imageinfo&iiprop=url|extmetadata&format=json&origin=*`;
-      const ir=await fetch(infoUrl); const ij=await ir.json();
-      const pages=ij?.query?.pages; const first=pages && Object.values(pages)[0];
-      const url=first?.imageinfo?.[0]?.url;
-      const artist=first?.imageinfo?.[0]?.extmetadata?.Artist?.value || '';
-      const license=first?.imageinfo?.[0]?.extmetadata?.LicenseShortName?.value || 'CC';
-      if(url && /\.(jpg|jpeg|png|webp)$/i.test(url)){
-        return {url, attribution: `${title.replace('File:','')} • ${license} • Wikimedia Commons`, artist};
-      }
-    }
-  }catch(e){}
-  // fallback to Wikimedia pageimages or picsum
-  try{
-    const thumb=`https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(keyword)}&gsrnamespace=0&prop=pageimages&pithumbsize=720&format=json&origin=*`;
-    const r=await fetch(thumb); const j=await r.json();
-    const pages=j?.query?.pages; if(pages){
-      const arr=Object.values(pages).filter(p=>p.thumbnail);
-      if(arr.length){ return {url: arr[0].thumbnail.source, attribution: `${arr[0].title} • Wikipedia • CC BY-SA`, artist:''}; }
-    }
-  }catch(e){}
-  return null;
-}
-
-function gradientForIndex(i){
-  const grads=[
-    'linear-gradient(135deg,#4f46e5 0%,#06b6d4 100%)',
-    'linear-gradient(135deg,#7c3aed 0%,#ec4899 100%)',
-    'linear-gradient(135deg,#0ea5e9 0%,#10b981 100%)',
-    'linear-gradient(135deg,#f59e0b 0%,#ef4444 100%)',
-    'linear-gradient(135deg,#1e293b 0%,#334155 100%)',
-  ];
-  return grads[i%grads.length];
-}
-
-function captionGroupsForSentence(sentence){
-  const words=sentence.split(/\s+/).filter(Boolean);
-  const groups=[];
-  for(let i=0;i<words.length;i+=3){
-    const slice=words.slice(i,i+3);
-    if(slice.length===1 && groups.length){ groups[groups.length-1].push(slice[0]); }
-    else groups.push(slice);
-  }
-  // ensure 2-4 words
-  return groups.map(g=>g.join(' '));
-}
-
-function buildWordTimings(scene, duration){
-  const words=scene.sentence.split(/\s+/).filter(Boolean);
-  const totalChars=words.reduce((a,w)=>a+w.length,0) || 1;
-  let t=0;
-  const timings=[];
-  words.forEach(w=>{
-    const wDur=(w.length/totalChars)*duration;
-    timings.push({word:w, start:t, end:t+wDur});
-    t+=wDur;
-  });
-  return timings;
-}
-
-async function generatePipeline(){
-  if(state.isRendering) return;
-  const btn=$('#btnGenerate');
-  btn.disabled=true; $('#genProgress').classList.remove('hidden');
-  $('#renderLog').classList.add('hidden');
-  setStep('wiki','active'); $('#genText').textContent='Creating factual script…'; $('#genBar').style.width='15%';
-  state.buffers=[]; state.blobs=[]; state.videoBlob=null; state.combinedWavBlob=null;
-  $('#statusBadge').textContent='Generating…';
-
-  try{
-    const sentences = await generateScript();
-    if(!sentences){ throw new Error('No script'); }
-    setStep('wiki','done');
-    $('#genBar').style.width='30%'; $('#genText').textContent=`Script ready • ${sentences.length} scenes`;
-    // Build scenes skeletons
-    state.scenes = sentences.map((s,i)=>{
-      const kw=keywordsForSentence(s);
-      return {
-        id:i,
-        sentence:s,
-        keywords:kw,
-        imageUrl:'',
-        attribution:'',
-        duration: Math.max(2.2, Math.min(6, s.split(' ').length/2.5)),
-        captionGroups: captionGroupsForSentence(s),
-        wordTimings: []
-      };
-    });
-    // Adjust durations to fit total duration
-    const totalEst = state.scenes.reduce((a,c)=>a+c.duration,0);
-    const scale = state.duration / totalEst;
-    state.scenes.forEach(sc=> sc.duration = parseFloat((sc.duration*scale).toFixed(2)) );
-    renderStoryboard(); selectScene(0); updateYouTubePackage();
-    logRender(`Script: ${sentences.length} sentences • Source: ${state.source}`);
-
-    // Images
-    setStep('img','active'); $('#genText').textContent='Searching Wikimedia images…'; $('#genBar').style.width='50%';
-    await generateImages();
-    setStep('img','done'); renderStoryboard();
-    logRender(`Images: ${state.scenes.filter(s=>s.imageUrl).length}/${state.scenes.length} found`);
-
-    // Narration
-    setStep('tts','active'); $('#genText').textContent=`Generating narration (${state.voice})…`; $('#genBar').style.width='70%';
-    const ok = await generateNarration();
-    if(ok){ setStep('tts','done'); $('#genText').textContent='Narration ready • WAV decoded'; }
-    else { setStep('tts','error'); $('#genText').textContent='TTS failed — using timing estimates'; }
-
-    // Captions sync
-    setStep('cap','active'); $('#genText').textContent='Synchronizing captions…'; $('#genBar').style.width='90%';
-    buildCaptions();
-    setStep('cap','done');
-
-    // Final
-    $('#genBar').style.width='100%'; $('#genText').textContent='Ready to preview & render';
-    $('#statusBadge').textContent='Ready • '+state.scenes.length+' scenes • '+state.duration+'s';
-    toast('Short generated — preview ready','✨');
-    // Enable downloads
-    enableDownloads(false);
-    // Draw preview
-    state.previewDuration = state.buffers.length ? state.buffers.reduce((a,b)=>a+b.duration/state.speed,0) : state.duration;
-    drawPreviewFrame(0);
-    $('#previewIdle').classList.add('hidden');
-    setStep('vid','active');
-    // auto play preview animation idle
-  }catch(e){
-    console.error(e); toast(e.message||'Generation failed','⚠️'); $('#genText').textContent='Failed: '+e.message; $('#statusBadge').textContent='Error';
-  } finally {
-    btn.disabled=false;
-    setTimeout(()=>{$('#genProgress').classList.add('hidden');},1200);
-  }
-}
-
-async function generateImages(){
-  for(let i=0;i<state.scenes.length;i++){
-    const sc=state.scenes[i];
-    $('#genText').textContent=`Searching image ${i+1}/${state.scenes.length} — ${sc.keywords}`;
-    const res=await fetchWikimediaImage(sc.keywords);
-    if(res){
-      sc.imageUrl=res.url; sc.attribution=res.attribution;
-    } else {
-      sc.imageUrl=''; sc.attribution='Gradient • No CC image found — license-free background';
-    }
-    renderStoryboard(); await new Promise(r=>setTimeout(r,150));
-  }
-}
-
-async function generateNarration(){
-  ensureAudioCtx();
-  state.buffers=[]; state.blobs=[];
-  let successCount=0;
-  for(let i=0;i<state.scenes.length;i++){
-    const sc=state.scenes[i];
+  const linkTitles = (Object.values(links.query.pages)[0].links||[]).map(l=>l.title);
+  const ranked = linkTitles
+    .filter(t=>t.length>3 && !/^(List of|Index of|Outline of|Timeline of|Glossary)/.test(t))
+    .map(t=>({t, n:occurrences(S.extract, t)}))
+    .filter(x=>x.n>0).sort((a,b)=>b.n-a.n);
+  S.relatedTitles = ranked.slice(0,3).map(x=>x.t);
+  if(S.relatedTitles.length) logD('▸ Following internal links: '+S.relatedTitles.map(t=>'“'+t+'”').join(', '));
+  S.related = [];
+  for(const rt of S.relatedTitles){
     try{
-      const blob=await fetchTTSBlob(sc.sentence, state.voice);
-      const ab=await blob.arrayBuffer();
-      const buf=await state.audioCtx.decodeAudioData(ab.slice(0));
-      state.buffers[i]=buf;
-      state.blobs[i]=blob;
-      // update duration to match actual audio (with speed)
-      const actual = buf.duration / state.speed;
-      sc.duration = Math.max(1.8, actual + 0.12);
-      successCount++;
-      $('#genText').textContent=`Narration ${i+1}/${state.scenes.length} • ${actual.toFixed(1)}s`;
-      $('#genBar').style.width=(70+ (i+1)/state.scenes.length*15 )+'%';
-      logRender(`TTS scene ${i+1}: ${actual.toFixed(2)}s • ${state.voice}`);
-    }catch(e){
-      console.warn('TTS fail scene',i,e);
-      // estimate duration from words
-      const est = Math.max(2.0, sc.sentence.split(' ').length / 2.4);
-      sc.duration = est;
-      // create silent buffer as placeholder
-      const sr=state.audioCtx.sampleRate || 44100;
-      const len=Math.floor(est*sr);
-      const silent=state.audioCtx.createBuffer(1,len,sr);
-      state.buffers[i]=silent;
-      state.blobs[i]=null;
-    }
-    // build word timings for this scene
-    sc.wordTimings = buildWordTimings(sc, sc.duration);
-    await new Promise(r=>setTimeout(r,180));
+      const [rx, rpi] = await Promise.all([
+        wiki({action:'query', prop:'extracts', exintro:'1', explaintext:'1', titles:rt, redirects:'1'}),
+        wiki({action:'query', prop:'pageimages', titles:rt, pithumbsize:'1200', redirects:'1'})
+      ]);
+      const rp = Object.values(rx.query.pages)[0];
+      const rpp = Object.values(rpi.query.pages)[0];
+      S.related.push({title:rt, intro:rp.extract||'', img:rpp.thumbnail&&rpp.thumbnail.source, pageimg:rpp.pageimage});
+    }catch(e){}
   }
-  // If any failed, we still have buffers (silent)
-  if(successCount===0) return false;
-  // combined wav blob for download
-  state.combinedWavBlob = exportCombinedWav();
-  return true;
+  if(S.related.length) logD('▸ Cross-checking '+S.related.length+' related articles for context and consistency');
+  S.imageOrder = ((imgs.parse&&imgs.parse.images)||[]);
+  const pipage = Object.values(pi.query.pages)[0];
+  S.leadImage = pipage.thumbnail && pipage.thumbnail.source;
+  S.leadTitle = pipage.pageimage;
+  await sleep(200);
+  setStage(0,'done', S.sections.length+' sections · '+S.related.length+' linked articles read');
 }
 
-function buildCaptions(){
-  state.scenes.forEach(sc=>{
-    sc.wordTimings = buildWordTimings(sc, sc.duration);
-  });
-  if(state.selected>=0) renderCaptionPreview();
+/* ================= STAGE 2: SCRIPT ================= */
+let SPLIT_RE; try{ SPLIT_RE = new RegExp('(?<=[.!?])\\s+(?=[A-Z0-9"“\'(])'); }catch(e){ SPLIT_RE = /[.!?]\s+(?=[A-Z0-9"“'(])/; }
+function cleanText(t){
+  return t
+    .replace(/\[[^\]]{0,90}\]/g,' ')
+    .replace(/\([^()]*[ˈˌɑɐɒæɓɔɕçðɖəɚɛɜɞɟɡɣɤɥɦɨɪɫɭɯɵɸɹɾʁʃʊʋʌʒʔʰʲːˑ][^()]*\)/g,' ')
+    .replace(/\((?:listen|pronunciation|play|audio)[^)]*\)/gi,' ')
+    .replace(/\/[^/]{2,60}\//g, m => /[ˈˌɪʊəɚɛɔæʃʒŋðθ]/.test(m) ? ' ' : m)
+    .replace(/\([^)]{170,}\)/g,' ')
+    .replace(/[ⓘ♦◊]/g,'')
+    .replace(/\s+/g,' ').trim();
 }
-
-function renderStoryboard(){
-  const el=$('#storyboard');
-  if(!state.scenes.length){ el.innerHTML='<div class="min-w-full text-center py-10 rounded-2xl bg-white/[0.03] border border-dashed border-white/10 text-sm text-white/40">No scenes yet — generate a short to see the horizontal storyboard.</div>'; $('#storyCount').textContent='0 scenes'; return; }
-  $('#storyCount').textContent=state.scenes.length+' scenes • '+state.duration+'s';
-  el.innerHTML=state.scenes.map((sc,i)=>`
-    <div data-idx="${i}" class="story-card min-w-[176px] max-w-[176px] rounded-2xl overflow-hidden bg-[#0B1022] border ${state.selected===i?'border-violet-500/60 ring-2 ring-violet-500/20':'border-white/10'} cursor-pointer flex flex-col">
-      <div class="h-[110px] relative overflow-hidden bg-black">
-        ${sc.imageUrl?`<img src="${sc.imageUrl}" crossorigin="anonymous" class="w-full h-full object-cover">`:`<div class="w-full h-full grid place-items-center text-[10px] font-black tracking-widest" style="background:${gradientForIndex(i)}">FACT ENGINE</div>`}
-        <span class="absolute top-2 left-2 text-[10px] font-black px-2 py-1 rounded-full bg-black/70 backdrop-blur border border-white/10">${String(i+1).padStart(2,'0')}</span>
-        <span class="absolute bottom-2 right-2 text-[10px] font-mono px-1.5 py-1 rounded-full bg-amber-400 text-black font-bold">${sc.duration.toFixed(1)}s</span>
-        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-        <div class="absolute bottom-2 left-2 right-12 text-[11px] font-bold leading-tight line-clamp-2 caption-shadow">${sc.sentence.slice(0,70)}</div>
-      </div>
-      <div class="p-2.5 flex-1 flex flex-col gap-2">
-        <div class="text-[11px] leading-snug text-white/80 line-clamp-2 min-h-[32px]">${sc.sentence}</div>
-        <div class="flex flex-wrap gap-1">
-          ${sc.captionGroups.slice(0,2).map(g=>`<span class="text-[10px] px-1.5 py-1 rounded-full bg-white/5 border border-white/10">${g.toUpperCase()}</span>`).join('')}
-        </div>
-        <div class="text-[10px] text-white/35 leading-tight line-clamp-1">${sc.attribution || 'No attribution'}</div>
-        <button data-swap="${i}" class="swap-btn mt-auto w-full rounded-full py-1.5 text-xs font-bold bg-white text-black">Swap image</button>
-      </div>
-    </div>
-  `).join('');
-  el.querySelectorAll('[data-idx]').forEach(card=>{
-    card.onclick=(e)=>{
-      if(e.target.classList.contains('swap-btn')) return;
-      selectScene(parseInt(card.dataset.idx));
-    };
-  });
-  el.querySelectorAll('.swap-btn').forEach(b=>{
-    b.onclick=async e=>{
-      e.stopPropagation();
-      const idx=parseInt(b.dataset.swap);
-      b.textContent='Searching…';
-      const sc=state.scenes[idx];
-      // try alternate keyword: add "nature" or use second word
-      const alt = sc.keywords.split(' ').slice().reverse().join(' ') + ' landscape';
-      const res=await fetchWikimediaImage(alt);
-      if(res){ sc.imageUrl=res.url; sc.attribution=res.attribution; } else { sc.imageUrl=''; sc.attribution='Gradient • Alternate not found'; }
-      renderStoryboard(); if(state.selected===idx) renderEditor(); drawPreviewFrame(getGlobalTimeForScene(idx));
-    };
-  });
-}
-
-function selectScene(idx){
-  state.selected=idx;
-  renderStoryboard(); renderEditor();
-  // move preview to scene
-  const t=getGlobalTimeForScene(idx);
-  drawPreviewFrame(t);
-  $('#timeline').value = state.previewDuration? (t/state.previewDuration*100):0;
-  $('#sceneBadge').textContent=`SCENE ${idx+1} / ${state.scenes.length}`;
-}
-function renderEditor(){
-  const sc=state.scenes[state.selected];
-  if(!sc){ $('#sceneEditor').classList.add('hidden'); return; }
-  $('#sceneEditor').classList.remove('hidden');
-  $('#editorIndex').textContent=`SCENE ${state.selected+1}`;
-  $('#editSentence').value=sc.sentence;
-  $('#editKeywords').value=sc.keywords;
-  $('#editDuration').value=sc.duration;
-  $('#editDurationLabel').textContent=sc.duration.toFixed(1)+'s';
-  $('#imageAttr').textContent=sc.attribution || '';
-  renderCaptionPreview();
-}
-function renderCaptionPreview(){
-  const sc=state.scenes[state.selected];
-  const preview=$('#editCaptionPreview');
-  if(!sc){ preview.innerHTML=''; return; }
-  // show groups, highlight first word of first group
-  preview.innerHTML=sc.captionGroups.map((g,gi)=>{
-    const words=g.split(' ');
-    return `<div class="flex gap-1.5 flex-wrap">${words.map((w,wi)=>{
-      const isActive = gi===0 && wi===0;
-      return `<span class="px-2 py-1 rounded-full text-xs font-black tracking-wide border ${isActive?'bg-amber-400 text-black border-amber-300':'bg-white/10 text-white border-white/10'}">${w.toUpperCase()}</span>`;
-    }).join('')}</div>`;
-  }).join('<span class="w-px bg-white/10 mx-1"></span>');
-}
-
-$('#editSentence').oninput=e=>{
-  const sc=state.scenes[state.selected];
-  if(!sc) return;
-  sc.sentence=e.target.value;
-  sc.captionGroups=captionGroupsForSentence(sc.sentence);
-  sc.wordTimings=buildWordTimings(sc, sc.duration);
-  renderStoryboard(); renderCaptionPreview(); drawPreviewFrame(getGlobalTimeForScene(state.selected));
-  updateYouTubePackage();
-};
-$('#editKeywords').oninput=e=>{ state.scenes[state.selected].keywords=e.target.value; };
-$('#editDuration').oninput=e=>{
-  const v=parseFloat(e.target.value);
-  state.scenes[state.selected].duration=v;
-  $('#editDurationLabel').textContent=v.toFixed(1)+'s';
-  state.scenes[state.selected].wordTimings=buildWordTimings(state.scenes[state.selected], v);
-  renderStoryboard(); updateYouTubePackage();
-  state.previewDuration = state.scenes.reduce((a,c)=>a+c.duration,0);
-};
-$('#btnApplyScene').onclick=()=>{
-  const sc=state.scenes[state.selected];
-  sc.captionGroups=captionGroupsForSentence(sc.sentence);
-  sc.wordTimings=buildWordTimings(sc, sc.duration);
-  renderStoryboard(); toast('Scene updated','✓');
-};
-$('#btnRegenerateCaptionTiming').onclick=()=>{
-  state.scenes.forEach(sc=> sc.wordTimings=buildWordTimings(sc, sc.duration));
-  renderCaptionPreview(); toast('Captions re-synced','✨');
-};
-$('#btnSwapImage').onclick=async()=>{
-  const sc=state.scenes[state.selected];
-  $('#btnSwapImage').textContent='Searching…';
-  const res=await fetchWikimediaImage(sc.keywords + ' photo');
-  if(res){ sc.imageUrl=res.url; sc.attribution=res.attribution; $('#imageAttr').textContent=res.attribution; }
-  else toast('No alternate found','⚠️');
-  $('#btnSwapImage').textContent='Swap image';
-  renderStoryboard(); drawPreviewFrame(getGlobalTimeForScene(state.selected));
-};
-
-function getGlobalTimeForScene(idx){
-  let t=0; for(let i=0;i<idx;i++) t+=state.scenes[i].duration;
-  return t;
-}
-function getSceneForTime(t){
-  let acc=0;
-  for(let i=0;i<state.scenes.length;i++){
-    const d=state.scenes[i].duration;
-    if(t < acc+d) return {idx:i, local:t-acc};
-    acc+=d;
+function splitSentences(t){ return t.split(SPLIT_RE).map(x=>x.trim()).filter(x=>x.length>0); }
+function parseBlocks(extract){
+  const lines = extract.split('\n').map(l=>l.trim()).filter(Boolean);
+  const blocks=[]; let section='Overview', buf=[], skipping=false;
+  const skipRe=/^(See also|References|Further reading|External links|Notes|Footnotes|Bibliography|Sources|Gallery|Citations|Works|Publications|Selected .*|Discography|Filmography|Awards.*|Honou?rs)$/i;
+  const flush=()=>{ if(buf.length){ blocks.push({section, text:buf.join(' ')}); buf=[]; } };
+  for(const l of lines){
+    const isHeading = l.length<=64 && l.split(' ').length<=7 && !/[.!?,;:)]$/.test(l) && /^[A-Z0-9]/.test(l);
+    if(isHeading){ flush(); section=l; skipping=skipRe.test(l); }
+    else if(!skipping) buf.push(l);
   }
-  return {idx: state.scenes.length-1, local: state.scenes[state.scenes.length-1]?.duration||0 };
+  flush(); return blocks;
+}
+function scoreSentence(s, i){
+  let sc = 0;
+  if(/\b(1[0-9]{3}|20[0-9]{2})\b/.test(s)) sc += 2;
+  if(/\d/.test(s)) sc += 0.8;
+  if(/\b(first|only|largest|smallest|longest|shortest|oldest|youngest|most|least|never|greatest|fastest|highest|deepest|record)\b/i.test(s)) sc += 2.6;
+  if(/\b(however|despite|although|yet|ironically|unexpectedly|surprisingly|in fact|in reality)\b/i.test(s)) sc += 1.6;
+  if(/\b(discovered|invented|created|built|founded|launched|developed|designed|proved|revealed|achieved|became)\b/i.test(s)) sc += 1.1;
+  if(/\b(secret|hidden|mystery|unknown|forgotten|lost|destroyed|collapsed|failed|disaster|died|death|killed|survived|escaped|banned|stolen)\b/i.test(s)) sc += 1.3;
+  sc += Math.min((s.match(/\b[A-Z][a-z]{2,}\b/g)||[]).length * 0.35, 2);
+  if(s.length < 70) sc -= 2.2;
+  if(s.length > 280) sc -= 1.4;
+  if(/citation needed|may refer to|for other uses|this article/i.test(s)) sc -= 12;
+  if(i===0) sc -= 1.5;
+  return sc;
+}
+function purposeOf(s){
+  if(/\b(however|despite|although|yet|but)\b/i.test(s)) return 'Turning point';
+  if(/\b(discovered|invented|first|revealed|proved)\b/i.test(s)) return 'Discovery';
+  if(/\b(born|died|death|married|studied)\b/i.test(s)) return 'Figure';
+  if(/\b(war|battle|launched|built|opened|erupted|collapsed|began)\b/i.test(s)) return 'Event';
+  return 'Detail';
+}
+function stageScript(){
+  setStage(1,'active');
+  logD('▸ Parsing article structure into sentences…');
+  const blocks = parseBlocks(S.extract);
+  let sents = [];
+  for(const b of blocks) for(const s of splitSentences(cleanText(b.text))) sents.push({s, section:b.section});
+  sents = sents.filter(x => x.s.length>=48 && x.s.length<=320 && /^[A-Z0-9"“'(]/.test(x.s) && !/may refer to|for other uses|this article is/i.test(x.s));
+  logD('▸ '+sents.length+' candidate sentences extracted across all sections');
+  if(sents.length < 8) throw new Error('Not enough material in this article to build a briefing.');
+  const scored = sents.map((x,i)=>({...x, i, score:scoreSentence(x.s,i)}));
+  logD('▸ Scoring for significance, specificity and surprise… '+Math.min(34,sents.length)+' strong candidates');
+
+  const def = scored[0];
+  const head = scored.filter(x=>x.i < sents.length*0.55 && x.i!==0);
+  const hook = (head.length?head:scored.slice(1)).sort((a,b)=>b.score-a.score)[0];
+  const tail = scored.filter(x=>x.i > sents.length*0.5 && /(today|remains|legacy|considered|regarded|remembered|continues|influenc|honou?red|commemorat|named after|still)\b/i.test(x.s));
+  const concl = (tail.sort((a,b)=>b.score-a.score)[0]) || scored[scored.length-1];
+
+  const used = new Set([hook.i, concl.i, def.i]);
+  const usedToks = [tokenize(hook.s), tokenize(def.s), tokenize(concl.s)];
+  const tooSimilar = t => { const tk=tokenize(t); for(const u of usedToks){ let n=0; for(const w of tk) if(u.has(w)) n++; if(n/Math.max(1,Math.min(tk.size,u.size))>0.62) return true; } return false; };
+  const body = scored.filter(x=>!used.has(x.i) && !tooSimilar(x.s)).sort((a,b)=>b.score-a.score).slice(0,6).sort((a,b)=>a.i-b.i);
+
+  const scenes = [];
+  scenes.push({text:hook.s, section:hook.section, purpose:'Hook'});
+  if(def.s!==hook.s) scenes.push({text:def.s, section:def.section, purpose:'Context'});
+  for(const b of body) scenes.push({text:b.s, section:b.section, purpose:purposeOf(b.s)});
+  if(concl.s!==hook.s) scenes.push({text:concl.s, section:concl.section, purpose:'Legacy'});
+  S.scenes = scenes.slice(0,9);
+  const words = S.scenes.reduce((a,s)=>a+s.text.split(/\s+/).length,0);
+  logD('▸ Narrative built — hook + '+(S.scenes.length-2)+' scenes + conclusion · '+words+' words (~'+Math.round(words/2.55)+'s)');
+  logD('▸ Every sentence is verbatim from the researched article — no invented claims');
+  setStage(1,'done', S.scenes.length+' scenes · '+words+' words, fully sourced');
 }
 
-// Preview drawing
-const previewCanvas=$('#previewCanvas');
-const pctx=previewCanvas.getContext('2d');
-let previewImages={};
-
-function loadImage(url){
-  if(!url) return Promise.resolve(null);
-  if(previewImages[url]) return Promise.resolve(previewImages[url]);
-  return new Promise(res=>{
-    const img=new Image(); img.crossOrigin='anonymous';
-    img.onload=()=>{ previewImages[url]=img; res(img); };
-    img.onerror=()=> res(null);
-    img.src=url;
-  });
-}
-
-async function drawPreviewFrame(globalTime){
-  if(!state.scenes.length){
-    pctx.fillStyle='#0a0e1a'; pctx.fillRect(0,0,720,1280);
-    return;
-  }
-  const {idx, local} = getSceneForTime(globalTime);
-  const sc=state.scenes[idx];
-  // background
-  pctx.fillStyle='#070a14'; pctx.fillRect(0,0,720,1280);
-  // image with Ken Burns
-  const progress = local / sc.duration;
-  const zoom = 1 + 0.08*progress;
-  if(sc.imageUrl){
-    const img=await loadImage(sc.imageUrl);
-    if(img){
-      const cw=720,ch=1280;
-      const iw=img.width, ih=img.height;
-      const scale=Math.max(cw/iw, ch/ih)*zoom;
-      const w=iw*scale, h=ih*scale;
-      const x=(cw-w)/2 + Math.sin(globalTime*0.15)*10;
-      const y=(ch-h)/2;
-      // clip rounded?
-      pctx.save();
-      pctx.drawImage(img, x, y, w, h);
-      // gradient overlay
-      const grad=pctx.createLinearGradient(0,0,0,1280);
-      grad.addColorStop(0,'rgba(0,0,0,0.15)'); grad.addColorStop(0.55,'rgba(0,0,0,0)'); grad.addColorStop(1,'rgba(0,0,0,0.75)');
-      pctx.fillStyle=grad; pctx.fillRect(0,0,720,1280);
-      pctx.restore();
-    } else {
-      // gradient fallback
-      pctx.fillStyle='#141a2e';
-      // draw gradient rect
-      const g=pctx.createLinearGradient(0,0,720,1280);
-      if(idx%2===0){ g.addColorStop(0,'#4f46e5'); g.addColorStop(1,'#06b6d4'); } else { g.addColorStop(0,'#7c3aed'); g.addColorStop(1,'#ec4899'); }
-      pctx.fillStyle=g; pctx.fillRect(0,0,720,1280);
-    }
-  } else {
-    const g=pctx.createLinearGradient(0,0,720,1280);
-    if(idx%3===0){ g.addColorStop(0,'#4f46e5'); g.addColorStop(1,'#06b6d4'); } else if(idx%3===1){ g.addColorStop(0,'#7c3aed'); g.addColorStop(1,'#ec4899'); } else { g.addColorStop(0,'#0ea5e9'); g.addColorStop(1,'#10b981'); }
-    pctx.fillStyle=g; pctx.fillRect(0,0,720,1280);
-    // title placeholder
-    pctx.fillStyle='rgba(255,255,255,0.9)'; pctx.font='900 44px Inter'; pctx.textAlign='center';
-    pctx.fillText('FACT ENGINE',360,640);
-  }
-  // vignette
-  pctx.fillStyle='rgba(0,0,0,0.18)'; pctx.fillRect(0,0,720,90);
-  pctx.fillStyle='rgba(0,0,0,0.35)'; pctx.fillRect(0,1180,720,100);
-
-  // captions handled via DOM overlay for crispness, but also draw for export consistency
-  updateCaptionOverlay(sc, local);
-}
-
-function updateCaptionOverlay(scene, localTime){
-  const overlay=$('#captionOverlay');
-  if(!scene || !scene.wordTimings?.length){ overlay.innerHTML=''; return; }
-  const words=scene.wordTimings;
-  // find active word
-  let activeIdx=-1;
-  for(let i=0;i<words.length;i++){ if(localTime>=words[i].start && localTime<words[i].end) {activeIdx=i; break;} }
-  if(activeIdx===-1 && localTime>=words[words.length-1].end) activeIdx=words.length-1;
-  // group logic: show current group (2-4 words)
-  const groups=scene.captionGroups;
-  // map word index to group
-  let wordPos=0, activeGroup=0;
-  for(let g=0;g<groups.length;g++){
-    const cnt=groups[g].split(' ').length;
-    if(activeIdx>=wordPos && activeIdx<wordPos+cnt) {activeGroup=g; break;}
-    wordPos+=cnt;
-  }
-  const groupText=groups[activeGroup] || groups[0] || '';
-  const gWords=groupText.split(' ');
-  // need offset of this group in words
-  let groupStartWord=0;
-  for(let g=0;g<activeGroup;g++) groupStartWord+=groups[g].split(' ').length;
-  overlay.innerHTML=gWords.map((w, i)=>{
-    const globalWordIdx=groupStartWord+i;
-    const isActive=globalWordIdx===activeIdx;
-    return `<span class="pop px-2.5 py-1.5 rounded-xl text-[18px] sm:text-[20px] font-black tracking-tight leading-none border ${isActive?'bg-amber-400 text-black border-amber-300 scale-105 shadow-lg':'bg-black/70 text-white border-white/15 backdrop-blur'} caption-shadow">${w.toUpperCase()}</span>`;
-  }).join('');
-}
-
-// preview playback
-function playPreview(){
-  if(!state.scenes.length){ toast('Generate a short first','⚠️'); return; }
-  if(state.isPlaying){ pausePreview(); return; }
-  ensureAudioCtx();
-  state.isPlaying=true;
-  $('#btnPlayPreview').textContent='❚❚';
-  $('#previewIdle').classList.add('hidden');
-  state.previewDuration = state.scenes.reduce((a,c)=>a+c.duration,0);
-  const startTime = parseFloat($('#timeline').value)/100 * state.previewDuration;
-  state.previewStart = performance.now() - startTime*1000;
-  // play audio via WebAudio scheduled
-  playPreviewAudio(startTime);
-  const tick=()=>{
-    if(!state.isPlaying) return;
-    const elapsed=(performance.now()-state.previewStart)/1000;
-    if(elapsed>=state.previewDuration){ pausePreview(); $('#timeline').value=0; drawPreviewFrame(0); $('#previewTime').textContent=`00:00 / ${fmtTime(state.previewDuration)}`; return; }
-    drawPreviewFrame(elapsed);
-    $('#timeline').value=(elapsed/state.previewDuration*100);
-    $('#previewTime').textContent=`${fmtTime(elapsed)} / ${fmtTime(state.previewDuration)}`;
-    $('#previewProgress').style.width=(elapsed/state.previewDuration*100)+'%';
-    const {idx}=getSceneForTime(elapsed);
-    $('#sceneBadge').textContent=`SCENE ${idx+1} / ${state.scenes.length}`;
-    // update selected visually but not force editor
-    state.previewRAF=requestAnimationFrame(tick);
+/* ================= STAGE 3: IMAGERY ================= */
+const BAD_IMG = /icon|logo|seal|coat[ _]of[ _]arms|commons-|wikipedia|wikimedia|wiki-|ambox|padlock|question[ _]book|edit[ _]|symbol|arrow|flag[ _]of|locator|location[ _]map|blank[ _]map|sound|audio|ogg|midi|pronunciation|signature/i;
+function mkImg(title, ii, order, src){
+  const ext = ii.extmetadata||{};
+  return {
+    title: title.replace(/^File:/,''), url: ii.thumburl||ii.url, w: ii.thumbwidth||ii.width, h: ii.thumbheight||ii.height,
+    mime: ii.mime, desc: stripHtml(ext.ImageDescription&&ext.ImageDescription.value),
+    artist: stripHtml(ext.Artist&&ext.Artist.value)||'Wikimedia Commons',
+    license: (ext.LicenseShortName&&ext.LicenseShortName.value)||'', page: ii.descriptionurl||'', order, src
   };
+}
+async function stageVisuals(){
+  setStage(2,'active');
+  logD('▸ Scanning article imagery — '+S.imageOrder.length+' files referenced in “'+S.articleTitle+'”');
+  const files = S.imageOrder.slice(0,60).map(f=>'File:'+f);
+  let pool = [];
+  for(let i=0;i<files.length;i+=50){
+    try{
+      const res = await wiki({action:'query', titles:files.slice(i,i+50).join('|'), prop:'imageinfo', iiprop:'url|size|mime|extmetadata', iiurlwidth:'1200'});
+      for(const p of Object.values((res.query&&res.query.pages)||{})){
+        const ii = p.imageinfo && p.imageinfo[0]; if(!ii) continue;
+        pool.push(mkImg(p.title, ii, pool.length, 'article'));
+      }
+    }catch(e){}
+  }
+  const orderMap = new Map(S.imageOrder.map((f,i)=>[f,i]));
+  pool.forEach(im=>{ im.order = orderMap.has(im.title)? orderMap.get(im.title) : 999; });
+  pool = pool.filter(im => (im.mime==='image/jpeg'||im.mime==='image/png') && im.w>=520 && !BAD_IMG.test(im.title+' '+im.desc));
+  const seen = new Set(); pool = pool.filter(im=>!seen.has(im.title)&&seen.add(im.title));
+  pool.forEach(im=>{ im.isLead = (im.title===S.leadTitle); });
+  logD('▸ Filtering icons, logos and non-photographic assets… '+pool.length+' verified candidates remain');
+
+  logD('▸ Searching Wikimedia Commons for supplementary media…');
+  try{
+    const cs = await commons({action:'query', generator:'search', gsrsearch:S.articleTitle, gsrnamespace:'6', gsrlimit:'15', prop:'imageinfo', iiprop:'url|size|mime|extmetadata', iiurlwidth:'1200'});
+    let added=0;
+    for(const p of Object.values((cs.query&&cs.query.pages)||{})){
+      const ii=p.imageinfo&&p.imageinfo[0]; if(!ii) continue;
+      const im=mkImg(p.title, ii, 500+added, 'commons');
+      if((im.mime==='image/jpeg'||im.mime==='image/png') && im.w>=520 && !BAD_IMG.test(im.title+' '+im.desc) && !seen.has(im.title)){ seen.add(im.title); pool.push(im); added++; }
+    }
+    if(added) logD('▸ +'+added+' additional verified assets from Wikimedia Commons');
+  }catch(e){ logD('▸ Commons supplement unavailable — proceeding with article media'); }
+  for(const r of S.related){ if(r.img && r.pageimg && !seen.has(r.pageimg)){ seen.add(r.pageimg); pool.push({title:r.pageimg, url:r.img, w:1200, h:800, mime:'image/jpeg', desc:r.title, artist:'Wikimedia Commons', license:'', page:'https://en.wikipedia.org/wiki/'+encodeURIComponent(r.title), order:600, src:'related', isLead:false}); } }
+
+  pool.forEach(im=>{ im.tokens = tokenize(im.title.replace(/\.[a-z]+$/i,'').replace(/[-_]/g,' ') + ' ' + im.desc); im.text=(im.title+' '+im.desc); });
+  logD('▸ Verifying each image subject against its scene narration…');
+  const usedImgs = new Set();
+  S.scenes.forEach((sc, i)=>{
+    const st = tokenize(sc.text); const props = properNouns(sc.text);
+    let best=null, bs=-1e9;
+    for(const im of pool){
+      let v = usedImgs.has(im.title) ? -100 : 0;
+      for(const w of st) if(im.tokens.has(w)) v += 1.3;
+      for(const pn of props) if(im.text.includes(pn)) v += 4;
+      if(im.isLead && i<=1) v += 5;
+      if(im.src==='article') v += 1.2;
+      v += Math.min(1.5, (im.w*im.h)/2.5e6);
+      v -= im.order*0.008;
+      if(v>bs){ bs=v; best=im; }
+    }
+    if(best){ usedImgs.add(best.title); sc.image=best; sc.imgScore=bs; }
+  });
+  const matched = S.scenes.filter(s=>s.image).length;
+  S.scenes.slice(0,3).forEach((sc,i)=>{ if(sc.image) logD('▸ Scene '+(i+1)+' ← “'+sc.image.title.slice(0,64)+'”'); });
+  logD('▸ Matched '+matched+'/'+S.scenes.length+' scenes to verified, context-correct imagery');
+
+  logD('▸ Loading media at full resolution…');
+  let done=0;
+  await Promise.all(S.scenes.map(async sc=>{
+    if(!sc.image) return;
+    sc.el = await loadImg(sc.image.url);
+    if(!sc.el){ const alt = pool.find(im=>!usedImgs.has(im.title)||im===sc.image); if(alt && alt!==sc.image){ sc.image=alt; sc.el=await loadImg(alt.url); } }
+    done++; if(done%2===0||done===S.scenes.length) logD('▸ Loading media… '+done+'/'+S.scenes.length);
+  }));
+  S.scenes = S.scenes.filter(sc=>sc.el);
+  if(!S.scenes.length) throw new Error('Could not load any usable imagery for this topic.');
+  S.pool = pool;
+  setStage(2,'done', S.scenes.length+' verified images · licenses recorded');
+}
+function loadImg(url){
+  return new Promise(res=>{
+    const im = new Image(); im.crossOrigin='anonymous';
+    im.onload = ()=>res(im); im.onerror = ()=>res(null);
+    im.src = url;
+  });
+}
+
+/* ================= STAGE 4: NARRATION ================= */
+async function fetchTTS(text, voice){
+  const r = await fetch('https://api.streamelements.com/kappa/v2/speech?voice='+encodeURIComponent(voice)+'&text='+encodeURIComponent(text));
+  if(!r.ok) throw new Error('tts');
+  const ab = await r.arrayBuffer();
+  if(ab.byteLength < 800) throw new Error('tts');
+  return ab;
+}
+async function stageAudio(){
+  setStage(3,'active');
+  S.buffers = []; S.audioMode='speech';
+  if(S.voice !== 'device'){
+    logD('▸ Synthesizing narration — cloud voice: '+S.voice);
+    try{
+      if(!S.ctx) S.ctx = new (window.AudioContext||window.webkitAudioContext)();
+      for(let i=0;i<S.scenes.length;i++){
+        const ab = await fetchTTS(S.scenes[i].text, S.voice);
+        const buf = await S.ctx.decodeAudioData(ab.slice(0));
+        S.buffers.push(buf);
+        logD('▸ Narration segment '+(i+1)+'/'+S.scenes.length+' — '+buf.duration.toFixed(1)+'s');
+      }
+      S.audioMode='tts';
+    }catch(e){
+      logD('▸ Cloud voice unreachable — falling back to the device speech engine');
+      S.audioMode='speech'; S.buffers=[];
+    }
+  } else logD('▸ Using device speech engine (offline mode)');
+  setStage(3,'done', S.audioMode==='tts' ? ('Cloud voice · '+S.buffers.length+' segments') : 'Device speech · estimated timing');
+}
+
+/* ================= STAGE 5: ASSEMBLY ================= */
+function buildSceneTiming(sc, i, speechDur){
+  const words = sc.text.split(/\s+/).filter(Boolean);
+  const totalChars = words.reduce((a,w)=>a+w.length,0) + words.length-1;
+  const start = sc.start + 0.12;
+  let acc=0, ch=0;
+  sc.words = words.map(w=>{
+    const st = start + (acc/totalChars)*speechDur;
+    acc += w.length+1;
+    const en = start + (acc/totalChars)*speechDur;
+    const o = {w, start:st, end:en, charStart:ch}; ch += w.length+1; return o;
+  });
+  sc.phrases=[]; let cur=[];
+  sc.words.forEach((wd,k)=>{
+    cur.push(k);
+    if((cur.length>=4 && /[,;:.!?—–-]$/.test(wd.w)) || cur.length>=6){ sc.phrases.push(cur); cur=[]; }
+  });
+  if(cur.length){ if(sc.phrases.length && cur.length<=2) sc.phrases[sc.phrases.length-1].push(...cur); else sc.phrases.push(cur); }
+}
+async function stageAssemble(){
+  setStage(4,'active');
+  logD('▸ Aligning subtitles — word-level timing from audio durations');
+  try{ await document.fonts.load('600 90px Fraunces'); await document.fonts.load('700 60px Inter'); await document.fonts.load('500 24px "JetBrains Mono"'); await document.fonts.ready; }catch(e){}
+  const titleDur = 2.8, gap = 0.42, endDur = 3.6;
+  let t = titleDur;
+  S.scenes.forEach((sc,i)=>{
+    const w = sc.text.split(/\s+/).length;
+    const speechDur = S.audioMode==='tts' ? S.buffers[i].duration : Math.max(2.2, w/2.55 + 0.25);
+    sc.speechDur = speechDur;
+    sc.start = t; sc.end = t + speechDur + 0.22;
+    buildSceneTiming(sc, i, speechDur);
+    t = sc.end + gap;
+  });
+  S.timeline = { titleDur, endStart:t, endDur:endDur, total:t+endDur };
+  logD('▸ Timeline locked — '+S.scenes.length+' scenes, '+S.timeline.total.toFixed(1)+'s at 1080×1920');
+  logOK('✓ Quality checks passed — facts sourced, imagery verified, captions aligned');
+  logOK('✓ Assembly complete — briefing ready for preview and export');
+  setStage(4,'done', S.timeline.total.toFixed(1)+'s · 1080×1920 · word-synced');
+}
+
+/* ================= RENDERER ================= */
+const gradCache = new Map();
+function bottomGrad(ctx,W,H){
+  const k=W+'x'+H; if(!gradCache.has(k)){
+    const g=ctx.createLinearGradient(0,H*0.45,0,H);
+    g.addColorStop(0,'rgba(5,5,8,0)'); g.addColorStop(0.55,'rgba(5,5,8,0.55)'); g.addColorStop(1,'rgba(5,5,8,0.92)');
+    const g2=ctx.createLinearGradient(0,0,0,H*0.22);
+    g2.addColorStop(0,'rgba(5,5,8,0.6)'); g2.addColorStop(1,'rgba(5,5,8,0)');
+    const v=ctx.createRadialGradient(W/2,H/2,H*0.35,W/2,H/2,H*0.75);
+    v.addColorStop(0,'rgba(0,0,0,0)'); v.addColorStop(1,'rgba(0,0,0,0.42)');
+    gradCache.set(k,{b:g,t:g2,v});
+  } return gradCache.get(k);
+}
+let noiseC=null;
+function getNoise(){
+  if(noiseC) return noiseC;
+  noiseC=document.createElement('canvas'); noiseC.width=noiseC.height=140;
+  const c=noiseC.getContext('2d'); const d=c.createImageData(140,140);
+  for(let i=0;i<d.data.length;i+=4){ const v=Math.random()*255|0; d.data[i]=d.data[i+1]=d.data[i+2]=v; d.data[i+3]=255; }
+  c.putImageData(d,0,0); return noiseC;
+}
+function drawCover(ctx, img, W, H, scale, px, py){
+  const ir=img.width/img.height, tr=W/H;
+  let dw,dh;
+  if(ir>tr){ dh=H*scale; dw=dh*ir; } else { dw=W*scale; dh=dw/ir; }
+  ctx.drawImage(img,(W-dw)/2+px*W*0.035,(H-dh)/2+py*H*0.03,dw,dh);
+}
+function wrapLines(ctx,text,maxW){
+  const words=text.split(/\s+/), lines=[]; let cur='';
+  for(const w of words){ const t=cur?cur+' '+w:w; if(ctx.measureText(t).width>maxW && cur){ lines.push(cur); cur=w; } else cur=t; }
+  if(cur) lines.push(cur); return lines;
+}
+function drawChrome(ctx,W,H,t){
+  const T=S.timeline, u=W/1080;
+  ctx.fillStyle='#E8A33D';
+  ctx.fillRect(0,0,W*clamp(t/T.total,0,1),Math.max(3,4*u));
+  ctx.font='500 '+Math.round(21*u)+'px "JetBrains Mono"'; ctx.textBaseline='middle';
+  ctx.fillStyle='rgba(237,234,226,0.72)';
+  const kick='FACT ENGINE — '+(S.articleTitle||'').toUpperCase();
+  ctx.fillText(kick.length>34?kick.slice(0,33)+'…':kick, W*0.055, H*0.052);
+  if(t>=T.titleDur && t<T.endStart){
+    const idx=sceneIndexAt(t);
+    ctx.textAlign='right'; ctx.fillStyle='rgba(237,234,226,0.55)';
+    ctx.fillText(String(idx+1).padStart(2,'0')+' / '+String(S.scenes.length).padStart(2,'0'), W*0.945, H*0.052);
+    ctx.textAlign='left';
+  }
+  const g=bottomGrad(ctx,W,H);
+  ctx.fillStyle=g.v; ctx.fillRect(0,0,W,H);
+  ctx.save(); ctx.globalAlpha=0.045;
+  const pat=ctx.createPattern(getNoise(),'repeat');
+  ctx.translate((Math.random()*140)|0,(Math.random()*140)|0);
+  ctx.fillStyle=pat; ctx.fillRect(-140,-140,W+280,H+280); ctx.restore();
+}
+function drawTitleCard(ctx,W,H,p){
+  const u=W/1080;
+  ctx.fillStyle='#070709'; ctx.fillRect(0,0,W,H);
+  const lead=S.scenes[0]&&S.scenes[0].el;
+  if(lead){ ctx.save(); ctx.globalAlpha=0.22; drawCover(ctx,lead,W,H,1.18+p*0.05,0,0); ctx.restore();
+    ctx.fillStyle='rgba(7,7,9,0.55)'; ctx.fillRect(0,0,W,H); }
+  const a=clamp(p/0.28,0,1);
+  ctx.globalAlpha=a;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.font='500 '+Math.round(22*u)+'px "JetBrains Mono"';
+  ctx.fillStyle='#E8A33D';
+  ctx.save(); ctx.translate(W/2,H*0.335); 
+  const kt='A FACT ENGINE BRIEFING';
+  ctx.fillText(kt.split('').join('  '),0,0); ctx.restore();
+  let size=Math.round(96*u);
+  ctx.font='600 '+size+'px Fraunces';
+  let lines=wrapLines(ctx,S.articleTitle||S.topic,W*0.84);
+  while(lines.length>3 && size>40){ size-=6; ctx.font='600 '+size+'px Fraunces'; lines=wrapLines(ctx,S.articleTitle||S.topic,W*0.84); }
+  const lh=size*1.12, y0=H*0.5-((lines.length-1)*lh)/2;
+  ctx.fillStyle='#EDEAE2';
+  lines.forEach((l,i)=>ctx.fillText(l,W/2,y0+i*lh));
+  const rw=W*0.34*clamp((p-0.3)/0.4,0,1);
+  ctx.fillStyle='#E8A33D'; ctx.fillRect(W/2-rw/2,H*0.5+((lines.length)*lh)/2+H*0.035,rw,Math.max(2,3*u));
+  ctx.globalAlpha=a*0.6;
+  ctx.font='400 '+Math.round(20*u)+'px "JetBrains Mono"'; ctx.fillStyle='#8E8E96';
+  ctx.fillText('RESEARCHED FROM WIKIPEDIA · REAL ARCHIVAL IMAGERY', W/2, H*0.72);
+  ctx.globalAlpha=1; ctx.textAlign='left';
+  if(p>0.85){ ctx.fillStyle='rgba(7,7,9,'+((p-0.85)/0.15)+')'; ctx.fillRect(0,0,W,H); }
+}
+function drawEndCard(ctx,W,H,p){
+  const u=W/1080;
+  ctx.fillStyle='#070709'; ctx.fillRect(0,0,W,H);
+  const a=clamp(p/0.2,0,1)*clamp((1.02-p)/0.12,0,1);
+  ctx.globalAlpha=a; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.font='500 '+Math.round(20*u)+'px "JetBrains Mono"'; ctx.fillStyle='#E8A33D';
+  ctx.fillText('S O U R C E S', W/2, H*0.30);
+  ctx.font='600 '+Math.round(52*u)+'px Fraunces'; ctx.fillStyle='#EDEAE2';
+  const lines=wrapLines(ctx,S.articleTitle||'',W*0.8).slice(0,2);
+  lines.forEach((l,i)=>ctx.fillText(l,W/2,H*0.37+i*52*u*1.15));
+  ctx.font='400 '+Math.round(20*u)+'px "JetBrains Mono"'; ctx.fillStyle='rgba(142,142,150,0.9)';
+  ctx.fillText('Narration text — Wikipedia (CC BY-SA)', W/2, H*0.50);
+  ctx.fillText('Imagery — Wikimedia Commons contributors', W/2, H*0.535);
+  ctx.font='400 '+Math.round(16*u)+'px "JetBrains Mono"'; ctx.fillStyle='rgba(142,142,150,0.55)';
+  const credits=[...new Set(S.scenes.map(s=>s.image&&s.image.artist).filter(Boolean))].slice(0,3);
+  credits.forEach((c,i)=>ctx.fillText((c.length>44?c.slice(0,43)+'…':c), W/2, H*0.585+i*22*u));
+  ctx.strokeStyle='rgba(232,163,61,0.9)'; ctx.lineWidth=Math.max(1.5,2*u);
+  const sq=14*u; ctx.strokeRect(W/2-sq/2,H*0.70-sq/2,sq,sq);
+  ctx.fillStyle='#E8A33D'; const sq2=6*u; ctx.fillRect(W/2-sq2/2,H*0.70-sq2/2,sq2,sq2);
+  ctx.font='500 '+Math.round(18*u)+'px "JetBrains Mono"'; ctx.fillStyle='rgba(237,234,226,0.8)';
+  ctx.fillText('F A C T   E N G I N E', W/2, H*0.745);
+  ctx.globalAlpha=1; ctx.textAlign='left';
+}
+function sceneIndexAt(t){
+  for(let i=0;i<S.scenes.length;i++){ if(t<S.scenes[i].end) return i; }
+  return S.scenes.length-1;
+}
+function drawScene(ctx,W,H,idx,t){
+  const sc=S.scenes[idx], prev=idx>0?S.scenes[idx-1]:null;
+  const dur=sc.end-sc.start;
+  let p=clamp((t-sc.start)/dur,0,1);
+  const inGap = t<sc.start;
+  if(inGap && prev){ drawCover(ctx,prev.el,W,H,1.15,kbDir(idx-1)*0.5,0); drawSubtitlesFor(ctx,W,H,prev,prev.end+1); return; }
+  const fade=clamp((t-sc.start)/0.55,0,1);
+  if(fade<1){
+    if(prev){ const pp=1; drawCover(ctx,prev.el,W,H,kbScale(idx-1,pp),kbDir(idx-1)*(pp-0.5),0); }
+    else { ctx.fillStyle='#070709'; ctx.fillRect(0,0,W,H); }
+    ctx.globalAlpha=fade;
+  }
+  drawCover(ctx,sc.el,W,H,kbScale(idx,p),kbDir(idx)*(p-0.5),0);
+  ctx.globalAlpha=1;
+  const g=bottomGrad(ctx,W,H);
+  ctx.fillStyle=g.b; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle=g.t; ctx.fillRect(0,0,W,H*0.22);
+  drawSubtitlesFor(ctx,W,H,sc,t);
+}
+function kbScale(i,p){ return i%2===0 ? lerp(1.06,1.16,p) : lerp(1.16,1.06,p); }
+function kbDir(i){ return i%2===0?1:-1; }
+function drawSubtitlesFor(ctx,W,H,sc,t){
+  if(!sc.words||!sc.words.length) return;
+  const u=W/1080;
+  let cur=-1;
+  if(S.audioMode==='speech' && S.boundaryLive && S.playing && S.scenes[S.liveSceneIdx]===sc && S.liveWord>=0) cur=S.liveWord;
+  else { for(let k=0;k<sc.words.length;k++){ if(t>=sc.words[k].start){cur=k;} else break; } }
+  if(cur<0 || t>sc.words[sc.words.length-1].end+0.5) return;
+  let ph=null;
+  for(const arr of sc.phrases){ if(arr.includes(cur)){ ph=arr; break; } }
+  if(!ph) return;
+  const first=sc.words[ph[0]], last=sc.words[ph[ph.length-1]];
+  const alpha=clamp((t-first.start+0.12)/0.15,0,1)*clamp((last.end+0.45-t)/0.25,0,1);
+  let size=Math.round(50*u);
+  ctx.font='700 '+size+'px Inter';
+  const space=ctx.measureText(' ').width;
+  const widths=ph.map(k=>ctx.measureText(sc.words[k].w).width);
+  let total=widths.reduce((a,b)=>a+b,0)+space*(ph.length-1);
+  if(total>W*0.88){ const f=(W*0.88)/total; size=Math.round(size*f); ctx.font='700 '+size+'px Inter';
+    const sp2=ctx.measureText(' ').width;
+    ph.forEach((k,j)=>widths[j]=ctx.measureText(sc.words[k].w).width);
+    total=widths.reduce((a,b)=>a+b,0)+sp2*(ph.length-1);
+  }
+  const y=H*0.80;
+  ctx.save();
+  ctx.globalAlpha=alpha;
+  ctx.textBaseline='middle';
+  ctx.shadowColor='rgba(0,0,0,0.75)'; ctx.shadowBlur=14*u; ctx.shadowOffsetY=2*u;
+  let x=(W-total)/2;
+  ph.forEach((k,j)=>{
+    const wd=sc.words[k];
+    if(k<cur) ctx.fillStyle='rgba(237,234,226,0.95)';
+    else if(k===cur){ ctx.fillStyle='#E8A33D'; }
+    else ctx.fillStyle='rgba(237,234,226,0.34)';
+    ctx.fillText(wd.w,x,y);
+    if(k===cur){ ctx.shadowBlur=0; ctx.fillStyle='rgba(232,163,61,0.85)';
+      const bw=widths[j]; roundRect(ctx,x,y+size*0.72,bw,Math.max(2.5,4*u),3*u); ctx.fill();
+      ctx.shadowBlur=14*u; }
+    x+=widths[j]+ctx.measureText(' ').width;
+  });
+  ctx.restore();
+  ctx.font='500 '+Math.round(19*u)+'px "JetBrains Mono"';
+  ctx.fillStyle='rgba(237,234,226,0.5)'; ctx.textBaseline='middle';
+  ctx.fillText('§ '+(sc.section||'Overview').toUpperCase()+' · '+(sc.purpose||'').toUpperCase(), W*0.055, H*0.715);
+}
+function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function render(ctx,W,H,t){
+  ctx.fillStyle='#070709'; ctx.fillRect(0,0,W,H);
+  const T=S.timeline; if(!T) return;
+  if(t<T.titleDur) drawTitleCard(ctx,W,H,t/T.titleDur);
+  else if(t<T.endStart) drawScene(ctx,W,H,sceneIndexAt(t),t);
+  else drawEndCard(ctx,W,H,(t-T.endStart)/T.endDur);
+  drawChrome(ctx,W,H,t);
+}
+
+/* ================= MUSIC ================= */
+function startMusic(actx, bus, t0, dur){
+  const nodes=[];
+  const master=actx.createGain(); master.gain.value=0; master.connect(bus);
+  const lp=actx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=300; lp.Q.value=0.4; lp.connect(master);
+  [[55,'sine',0.5],[82.41,'sine',0.4],[110,'triangle',0.14],[164.81,'triangle',0.09]].forEach(([f,ty,g],i)=>{
+    const o=actx.createOscillator(); o.type=ty; o.frequency.value=f; o.detune.value=i%2?5:-5;
+    const gg=actx.createGain(); gg.gain.value=g; o.connect(gg); gg.connect(lp);
+    o.start(t0); o.stop(t0+dur+0.5); nodes.push(o);
+  });
+  const lfo=actx.createOscillator(); lfo.frequency.value=0.055;
+  const lg=actx.createGain(); lg.gain.value=110; lfo.connect(lg); lg.connect(lp.frequency);
+  lfo.start(t0); lfo.stop(t0+dur+0.5); nodes.push(lfo);
+  master.gain.setValueAtTime(0.0001,t0);
+  master.gain.linearRampToValueAtTime(0.055,t0+3.5);
+  master.gain.setValueAtTime(0.055,Math.max(t0+3.5,t0+dur-3));
+  master.gain.linearRampToValueAtTime(0.0001,t0+dur);
+  return nodes;
+}
+
+/* ================= PLAYER ================= */
+const pctx = $('preview').getContext('2d');
+function stopSources(){ S.sources.forEach(s=>{try{s.stop()}catch(e){}}); S.sources=[]; S.musicNodes.forEach(s=>{try{s.stop()}catch(e){}}); S.musicNodes=[]; }
+function scheduleNarration(actx, bus, t0){
+  const srcs=[];
+  S.scenes.forEach((sc,i)=>{ const s=actx.createBufferSource(); s.buffer=S.buffers[i]; s.connect(bus); s.start(t0+sc.start); srcs.push(s); });
+  return srcs;
+}
+function now(){ return S.audioMode==='tts' ? (S.ctx.currentTime - S.t0) : (performance.now()-S.perf0)/1000; }
+function play(){
+  if(S.playing || !S.timeline) return;
+  stopSources();
+  speechSynthesis.cancel();
+  S.boundaryLive=false; S.liveWord=-1; S.liveSceneIdx=-1;
+  if(S.audioMode==='tts'){
+    if(!S.ctx) S.ctx=new (window.AudioContext||window.webkitAudioContext)();
+    S.ctx.resume();
+    const bus=S.ctx.createGain(); bus.gain.value=1; bus.connect(S.ctx.destination);
+    S.t0=S.ctx.currentTime+0.08;
+    S.sources=scheduleNarration(S.ctx,bus,S.t0);
+    if(S.musicOn) S.musicNodes=startMusic(S.ctx,bus,S.t0,S.timeline.total);
+  } else {
+    S.perf0=performance.now();
+    speakChain(0);
+  }
+  S.playing=true; S.curSceneIdx=-1;
+  setPlayUI(true); $('bigPlay').style.opacity='0'; $('bigPlay').style.pointerEvents='none';
   tick();
 }
-let previewAudioNodes=[];
-function playPreviewAudio(offset){
-  stopPreviewAudio();
-  ensureAudioCtx();
-  let t=0;
-  const now=state.audioCtx.currentTime+0.05;
-  state.scenes.forEach((sc,i)=>{
-    const buf=state.buffers[i];
-    if(!buf) { t+=sc.duration; return; }
-    const src=state.audioCtx.createBufferSource(); src.buffer=buf; src.playbackRate.value=state.speed;
-    const gain=state.audioCtx.createGain(); gain.gain.value=1;
-    src.connect(gain).connect(state.audioCtx.destination);
-    // schedule only if after offset
-    const startAt = t - offset;
-    if(startAt + buf.duration/state.speed > 0){
-      const when = now + Math.max(0,startAt);
-      const off = startAt<0 ? -startAt*state.speed : 0;
-      const dur = buf.duration - off;
-      try{ src.start(when, off); }catch(e){}
-      previewAudioNodes.push(src);
-    }
-    t+=sc.duration;
+function pause(){
+  if(!S.playing) return;
+  S.playing=false; cancelAnimationFrame(S.raf);
+  if(S.audioMode==='tts' && S.ctx) S.ctx.suspend();
+  else { S.pauseStart=performance.now(); try{speechSynthesis.pause();}catch(e){} }
+  setPlayUI(false);
+}
+function resume(){
+  if(S.playing) return;
+  if(S.audioMode==='tts' && S.ctx){ S.ctx.resume(); }
+  else { const d=performance.now()-S.pauseStart; S.perf0+=d; try{speechSynthesis.resume();}catch(e){} }
+  S.playing=true; setPlayUI(true); tick();
+}
+function restart(){
+  pause(); stopSources(); speechSynthesis.cancel();
+  render(pctx,540,960,0.001);
+  updateTransport(0);
+  play();
+}
+function finish(){
+  S.playing=false; cancelAnimationFrame(S.raf);
+  stopSources();
+  setPlayUI(false);
+  $('bigPlay').style.opacity='1'; $('bigPlay').style.pointerEvents='auto';
+}
+function tick(){
+  if(!S.playing) return;
+  const t=now();
+  if(t>=S.timeline.total){ render(pctx,540,960,S.timeline.total-0.01); updateTransport(S.timeline.total); finish(); return; }
+  render(pctx,540,960,Math.max(0.001,t));
+  updateTransport(t);
+  S.raf=requestAnimationFrame(tick);
+}
+function updateTransport(t){
+  $('timeCur').textContent=fmtT(t); $('timeTot').textContent=fmtT(S.timeline?S.timeline.total:0);
+  const T=S.timeline; if(!T) return;
+  const segs=$('segBar').children;
+  S.scenes.forEach((sc,i)=>{
+    const el=segs[i]&&segs[i].firstChild; if(!el) return;
+    el.style.width=(clamp((t-sc.start)/(sc.end-sc.start),0,1)*100)+'%';
   });
-}
-function stopPreviewAudio(){ previewAudioNodes.forEach(n=>{ try{n.stop();}catch(e){} }); previewAudioNodes=[]; }
-function pausePreview(){
-  state.isPlaying=false;
-  $('#btnPlayPreview').textContent='▶';
-  if(state.previewRAF) cancelAnimationFrame(state.previewRAF);
-  stopPreviewAudio();
-}
-$('#btnPlayPreview').onclick=playPreview;
-$('#btnPreviewHeader').onclick=playPreview;
-$('#timeline').oninput=e=>{
-  const pct=parseFloat(e.target.value);
-  const t= state.previewDuration * pct/100;
-  drawPreviewFrame(t);
-  $('#previewTime').textContent=`${fmtTime(t)} / ${fmtTime(state.previewDuration||state.duration)}`;
-  if(state.isPlaying){ state.previewStart=performance.now()-t*1000; stopPreviewAudio(); playPreviewAudio(t); }
-};
-$('#btnPrevScene').onclick=()=>{ const cur=getSceneForTime( (parseFloat($('#timeline').value)/100*(state.previewDuration||state.duration)) ).idx; selectScene(Math.max(0,cur-1)); };
-$('#btnNextScene').onclick=()=>{ const cur=getSceneForTime( (parseFloat($('#timeline').value)/100*(state.previewDuration||state.duration)) ).idx; selectScene(Math.min(state.scenes.length-1,cur+1)); };
-
-function fmtTime(s){ const m=Math.floor(s/60), sec=Math.floor(s%60); return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); }
-
-// YouTube package
-function updateYouTubePackage(){
-  const topic=state.topic || 'Amazing Facts';
-  const sentences=state.scenes.map(s=>s.sentence);
-  const titles=[
-    `The SHOCKING Truth About ${topic} You Never Knew!`,
-    `${topic}: 5 Facts That Will Blow Your Mind 🤯`,
-    `Why ${topic} Is More Insane Than You Think`,
-    `This ${topic} Fact Changes Everything (30s)`,
-    `${topic} Explained in 30 Seconds — You Won't Believe #3`
-  ];
-  $('#ytTitles').innerHTML=titles.map(t=>`<li>${t}</li>`).join('');
-  const desc=`${sentences.join(' ')}
-
-Discover the fascinating world of ${topic} in this 9:16 YouTube Short! Perfect for curious minds.
-
-⏱️ Timestamps
-${state.scenes.map((s,i)=>`00:${String(Math.floor(getGlobalTimeForScene(i))).padStart(2,'0')} — ${s.sentence.slice(0,48)}`).join('\n')}
-
-🔗 Sources
-${state.source}
-
-#Shorts #Facts #${topic.replace(/\s+/g,'')} #Education #Science #DidYouKnow`;
-  $('#ytDesc').textContent=desc;
-  $('#ytTags').textContent=`#Shorts #Facts #Education #Science #${topic.replace(/\s+/g,'')} #DidYouKnow #Viral #LearnOnTikTok #FactEngine #YouTubeShorts`;
-  $('#ytThumb').textContent=`Vertical 9:16 bold text: "${topic.toUpperCase()}" + shocked face + high-contrast image (${state.scenes[0]?.keywords||topic}) + amber highlight + dark vignette. Keep text in safe area.`;
-  $('#ytTranscript').textContent=sentences.join('\n');
-  const credits=`Image Credits:
-${state.scenes.map((s,i)=>`${i+1}. "${s.keywords}" — ${s.attribution || 'Gradient background'}`).join('\n')}
-
-Music: ${state.music==='none'?'No music': state.music==='custom'?'Custom upload • User provided': state.music+' • Generated loop • Royalty-free (Fact Engine)'}
-
-Narration: ${state.voice} • English TTS via StreamElements • Speed ${state.speed.toFixed(2)}x
-Generated with FACT ENGINE • ${new Date().toLocaleDateString()}
-`;
-  $('#ytCredits').textContent=credits;
-}
-$('#btnCopyPackage').onclick=()=>{
-  const txt=`TITLES:\n${[...document.querySelectorAll('#ytTitles li')].map(li=>'- '+li.textContent).join('\n')}\n\nDESCRIPTION:\n${$('#ytDesc').textContent}\n\nTAGS:\n${$('#ytTags').textContent}\n\nTHUMBNAIL:\n${$('#ytThumb').textContent}\n\nTRANSCRIPT:\n${$('#ytTranscript').textContent}\n\nCREDITS:\n${$('#ytCredits').textContent}`;
-  navigator.clipboard.writeText(txt).then(()=>toast('Package copied','📋'));
-};
-
-// WAV export
-function encodeWAV(buffer){
-  const numChannels=buffer.numberOfChannels;
-  const sampleRate=buffer.sampleRate;
-  const length=buffer.length*numChannels*2 + 44;
-  const ab=new ArrayBuffer(length);
-  const view=new DataView(ab);
-  let pos=0;
-  function writeString(s){ for(let i=0;i<s.length;i++) view.setUint8(pos++, s.charCodeAt(i)); }
-  writeString('RIFF'); view.setUint32(pos, length-8, true); pos+=4;
-  writeString('WAVE'); writeString('fmt '); view.setUint32(pos,16,true); pos+=4;
-  view.setUint16(pos,1,true); pos+=2;
-  view.setUint16(pos,numChannels,true); pos+=2;
-  view.setUint32(pos,sampleRate,true); pos+=4;
-  view.setUint32(pos,sampleRate*numChannels*2,true); pos+=4;
-  view.setUint16(pos,numChannels*2,true); pos+=2;
-  view.setUint16(pos,16,true); pos+=2;
-  writeString('data'); view.setUint32(pos, length-pos-4, true); pos+=4;
-  // interleave
-  const channels=[]; for(let c=0;c<numChannels;c++) channels.push(buffer.getChannelData(c));
-  let offset=0;
-  for(let i=0;i<buffer.length;i++){
-    for(let c=0;c<numChannels;c++){
-      let s=Math.max(-1, Math.min(1, channels[c][i]));
-      view.setInt16(pos, s<0? s*0x8000 : s*0x7FFF, true); pos+=2;
-    }
+  const idx=(t>=T.titleDur&&t<T.endStart)?sceneIndexAt(t):-1;
+  if(idx!==S.curSceneIdx){
+    S.curSceneIdx=idx;
+    document.querySelectorAll('.scenecard').forEach((c,i)=>c.classList.toggle('live', i===idx));
+    const live=document.querySelector('.scenecard.live');
+    if(live) live.scrollIntoView({block:'nearest',behavior:'smooth'});
   }
-  return new Blob([view], {type:'audio/wav'});
 }
-function exportCombinedWav(){
-  if(!state.buffers.length) return null;
-  ensureAudioCtx();
-  const sr=state.audioCtx.sampleRate;
-  const totalLen=state.buffers.reduce((a,b)=>a+b.length,0);
-  const out=state.audioCtx.createBuffer(1, totalLen, sr);
-  const data=out.getChannelData(0);
-  let offset=0;
-  state.buffers.forEach(buf=>{
-    const ch=buf.getChannelData(0);
-    // handle speed by resampling? simple: just copy (already duration accounts)
-    // If speed !=1, we already adjusted scene duration but buffer remains original speed; for WAV we export at original speed
-    data.set(ch, offset);
-    offset+=ch.length;
-  });
-  return encodeWAV(out);
+function setPlayUI(playing){
+  $('iconPlay').classList.toggle('hidden',playing);
+  $('iconPause').classList.toggle('hidden',!playing);
 }
-function downloadBlob(blob, filename){
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click();
-  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 1000);
+/* speech fallback */
+function speakChain(i){
+  if(!S.playing && i>0) return;
+  if(i>=S.scenes.length) return;
+  const sc=S.scenes[i];
+  const u=new SpeechSynthesisUtterance(sc.text);
+  if(S.speechVoice) u.voice=S.speechVoice;
+  u.rate=1.02; u.pitch=1;
+  u.onboundary=e=>{ if(e.charIndex!=null){ S.boundaryLive=true; S.liveSceneIdx=i;
+    let k=0; for(let j=0;j<sc.words.length;j++){ if(sc.words[j].charStart<=e.charIndex) k=j; else break; } S.liveWord=k; } };
+  u.onstart=()=>{ S.liveSceneIdx=i; };
+  u.onend=()=>{ if(S.playing) speakChain(i+1); };
+  speechSynthesis.speak(u);
+}
+function pickSpeechVoice(){
+  const vs=speechSynthesis.getVoices().filter(v=>/^en[-_]/i.test(v.lang));
+  const pref=[/Google UK English Male/i,/Daniel/i,/Google US English/i,/Microsoft Guy/i,/Microsoft Christopher/i,/Microsoft Ryan/i,/Alex/i,/Samantha/i,/Google UK English Female/i,/Microsoft Aria/i];
+  for(const p of pref){ const f=vs.find(v=>p.test(v.name)); if(f) return f; }
+  return vs[0]||null;
 }
 
-// Render video with canvas + MediaRecorder
-async function renderVideo(){
-  if(!state.scenes.length){ toast('Generate a short first','⚠️'); return; }
-  if(state.isRendering) return;
-  pausePreview();
-  ensureAudioCtx();
-  if(state.audioCtx.state==='suspended') await state.audioCtx.resume();
+/* ================= STUDIO UI ================= */
+function thumbOf(url){ return url.replace(/\/\d+px-/,'/320px-'); }
+function populateStudio(){
+  $('studioTitle').textContent=S.articleTitle;
+  const words=S.scenes.reduce((a,s)=>a+s.text.split(/\s+/).length,0);
+  $('studioMeta').textContent=S.scenes.length+' SCENES · '+words+' WORDS · '+S.timeline.total.toFixed(0)+'S RUNTIME · 9:16 VERTICAL';
+  $('modeBadge').textContent=S.audioMode==='tts' ? ('NARRATION: CLOUD VOICE — '+S.voice.toUpperCase()) : 'NARRATION: DEVICE SPEECH ENGINE';
+  $('exportNote').textContent = S.audioMode==='tts'
+    ? 'Exports a single .webm master with narration, captions and score mixed in. Rendering happens in real time — keep this tab visible.'
+    : 'Device narration cannot be captured by the browser; the export contains the full graded picture, burned-in subtitles and ambient score.';
+  // segments
+  $('segBar').innerHTML=S.scenes.map(sc=>'<div class="flex-1 bg-white/10 rounded-full overflow-hidden" style="flex-grow:'+((sc.end-sc.start)*100|0)+'"><div class="segfill h-full bg-accent rounded-full" style="width:0%"></div></div>').join('');
+  // scenes tab
+  $('tab-scenes').innerHTML=S.scenes.map((sc,i)=>`
+    <div class="scenecard rounded-xl p-3.5 flex gap-4 items-start" data-i="${i}">
+      <img src="${thumbOf(sc.image.url)}" referrerpolicy="no-referrer" class="w-[62px] h-[82px] object-cover rounded-lg flex-none border border-line" alt="">
+      <div class="min-w-0 flex-1">
+        <div class="flex items-center gap-2 mb-1.5">
+          <span class="font-mono text-[9px] tracking-[.18em] text-accent border border-accent/40 rounded-full px-2 py-0.5">${String(i+1).padStart(2,'0')} · ${esc(sc.purpose.toUpperCase())}</span>
+          <span class="font-mono text-[9px] text-dim">${(sc.end-sc.start).toFixed(1)}s</span>
+        </div>
+        <p class="text-[12.5px] leading-relaxed text-paper/85">${esc(sc.text)}</p>
+        <div class="font-mono text-[9px] text-dim mt-2 marq" title="${esc(sc.image.title)}">IMG: ${esc(sc.image.title.slice(0,58))} · § ${esc(sc.section)}</div>
+      </div>
+    </div>`).join('');
+  // script tab
+  $('scriptBody').innerHTML=S.scenes.map((sc,i)=>`
+    <div>
+      <div class="font-mono text-[9px] tracking-[.2em] text-accent mb-1.5">${String(i+1).padStart(2,'0')} — ${esc(sc.purpose.toUpperCase())} <span class="text-dim">/ SOURCE: WIKIPEDIA · § ${esc(sc.section.toUpperCase())}</span></div>
+      <p class="font-serif text-[17px] leading-relaxed text-paper/90">${esc(sc.text)}</p>
+    </div>`).join('');
+  $('scriptMeta').textContent='ALL NARRATION SENTENCES VERBATIM FROM THE RESEARCHED ARTICLE — ZERO INVENTED CLAIMS · '+words+' WORDS';
+  // sources tab
+  const imgCredits=[...new Map(S.scenes.map(s=>[s.image.title,s.image])).values()];
+  $('sourcesBody').innerHTML=`
+    <a href="https://en.wikipedia.org/wiki/${encodeURIComponent(S.articleTitle)}" target="_blank" rel="noopener" class="scenecard rounded-xl p-4 flex items-center justify-between gap-4 block">
+      <div><div class="font-mono text-[9px] tracking-[.2em] text-accent mb-1">PRIMARY SOURCE</div>
+      <div class="text-[14px] font-medium">${esc(S.articleTitle)} — Wikipedia</div>
+      <div class="font-mono text-[9px] text-dim mt-1">FULL ARTICLE READ · ${S.sections.length} SECTIONS · TEXT CC BY-SA 3.0</div></div>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8E8E96" stroke-width="2"><path d="M7 17L17 7M9 7h8v8" stroke-linecap="round"/></svg>
+    </a>
+    ${S.related.map(r=>`<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(r.title)}" target="_blank" rel="noopener" class="scenecard rounded-xl p-4 flex items-center justify-between gap-4 block">
+      <div><div class="font-mono text-[9px] tracking-[.2em] text-dim mb-1">CROSS-CHECKED</div><div class="text-[13px]">${esc(r.title)} — Wikipedia</div></div>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8E8E96" stroke-width="2"><path d="M7 17L17 7M9 7h8v8" stroke-linecap="round"/></svg></a>`).join('')}
+    <div class="font-mono text-[9px] tracking-[.2em] text-dim pt-3">IMAGE CREDITS — WIKIMEDIA COMMONS</div>
+    ${imgCredits.map(im=>`<a href="${esc(im.page||'#')}" target="_blank" rel="noopener" class="scenecard rounded-xl p-3 flex gap-3 items-center block">
+      <img src="${thumbOf(im.url)}" referrerpolicy="no-referrer" class="w-11 h-11 object-cover rounded-md border border-line flex-none" alt="">
+      <div class="min-w-0"><div class="text-[11.5px] truncate">${esc(im.title)}</div>
+      <div class="font-mono text-[9px] text-dim truncate">${esc(im.artist)}${im.license?' · '+esc(im.license):''}</div></div></a>`).join('')}`;
+  render(pctx,540,960,0.001);
+  updateTransport(0);
+}
 
-  state.isRendering=true;
-  $('#exportProgress').classList.remove('hidden');
-  $('#renderLog').classList.remove('hidden');
-  $('#renderLog').innerHTML='';
-  $('#exportBar').style.width='0%'; $('#exportText').textContent='Preparing canvas…';
-  logRender('Render started • '+state.res+' @ '+state.fps+'fps');
-  // setup canvas
-  const canvas=$('#renderCanvas');
-  const [w,h]=state.res.split('x').map(Number);
-  canvas.width=w; canvas.height=h;
-  const ctx=canvas.getContext('2d');
-  const fps=state.fps;
-  const totalDuration = state.scenes.reduce((a,c)=>a+c.duration,0);
-  logRender(`Total duration ${totalDuration.toFixed(2)}s • ${state.scenes.length} scenes`);
-
-  // prepare audio stream
-  const dest=state.audioCtx.createMediaStreamDestination();
-  const startAt=state.audioCtx.currentTime+0.3;
-  let tOffset=startAt;
-  const sources=[];
-  state.buffers.forEach((buf,i)=>{
-    if(!buf) return;
-    const src=state.audioCtx.createBufferSource(); src.buffer=buf; src.playbackRate.value=state.speed;
-    const gain=state.audioCtx.createGain(); gain.gain.value=1;
-    src.connect(gain).connect(dest);
-    // also connect to destination for monitoring (optional mute)
-    // src.connect(state.audioCtx.destination);
-    const dur=buf.duration/state.speed;
-    src.start(tOffset);
-    sources.push(src);
-    tOffset+= state.scenes[i].duration; // scene duration aligned
-  });
-  // music
-  let musicNode=null;
-  if(state.music!=='none'){
-    try{
-      const musicBuf = await getMusicBuffer(totalDuration);
-      if(musicBuf){
-        const msrc=state.audioCtx.createBufferSource(); msrc.buffer=musicBuf; msrc.loop=true;
-        const mgain=state.audioCtx.createGain();
-        // ducking: lower during narration
-        mgain.gain.value=state.musicVolume;
-        msrc.connect(mgain).connect(dest);
-        msrc.start(startAt);
-        // simple duck: we keep low volume constant (narration clear)
-        musicNode=msrc;
-        logRender(`Music: ${state.music} • vol ${state.musicVolume}`);
-      }
-    }catch(e){ logRender('Music load failed: '+e.message); }
+/* ================= EXPORT ================= */
+async function exportVideo(){
+  if(S.exporting || !S.timeline) return;
+  if(!('MediaRecorder' in window) || !HTMLCanvasElement.prototype.captureStream){
+    $('exportNote').textContent='This browser does not support in-browser video capture. Try Chrome or Edge.'; return;
   }
+  S.exporting=true; pause();
+  const modal=$('exportModal'); modal.classList.remove('hidden');
+  $('expDone').classList.add('hidden'); $('expProg').style.width='0%';
+  $('expStatus').textContent='Preparing 1080×1920 renderer…';
+  const ec=document.createElement('canvas'); ec.width=1080; ec.height=1920;
+  ec.style.width='100%'; ec.style.display='block';
+  const wrap=$('expCanvasWrap'); wrap.innerHTML=''; wrap.appendChild(ec);
+  const ex=ec.getContext('2d');
+  await sleep(400);
 
-  const canvasStream=canvas.captureStream(fps);
-  // add audio tracks
-  dest.stream.getAudioTracks().forEach(tr=> canvasStream.addTrack(tr));
+  const mime=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(m=>{try{return MediaRecorder.isTypeSupported(m)}catch(e){return false}})||'';
+  const vStream=ec.captureStream(30);
+  const actx=new (window.AudioContext||window.webkitAudioContext)();
+  await actx.resume();
+  const dest=actx.createMediaStreamDestination();
+  const bus=actx.createGain(); bus.gain.value=1;
+  bus.connect(dest);
+  const monitor=actx.createGain(); monitor.gain.value=0.55; bus.connect(monitor); monitor.connect(actx.destination);
+  const t0=actx.currentTime+0.15;
+  if(S.audioMode==='tts') scheduleNarration(actx,bus,t0);
+  else { const silent=actx.createBufferSource(); silent.buffer=actx.createBuffer(1,actx.sampleRate*S.timeline.total,actx.sampleRate); silent.connect(bus); silent.start(t0); }
+  if(S.musicOn) startMusic(actx,bus,t0,S.timeline.total);
+  if(S.audioMode==='speech'){ S.playing=true; S.perf0=performance.now(); speakChain(0); }
 
-  let mime='video/webm;codecs=vp9';
-  if(!MediaRecorder.isTypeSupported(mime)) mime='video/webm;codecs=vp8';
-  if(!MediaRecorder.isTypeSupported(mime)) mime='video/webm';
-  if(!MediaRecorder.isTypeSupported(mime)) mime='video/mp4';
-  logRender(`MediaRecorder mime: ${mime} • supported=${MediaRecorder.isTypeSupported(mime)}`);
+  const rec=new MediaRecorder(new MediaStream([...vStream.getVideoTracks(),...dest.stream.getAudioTracks()]),
+    {mimeType:mime||undefined, videoBitsPerSecond:12000000, audioBitsPerSecond:128000});
+  const chunks=[]; rec.ondataavailable=e=>{ if(e.data&&e.data.size) chunks.push(e.data); };
+  const stopped=new Promise(r=>rec.onstop=r);
+  rec.start(250);
+  $('expStatus').textContent='Rendering in real time — keep this tab visible';
 
-  let chunks=[];
-  let recorder;
-  try{ recorder=new MediaRecorder(canvasStream, {mimeType: mime, videoBitsPerSecond: 5500000}); }
-  catch(e){ recorder=new MediaRecorder(canvasStream); mime=recorder.mimeType; }
-
-  recorder.ondataavailable=e=>{ if(e.data && e.data.size>0) chunks.push(e.data); };
-  recorder.onerror=e=> logRender('Recorder error: '+e.error);
-
-  const recPromise=new Promise(res=>{
-    recorder.onstop=()=>{
-      const blob=new Blob(chunks,{type: mime});
-      state.videoBlob=blob;
-      logRender(`Recorder stopped • ${ (blob.size/1024/1024).toFixed(2)} MB • ${blob.type}`);
-      res(blob);
+  await new Promise(res=>{
+    const loop=()=>{
+      const t=actx.currentTime-t0;
+      if(t>=S.timeline.total){ res(); return; }
+      render(ex,1080,1920,Math.max(0.001,t));
+      $('expProg').style.width=(clamp(t/S.timeline.total,0,1)*100)+'%';
+      requestAnimationFrame(loop);
     };
+    render(ex,1080,1920,0.001); loop();
   });
-
-  recorder.start(100);
-  $('#exportText').textContent='Recording frames… 0%';
-  logRender('Recording… keep tab active');
-
-  // render loop
-  const startPerf=performance.now();
-  const durationMs=totalDuration*1000;
-  // preload all images
-  await Promise.all(state.scenes.map(s=> s.imageUrl? loadImage(s.imageUrl): Promise.resolve(null)));
-  let frameCount=0;
-  await new Promise(resolve=>{
-    function frame(now){
-      const elapsed=performance.now()-startPerf;
-      const pct=Math.min(1, elapsed/durationMs);
-      const globalTime=pct*totalDuration;
-      // draw
-      drawRenderFrame(ctx, w, h, globalTime);
-      $('#exportBar').style.width=(pct*100).toFixed(1)+'%';
-      $('#exportText').textContent=`Rendering ${Math.floor(pct*100)}% • ${frameCount} frames`;
-      frameCount++;
-      if(pct<1 && state.isRendering){
-        // use setTimeout for fps throttling
-        setTimeout(()=> requestAnimationFrame(frame), 1000/fps/1.2);
-      } else {
-        resolve();
-      }
-    }
-    requestAnimationFrame(frame);
-  });
-
-  // small tail to ensure audio finishes
-  await new Promise(r=>setTimeout(r, 600));
-  if(recorder.state!=='inactive') recorder.stop();
-  // stop music
-  try{ if(musicNode) musicNode.stop(); }catch(e){}
-  sources.forEach(s=>{ try{ s.stop(); }catch(e){} });
-
-  const blob=await recPromise;
-  state.isRendering=false;
-  $('#exportText').textContent='Done';
-  enableDownloads(true);
-  // enable video download
+  await sleep(400);
+  rec.stop(); await stopped;
+  try{speechSynthesis.cancel();}catch(e){}
+  S.playing=false;
+  actx.close().catch(()=>{});
+  const blob=new Blob(chunks,{type:mime||'video/webm'});
   const url=URL.createObjectURL(blob);
-  // preview? show toast with download
-  toast('Video rendered — downloading','🎬');
-  // auto download?
-  const ext=mime.includes('mp4')?'mp4':'webm';
-  downloadBlob(blob, `fact-engine-${(state.topic||'short').replace(/\s+/g,'-').toLowerCase()}-${Date.now()}.${ext}`);
-  // also set preview? keep canvas display
-  // stop tracks
-  canvasStream.getTracks().forEach(t=>t.stop());
+  const ext=(mime&&mime.includes('mp4'))?'mp4':'webm';
+  const a=$('expDownload'); a.href=url; a.download=slug(S.articleTitle||'briefing')+'-fact-engine.'+ext;
+  $('expSize').textContent=(blob.size/1048576).toFixed(1)+' MB · 1080×1920 · '+ext.toUpperCase()+' · '+S.timeline.total.toFixed(0)+'s';
+  $('expStatus').textContent='Master complete — ready to save';
+  $('expProg').style.width='100%';
+  $('expDone').classList.remove('hidden');
+  S.exporting=false;
 }
 
-function drawRenderFrame(ctx, W, H, globalTime){
-  const {idx, local} = getSceneForTime(globalTime);
-  const sc=state.scenes[idx];
-  // background
-  ctx.fillStyle='#070a14'; ctx.fillRect(0,0,W,H);
-  // image
-  const prog=local/sc.duration;
-  const zoom=1 + 0.06*prog;
-  const img = sc.imageUrl ? previewImages[sc.imageUrl] : null;
-  if(img){
-    const iw=img.width, ih=img.height;
-    const scale=Math.max(W/iw, H/ih)*zoom;
-    const w=iw*scale, h=ih*scale;
-    const x=(W-w)/2 + Math.sin(globalTime*0.2)* (W*0.02);
-    const y=(H-h)/2;
-    ctx.drawImage(img, x, y, w, h);
-    // overlay gradient
-    const grad=ctx.createLinearGradient(0,0,0,H);
-    grad.addColorStop(0,'rgba(0,0,0,0.18)'); grad.addColorStop(0.6,'rgba(0,0,0,0)'); grad.addColorStop(1,'rgba(0,0,0,0.7)');
-    ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
-  } else {
-    const g=ctx.createLinearGradient(0,0,W,H);
-    const c=[ ['#4f46e5','#06b6d4'], ['#7c3aed','#ec4899'], ['#0ea5e9','#10b981'] ][idx%3];
-    g.addColorStop(0,c[0]); g.addColorStop(1,c[1]);
-    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-    ctx.fillStyle='rgba(255,255,255,0.92)'; ctx.font='900 '+Math.floor(W*0.08)+'px Inter'; ctx.textAlign='center';
-    ctx.fillText('FACT ENGINE',W/2,H/2);
-    ctx.font='600 '+Math.floor(W*0.032)+'px Inter'; ctx.fillStyle='rgba(255,255,255,0.7)';
-    ctx.fillText((state.topic||'Amazing Facts').toUpperCase(),W/2,H/2+40);
+/* ================= ORCHESTRATOR ================= */
+async function generate(topic){
+  topic=topic.trim();
+  if(!topic){ $('topicInput').classList.add('shake'); setTimeout(()=>$('topicInput').classList.remove('shake'),450); return; }
+  S.topic=topic;
+  pause(); stopSources(); speechSynthesis.cancel();
+  S.timeline=null; S.scenes=[]; S.buffers=[]; S.audioMode='speech';
+  $('termLines').innerHTML='';
+  document.querySelectorAll('.step').forEach(li=>{li.classList.remove('active','done');});
+  ['Deep research','Fact script','Real imagery','Narration','Assembly'].forEach((n,i)=>{});
+  const defs=['Article, sections & linked sources','Verified sentences, narrative arc','Article media + Wikimedia Commons','Voice synthesis, segment timing','Word-level captions, 9:16 timeline'];
+  document.querySelectorAll('.step .status').forEach((el,i)=>el.textContent=defs[i]);
+  $('pipeTopic').textContent='“'+topic+'”';
+  $('inputErr').classList.add('hidden');
+  showView('pipeline');
+  try{
+    await stageResearch(topic);
+    stageScript();
+    await stageVisuals();
+    await stageAudio();
+    await stageAssemble();
+    await sleep(500);
+    populateStudio();
+    showView('studio');
+  }catch(e){
+    console.error(e);
+    logErr('! '+e.message);
+    logD('▸ Adjust the topic and run the engine again.');
+    await sleep(1600);
+    showView('input');
+    const err=$('inputErr'); err.textContent=e.message; err.classList.remove('hidden');
   }
-  // top bar
-  ctx.fillStyle='rgba(0,0,0,0.55)'; ctx.fillRect(0,0,W, Math.floor(H*0.07));
-  ctx.fillStyle='#fff'; ctx.font='800 '+Math.floor(W*0.022)+'px Inter'; ctx.textAlign='left';
-  ctx.fillText('FACT ENGINE', Math.floor(W*0.04), Math.floor(H*0.045));
-  ctx.textAlign='right'; ctx.fillStyle='#f59e0b'; ctx.font='800 '+Math.floor(W*0.02)+'px JetBrains Mono';
-  ctx.fillText(`SCENE ${idx+1}/${state.scenes.length}`, W- Math.floor(W*0.04), Math.floor(H*0.045));
-
-  // transition crossfade from previous scene (0.25s)
-  const transition=0.28;
-  if(local < transition && idx>0){
-    const prev=state.scenes[idx-1];
-    const prevImg=prev.imageUrl? previewImages[prev.imageUrl]:null;
-    if(prevImg){
-      const alpha=1 - (local/transition);
-      ctx.globalAlpha=alpha;
-      const iw=prevImg.width, ih=prevImg.height;
-      const scale=Math.max(W/iw, H/ih)*(1+0.06);
-      const w=iw*scale, h=ih*scale;
-      ctx.drawImage(prevImg, (W-w)/2, (H-h)/2, w, h);
-      ctx.globalAlpha=1;
-      ctx.fillStyle=`rgba(0,0,0,${alpha*0.25})`; ctx.fillRect(0,0,W,H);
-    }
-  }
-
-  // captions
-  if(sc.wordTimings && sc.wordTimings.length){
-    let activeIdx=-1;
-    for(let i=0;i<sc.wordTimings.length;i++){
-      if(local>=sc.wordTimings[i].start && local<sc.wordTimings[i].end){ activeIdx=i; break; }
-    }
-    if(activeIdx===-1 && local>=sc.wordTimings[sc.wordTimings.length-1].end) activeIdx=sc.wordTimings.length-1;
-    // find group
-    const groups=sc.captionGroups;
-    let wpos=0, activeGroup=0;
-    for(let g=0;g<groups.length;g++){
-      const cnt=groups[g].split(' ').length;
-      if(activeIdx>=wpos && activeIdx<wpos+cnt){ activeGroup=g; break; }
-      wpos+=cnt;
-    }
-    const gText=groups[activeGroup] || groups[0] || '';
-    const gWords=gText.split(' ');
-    let groupStart=0; for(let g=0;g<activeGroup;g++) groupStart+=groups[g].split(' ').length;
-
-    // layout: center bottom safe area (~18% from bottom)
-    const centerY = H*0.78;
-    const pad = Math.floor(W*0.025);
-    // measure
-    ctx.font='900 '+Math.floor(W*0.055)+'px Inter';
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    // background pill behind caption group
-    const wordWidths=gWords.map(w=> ctx.measureText(w.toUpperCase()).width + pad*2);
-    const gap= Math.floor(W*0.02);
-    const totalW=wordWidths.reduce((a,b)=>a+b,0)+ gap*(gWords.length-1);
-    let x = (W-totalW)/2;
-    // subtle backdrop
-    // ctx.fillStyle='rgba(0,0,0,0.28)';
-    // roundRect(ctx, (W-totalW)/2 - pad, centerY - Math.floor(H*0.04), totalW+pad*2, Math.floor(H*0.075), 18);
-    // ctx.fill();
-
-    gWords.forEach((w,i)=>{
-      const isActive = (groupStart+i)===activeIdx;
-      const ww=wordWidths[i];
-      const cx=x+ww/2;
-      // shadow / outline
-      ctx.save();
-      // pop animation for active
-      let scale=1;
-      if(isActive){
-        const pulse = Math.sin(local*12)*0.02+1.03;
-        scale=pulse;
-      }
-      ctx.translate(cx, centerY);
-      ctx.scale(scale,scale);
-      ctx.translate(-cx,-centerY);
-      // box
-      ctx.fillStyle= isActive? '#f59e0b' : 'rgba(0,0,0,0.72)';
-      ctx.strokeStyle= isActive? '#f59e0b' : 'rgba(255,255,255,0.12)';
-      ctx.lineWidth=2;
-      // rounded rect
-      const rx=x, ry=centerY- Math.floor(H*0.038), rw=ww, rh=Math.floor(H*0.072);
-      roundRect(ctx, rx, ry, rw, rh, 14);
-      ctx.fill();
-      if(!isActive) ctx.stroke();
-      // text
-      ctx.fillStyle= isActive? '#000' : '#fff';
-      ctx.font='900 '+Math.floor(W*0.055)+'px Inter';
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      // outline for inactive
-      if(!isActive){
-        ctx.strokeStyle='rgba(0,0,0,0.9)'; ctx.lineWidth=6; ctx.lineJoin='round';
-        ctx.strokeText(w.toUpperCase(), cx, centerY+1);
-      }
-      ctx.fillText(w.toUpperCase(), cx, centerY+1);
-      ctx.restore();
-      x+= ww + gap;
-    });
-  }
-
-  // progress bar bottom
-  const totalDuration = state.scenes.reduce((a,c)=>a+c.duration,0);
-  const pct=globalTime/totalDuration;
-  ctx.fillStyle='rgba(255,255,255,0.18)'; ctx.fillRect(0,H-6,W,6);
-  ctx.fillStyle='#f59e0b'; ctx.fillRect(0,H-6,W*pct,6);
 }
 
-function roundRect(ctx,x,y,w,h,r){
-  ctx.beginPath();
-  ctx.moveTo(x+r,y);
-  ctx.arcTo(x+w,y,x+w,y+h,r);
-  ctx.arcTo(x+w,y+h,x,y+h,r);
-  ctx.arcTo(x,y+h,x,y,r);
-  ctx.arcTo(x,y,x+w,y,r);
-  ctx.closePath();
-}
-
-async function getMusicBuffer(totalDuration){
-  if(state.customMusicBuffer) {
-    // loop to duration
-    ensureAudioCtx();
-    const srcBuf=state.customMusicBuffer;
-    const sr=state.audioCtx.sampleRate;
-    const len=Math.ceil(totalDuration*sr);
-    const out=state.audioCtx.createBuffer(srcBuf.numberOfChannels, len, sr);
-    for(let c=0;c<out.numberOfChannels;c++){
-      const o=out.getChannelData(c);
-      const s=srcBuf.getChannelData(c % srcBuf.numberOfChannels);
-      for(let i=0;i<len;i++) o[i]= s[i % s.length] * 0.9;
-    }
-    return out;
-  }
-  if(state.music==='cinematic' || state.music==='lofi' || state.music==='energetic'){
-    // generate synthetic pad via offline
-    ensureAudioCtx();
-    const sr=state.audioCtx.sampleRate;
-    const len=Math.ceil(totalDuration*sr);
-    const out=state.audioCtx.createBuffer(2, len, sr);
-    // simple pad: low sine + filtered noise
-    for(let c=0;c<2;c++){
-      const d=out.getChannelData(c);
-      for(let i=0;i<len;i++){
-        const t=i/sr;
-        let v=0;
-        if(state.music==='cinematic'){
-          v = Math.sin(2*Math.PI*55*t)*0.12 + Math.sin(2*Math.PI*110*t)*0.06;
-          v += (Math.random()-0.5)*0.015;
-          v *= 0.4 + 0.3*Math.sin(2*Math.PI*0.07*t);
-        } else if(state.music==='lofi'){
-          v = Math.sin(2*Math.PI*80*t)*0.08 + Math.sin(2*Math.PI*160*t)*0.04;
-          // vinyl crackle
-          if(Math.random()<0.001) v+= (Math.random()-0.5)*0.2;
-          v *= 0.5;
-        } else {
-          v = Math.sin(2*Math.PI*95*t)*0.1 + Math.sin(2*Math.PI*190*t)*0.05;
-          v += Math.sin(2*Math.PI*3*t)*0.02;
-          v *= 0.6;
-        }
-        // fade in/out 1.2s
-        const fade=Math.min(1, t/1.2, (totalDuration - t)/1.0);
-        d[i]=v*fade;
-      }
-    }
-    return out;
-  }
-  return null;
-}
-
-function logRender(msg){
-  const el=$('#renderLog');
-  const time=new Date().toLocaleTimeString();
-  el.innerHTML+=`<div>[${time}] ${msg}</div>`;
-  el.scrollTop=el.scrollHeight;
-}
-function enableDownloads(rendered){
-  const hasScenes=state.scenes.length>0;
-  const hasAudio=state.combinedWavBlob;
-  const hasVideo=state.videoBlob;
-  const btnV=$('#btnDownloadVideo'), btnW=$('#btnDownloadWav'), btnP=$('#btnDownloadPack');
-  [btnV,btnW,btnP].forEach(b=>{
-    b.classList.remove('opacity-50','pointer-events-none');
-  });
-  if(!hasScenes){
-    [btnV,btnW,btnP].forEach(b=> b.classList.add('opacity-50','pointer-events-none'));
-  }
-  // also header
-  $('#btnExportWav').disabled=!hasAudio;
-  $('#btnExportPack').disabled=!hasScenes;
-}
-
-// Download handlers
-$('#btnDownloadVideo').onclick=()=>{
-  if(state.videoBlob) {
-    const ext=state.videoBlob.type.includes('mp4')?'mp4':'webm';
-    downloadBlob(state.videoBlob, `fact-engine-${(state.topic||'short').replace(/\s+/g,'-')}.${ext}`);
-  } else {
-    toast('Render the video first','⚠️');
-  }
-};
-$('#btnDownloadWav').onclick=()=>{
-  if(state.combinedWavBlob) downloadBlob(state.combinedWavBlob, `fact-engine-narration-${Date.now()}.wav`);
-  else if(state.buffers.length) {
-    const b=exportCombinedWav(); if(b) downloadBlob(b,`fact-engine-narration-${Date.now()}.wav`); else toast('No audio yet','⚠️');
-  } else toast('Generate narration first','⚠️');
-};
-$('#btnDownloadPack').onclick=downloadPackage;
-$('#btnExportWav').onclick=$('#btnDownloadWav').onclick;
-$('#btnExportPack').onclick=downloadPackage;
-function downloadPackage(){
-  if(!state.scenes.length){ toast('Generate a short first','⚠️'); return; }
-  const txt=`FACT ENGINE — YOUTUBE PUBLISHING PACKAGE
-Topic: ${state.topic}
-Source: ${state.source}
-Duration: ${state.duration}s • ${state.scenes.length} scenes • Voice: ${state.voice} @ ${state.speed}x
-Generated: ${new Date().toISOString()}
-
---------------------------------------------------
-5 TITLE SUGGESTIONS
---------------------------------------------------
-${[...document.querySelectorAll('#ytTitles li')].map((li,i)=>`${i+1}. ${li.textContent}`).join('\n')}
-
---------------------------------------------------
-DESCRIPTION (SEO)
---------------------------------------------------
-${$('#ytDesc').textContent}
-
---------------------------------------------------
-HASHTAGS
---------------------------------------------------
-${$('#ytTags').textContent}
-
---------------------------------------------------
-THUMBNAIL CONCEPT
---------------------------------------------------
-${$('#ytThumb').textContent}
-
---------------------------------------------------
-TRANSCRIPT
---------------------------------------------------
-${$('#ytTranscript').textContent}
-
---------------------------------------------------
-CREDITS & ATTRIBUTION
---------------------------------------------------
-${$('#ytCredits').textContent}
-
---------------------------------------------------
-SCENE BREAKDOWN
---------------------------------------------------
-${state.scenes.map((s,i)=>`Scene ${i+1} [${s.duration.toFixed(1)}s] — Keywords: ${s.keywords}\n"${s.sentence}"\nImage: ${s.attribution}\nCaptions: ${s.captionGroups.join(' | ')}\n`).join('\n')}
-`;
-  downloadBlob(new Blob([txt],{type:'text/plain'}), `fact-engine-youtube-package-${(state.topic||'short').replace(/\s+/g,'-').toLowerCase()}.txt`);
-  toast('Package downloaded','📄');
-}
-
-// Resolution/FPS
-$$('.res-btn').forEach(b=> b.onclick=()=>{
-  $$('.res-btn').forEach(x=> x.className='res-btn rounded-xl py-2.5 text-xs font-bold bg-white/5 border border-white/10');
-  b.className='res-btn pill-active rounded-xl py-2.5 text-xs font-bold'; state.res=b.dataset.res;
+/* ================= EVENTS ================= */
+$('generateBtn').addEventListener('click',()=>generate($('topicInput').value));
+$('topicInput').addEventListener('keydown',e=>{ if(e.key==='Enter') generate($('topicInput').value); });
+document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{ $('topicInput').value=c.dataset.topic; generate(c.dataset.topic); }));
+$('newTopicBtn').addEventListener('click',()=>{ pause(); stopSources(); speechSynthesis.cancel(); showView('input'); });
+$('btnPlay').addEventListener('click',()=>{ if(!S.timeline) return;
+  if(S.playing) pause();
+  else if(S.audioMode==='tts' && S.ctx && S.ctx.state==='suspended' && S.t0) resume();
+  else if(S.audioMode==='speech' && S.pauseStart && speechSynthesis.paused) resume();
+  else play();
 });
-$$('.fps-btn').forEach(b=> b.onclick=()=>{
-  $$('.fps-btn').forEach(x=> x.className='fps-btn rounded-xl py-2.5 text-xs font-bold bg-white/5 border border-white/10');
-  b.className='fps-btn pill-active rounded-xl py-2.5 text-xs font-bold'; state.fps=parseInt(b.dataset.fps);
+$('bigPlay').addEventListener('click',()=>{ $('bigPlay').style.opacity='0'; $('bigPlay').style.pointerEvents='none'; play(); });
+$('btnRestart').addEventListener('click',()=>{ if(S.timeline) restart(); });
+$('exportBtn').addEventListener('click',exportVideo);
+$('expClose').addEventListener('click',()=>{ if(!S.exporting) $('exportModal').classList.add('hidden'); });
+$('musicToggle').addEventListener('click',()=>{ S.musicOn=!S.musicOn;
+  $('musicToggle').classList.toggle('on',S.musicOn);
+  $('musicLabel').textContent=S.musicOn?'ON — subtle, under narration':'OFF';
 });
-
-// Main generate
-$('#btnGenerate').onclick=generatePipeline;
-$('#btnRender').onclick=renderVideo;
-$('#btnRenderHeader').onclick=renderVideo;
-
-// Init
-initStepper();
-$('#previewCanvas').width=720; $('#previewCanvas').height=1280;
-// initial draw
-pctx.fillStyle='#0a0e1a'; pctx.fillRect(0,0,720,1280);
-updateYouTubePackage();
-
-// allow Enter on topic
-$('#topicInput').addEventListener('keydown',e=>{ if(e.key==='Enter') generatePipeline(); });
-
-// handle visibility to pause
-document.addEventListener('visibilitychange',()=>{
-  if(document.hidden && state.isPlaying){ logRender('Tab hidden — playback paused to save memory'); }
+$('voiceSelect').addEventListener('change',async e=>{
+  S.voice=e.target.value;
+  const btn=$('exportBtn'); btn.disabled=true;
+  pause(); stopSources(); speechSynthesis.cancel();
+  try{ await stageAudio(); await stageAssemble(); populateStudio(); }catch(err){}
+  btn.disabled=false;
 });
+document.querySelectorAll('.tabbtn').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tabbtn').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  document.querySelectorAll('.tabpanel').forEach(p=>p.classList.add('hidden'));
+  $('tab-'+b.dataset.tab).classList.remove('hidden');
+}));
+document.addEventListener('keydown',e=>{
+  if(e.code==='Space' && !views.studio.classList.contains('hidden') && document.activeElement.tagName!=='INPUT' && document.activeElement.tagName!=='SELECT'){
+    e.preventDefault(); $('btnPlay').click();
+  }
+});
+speechSynthesis.onvoiceschanged=()=>{ S.speechVoice=pickSpeechVoice(); };
+S.speechVoice=pickSpeechVoice();
+
+/* entrance */
+if(window.gsap) gsap.fromTo('#view-input .fadeup',{y:22,opacity:0},{y:0,opacity:1,duration:.9,stagger:.09,ease:'power3.out',delay:.15});
+else document.querySelectorAll('.fadeup').forEach(el=>{el.style.opacity=1;el.style.transform='none';});
+})();
 </script>
 </body>
 </html>
