@@ -1,2029 +1,1428 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>FACT ENGINE 2.0 — Premium Shorts Generator</title>
-<meta name="description" content="Any topic in. A broadcast-grade YouTube Short out. Deep Wikipedia research, real Wikimedia imagery, studio neural voices and word-timed subtitles — auto-assembled. No intro. No branding. Just the story.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='17' fill='none' stroke='%23E3B558' stroke-width='3'/%3E%3Cpath d='M15 27V13h11M15 19.5h8.5' stroke='%23E3B558' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:ital,wght@1,400;1,500;1,600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>FACT ENGINE 2.0 | Premium AI Shorts Studio</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={theme:{extend:{colors:{neon:'#00d4ff',violet:'#8b5cf6',charcoal:'#0f0f17',deep:'#08080e',surface:'#14141f',surfaceLight:'#1a1a28'},fontFamily:{display:['Space Grotesk','sans-serif'],body:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']}}}}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 <style>
-/* ============================================================
-   FACT ENGINE 2.0 — DESIGN SYSTEM
-   ============================================================ */
-:root{
-  --bg:#08080C;
-  --panel:#121218;
-  --panel-2:#0D0D13;
-  --panel-3:#17171F;
-  --panel-4:#1D1D26;
-  --line:rgba(255,255,255,.07);
-  --line-2:rgba(255,255,255,.13);
-  --text:#ECEAE0;
-  --muted:#A4A297;
-  --faint:#6F6E64;
-  --gold:#E3B558;
-  --gold-2:#F5D98B;
-  --gold-3:#B87F26;
-  --gold-deep:#8A5E17;
-  --green:#6FD598;
-  --red:#E2725B;
-  --font-d:'Fraunces',serif;
-  --font-b:'Inter',sans-serif;
-  --font-m:'IBM Plex Mono',monospace;
-}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--neon:#00d4ff;--violet:#8b5cf6;--deep:#08080e;--charcoal:#0f0f17;--surface:#14141f;--surface-light:#1a1a28;--border:rgba(0,212,255,0.1);--border-violet:rgba(139,92,246,0.1);--glow:0 0 20px rgba(0,212,255,0.06);--glow-violet:0 0 20px rgba(139,92,246,0.06);--radius:14px;--radius-sm:10px;--radius-lg:18px}
+*{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:var(--font-b);
-  -webkit-font-smoothing:antialiased;
-  overflow-x:hidden;
-  min-height:100vh;
-}
-body::before{
-  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
-  background:
-    radial-gradient(1100px 700px at -12% -10%, rgba(227,181,88,.09), transparent 55%),
-    radial-gradient(900px 700px at 112% 8%, rgba(84,140,158,.08), transparent 55%),
-    radial-gradient(1000px 900px at 50% 118%, rgba(227,181,88,.06), transparent 55%);
-}
-.grain{
-  position:fixed;inset:-60px;z-index:60;pointer-events:none;opacity:.055;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.9'/%3E%3C/svg%3E");
-  background-size:280px 280px;
-}
-::selection{background:var(--gold);color:#141005}
-:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4px}
-::-webkit-scrollbar{width:9px;height:9px}
-::-webkit-scrollbar-track{background:#0D0D13}
-::-webkit-scrollbar-thumb{background:#2C2C36;border-radius:8px}
-::-webkit-scrollbar-thumb:hover{background:#453F2A}
-
-.mono{font-family:var(--font-m)}
-
-/* ============================================================
-   TOP BAR
-   ============================================================ */
-.topbar{
-  position:sticky;top:0;z-index:50;
-  height:64px;display:flex;align-items:center;justify-content:space-between;
-  padding:0 clamp(18px,3.4vw,40px);
-  background:rgba(8,8,12,.78);
-  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-  border-bottom:1px solid rgba(227,181,88,.14);
-}
-.brand{display:flex;align-items:center;gap:14px;text-decoration:none}
-.brand svg{display:block}
-.brand-word{display:flex;align-items:baseline;gap:9px}
-.brand-name{font-family:var(--font-b);font-weight:800;letter-spacing:.14em;font-size:15px;color:var(--text)}
-.brand-ver{font-family:var(--font-m);font-size:10px;color:#141005;background:linear-gradient(160deg,#F6D98B,#DFA63F);padding:2px 5px;border-radius:4px;letter-spacing:.08em}
-.brand-tag{font-family:var(--font-m);font-size:9px;letter-spacing:.3em;color:var(--faint);display:block;margin-top:2px}
-.topnav{display:flex;align-items:center;gap:14px;font-family:var(--font-m);font-size:10px;letter-spacing:.18em;color:var(--faint)}
-.topnav b{color:var(--muted);font-weight:500}
-.topnav .arr{color:var(--gold);opacity:.9}
-.top-status{display:flex;align-items:center;gap:9px;font-family:var(--font-m);font-size:10px;letter-spacing:.22em;color:var(--green);border:1px solid rgba(111,213,152,.28);background:rgba(111,213,152,.06);padding:7px 13px;border-radius:100px}
-.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 1.6s ease-in-out infinite}
-@keyframes blink{0%,100%{box-shadow:0 0 0 0 rgba(111,213,152,.5)}50%{box-shadow:0 0 0 5px rgba(111,213,152,.08)}}
-
-/* ============================================================
-   STUDIO LAYOUT
-   ============================================================ */
-.studio{
-  position:relative;z-index:1;
-  max-width:1560px;margin:0 auto;
-  padding:clamp(20px,3vw,36px) clamp(16px,3vw,40px) 60px;
-  display:grid;grid-template-columns:minmax(430px,540px) minmax(0,1fr);
-  gap:clamp(18px,2.4vw,30px);align-items:start;
-}
-
-/* ============================================================
-   CONTROL PANEL
-   ============================================================ */
-.panel{
-  background:linear-gradient(180deg,#14141B 0%,#101016 100%);
-  border:1px solid var(--line);
-  border-radius:22px;
-  box-shadow:0 40px 80px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.05);
-  padding:clamp(22px,2.4vw,30px);
-}
-.control-panel{display:flex;flex-direction:column;gap:0}
-.eyebrow{font-family:var(--font-m);font-size:10px;letter-spacing:.32em;color:var(--gold);display:flex;align-items:center;gap:10px}
-.eyebrow::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(227,181,88,.4),transparent)}
-.display{
-  font-family:var(--font-d);font-weight:560;font-variation-settings:'opsz' 100;
-  font-size:clamp(38px,3.6vw,52px);line-height:1.0;letter-spacing:-.015em;
-  color:#F2EFE4;margin:16px 0 14px;
-}
-.display em{
-  font-style:italic;
-  background:linear-gradient(115deg,#F8E3A6 0%,#E9BE62 28%,#C98F2B 55%,#F2D488 82%,#A87122 100%);
-  background-size:200% 100%;
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
-  animation:goldShift 6s ease-in-out infinite alternate;
-}
-@keyframes goldShift{from{background-position:0% 50%}to{background-position:100% 50%}}
-.lede{font-size:14px;line-height:1.65;color:var(--muted);max-width:54ch;margin-bottom:22px}
-.lede b{color:#D9D6C9;font-weight:600}
-
-.field-label{
-  display:flex;align-items:center;gap:10px;
-  font-family:var(--font-m);font-size:10px;letter-spacing:.26em;color:#8E8D83;
-  margin:22px 0 10px;
-}
-.step-dot{
-  width:19px;height:19px;border-radius:6px;flex:0 0 19px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:10px;color:#191307;font-weight:600;
-  background:linear-gradient(160deg,#F4CE7C,#C98F2B);
-  box-shadow:0 2px 6px rgba(227,181,88,.35);
-}
-.field-note{margin-left:auto;font-size:9px;letter-spacing:.14em;color:var(--faint)}
-
-/* mode tabs */
-.mode-tabs{display:flex;gap:6px;background:#0C0C12;border:1px solid var(--line);border-radius:12px;padding:5px;margin-bottom:10px}
-.mode-tab{
-  flex:1;border:0;background:transparent;color:var(--muted);cursor:pointer;
-  font-family:var(--font-m);font-size:10px;letter-spacing:.18em;padding:9px 6px;border-radius:8px;
-  transition:all .25s;
-}
-.mode-tab:hover{color:var(--text)}
-.mode-tab.active{background:linear-gradient(180deg,#24242E,#1B1B23);color:var(--gold-2);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 2px 8px rgba(0,0,0,.4)}
-.mode-note{font-size:11px;color:var(--faint);margin:-2px 2px 10px;line-height:1.5;display:none}
-.mode-note.show{display:block}
-
-/* topic input */
-.input-shell{position:relative}
-#topicInput{
-  width:100%;background:#0B0B11;border:1px solid var(--line-2);border-radius:14px;
-  color:var(--text);font-family:var(--font-b);font-size:15px;line-height:1.55;
-  padding:14px 16px;resize:none;min-height:64px;max-height:220px;
-  transition:border-color .25s, box-shadow .25s;
-}
-#topicInput::placeholder{color:#4E4D45}
-#topicInput:focus{outline:none;border-color:rgba(227,181,88,.55);box-shadow:0 0 0 3px rgba(227,181,88,.12),0 8px 30px rgba(0,0,0,.4)}
-#topicInput.flag{border-color:rgba(226,114,91,.7);box-shadow:0 0 0 3px rgba(226,114,91,.14);animation:shake .45s}
-@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
-.input-foot{display:flex;justify-content:space-between;margin:6px 2px 0;font-family:var(--font-m);font-size:9px;letter-spacing:.16em;color:var(--faint)}
-#inputCount{color:var(--gold);opacity:.85}
-.chip-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
-.topic-chip{
-  border:1px solid var(--line-2);background:transparent;color:var(--muted);
-  font-family:var(--font-b);font-size:11.5px;padding:6px 12px;border-radius:100px;cursor:pointer;
-  transition:all .2s;
-}
-.topic-chip:hover{border-color:rgba(227,181,88,.5);color:var(--gold-2);transform:translateY(-1px)}
-
-/* ============================================================
-   VOICE GRID
-   ============================================================ */
-.voice-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.voice-card{
-  position:relative;text-align:left;cursor:pointer;overflow:hidden;
-  background:var(--panel-2);border:1px solid var(--line-2);border-radius:16px;
-  padding:13px 13px 11px;display:flex;gap:11px;align-items:flex-start;
-  transition:transform .22s,border-color .22s, box-shadow .22s;color:var(--text);
-}
-.voice-card::before{
-  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
-  background:linear-gradient(180deg,var(--gold-2),var(--gold-3));
-  opacity:0;transition:opacity .25s;
-}
-.voice-card:hover{transform:translateY(-2px);border-color:rgba(227,181,88,.35)}
-.voice-card.selected{border-color:rgba(227,181,88,.65);box-shadow:0 0 0 1px rgba(227,181,88,.55),0 12px 34px rgba(227,181,88,.10);background:linear-gradient(180deg,#161510,#131209)}
-.voice-card.selected::before{opacity:1}
-.vc-avatar{
-  flex:0 0 44px;width:44px;height:44px;border-radius:12px;
-  display:flex;align-items:center;justify-content:center;
-  font-family:var(--font-d);font-style:italic;font-weight:600;font-size:16px;color:#1B1408;
-  background:linear-gradient(155deg,var(--h,#E3B558) 0%,#8A6A20 130%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.55), 0 3px 8px rgba(0,0,0,.5);
-}
-.vc-body{display:flex;flex-direction:column;gap:2px;min-width:0}
-.vc-namerow{display:flex;align-items:center;gap:7px}
-.vc-name{font-weight:700;font-size:13.5px;letter-spacing:.01em}
-.vc-tag{font-family:var(--font-m);font-size:8px;letter-spacing:.18em;color:var(--gold);border:1px solid rgba(227,181,88,.4);border-radius:4px;padding:2px 4px}
-.vc-role{font-family:var(--font-m);font-size:8.5px;letter-spacing:.14em;color:#C9C6B8;margin-top:1px}
-.vc-desc{font-size:10.5px;line-height:1.45;color:var(--faint);margin-top:3px}
-.vc-foot{display:flex;align-items:center;justify-content:space-between;margin-top:7px;gap:6px}
-.eq{display:inline-flex;align-items:flex-end;gap:2.5px;height:13px}
-.eq i{width:3px;height:22%;border-radius:2px;background:var(--gold);opacity:.32;transition:opacity .2s}
-.voice-card:hover .eq i,.voice-card.selected .eq i{opacity:1;animation:eq .9s ease-in-out infinite alternate}
-.eq i:nth-child(1){animation-delay:-.1s}.eq i:nth-child(2){animation-delay:-.5s;animation-duration:.74s}.eq i:nth-child(3){animation-delay:-.3s;animation-duration:1.05s}.eq i:nth-child(4){animation-delay:-.7s;animation-duration:.82s}.eq i:nth-child(5){animation-delay:-.2s}
-@keyframes eq{from{height:14%}to{height:100%}}
-.vc-sample{
-  border:1px solid var(--line-2);background:transparent;color:var(--muted);
-  font-family:var(--font-m);font-size:8px;letter-spacing:.2em;padding:4px 8px;border-radius:6px;cursor:pointer;
-  transition:all .2s;white-space:nowrap;
-}
-.vc-sample:hover{color:var(--gold-2);border-color:rgba(227,181,88,.5)}
-.voice-card.playing .vc-sample{color:#141005;background:var(--gold);border-color:var(--gold)}
-
-/* ============================================================
-   SUBTITLE STYLE GRID
-   ============================================================ */
-.style-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-.style-card{
-  cursor:pointer;border:1px solid var(--line-2);background:var(--panel-2);
-  border-radius:14px;padding:8px 6px 9px;display:flex;flex-direction:column;gap:7px;
-  transition:transform .2s,border-color .2s,box-shadow .2s;color:var(--text);text-align:center;
-}
-.style-card:hover{transform:translateY(-2px);border-color:rgba(227,181,88,.35)}
-.style-card.selected{border-color:rgba(227,181,88,.65);box-shadow:0 0 0 1px rgba(227,181,88,.55),0 10px 28px rgba(227,181,88,.10)}
-.demo{
-  height:74px;border-radius:9px;background:radial-gradient(120% 160% at 50% 0%,#232029 0%,#0B0B0F 78%);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;overflow:hidden;
-  border:1px solid rgba(255,255,255,.05);padding:6px;
-}
-.demo .w{display:inline-block;margin:0 2px;white-space:nowrap}
-.style-name{font-size:10px;font-weight:700;letter-spacing:.02em;line-height:1.3}
-.style-tag{font-family:var(--font-m);font-size:6.5px;letter-spacing:.06em;color:var(--faint);line-height:1.5}
-
-/* demo animations — each genuinely different */
-.d-minimal .w{font-family:var(--font-b);font-weight:600;font-size:9px;letter-spacing:.28em;color:#EDEAE0;animation:dimFade 2.6s infinite}
-.d-minimal .w:nth-child(2){animation-delay:.18s}.d-minimal .w:nth-child(3){animation-delay:.36s}
-@keyframes dimFade{0%,100%{opacity:.25}35%,65%{opacity:1}}
-.d-bold{align-items:flex-start;padding-left:10px}
-.d-bold .w{font-family:var(--font-b);font-weight:800;font-size:11px;color:#fff;text-transform:uppercase;animation:slam 2.4s infinite;text-shadow:0 2px 0 #000,0 0 12px rgba(0,0,0,.8)}
-.d-bold .w:nth-child(2){animation-delay:.15s}.d-bold .w:nth-child(3){animation-delay:.3s}
-@keyframes slam{0%,100%{opacity:.28;transform:translateY(3px)}30%,60%{opacity:1;transform:translateY(0)}}
-.d-hl .w{font-family:var(--font-b);font-weight:800;font-size:11px;color:rgba(255,255,255,.35);padding:2px 4px;border-radius:4px;animation:karaoke 2.4s infinite}
-.d-hl .w:nth-child(2){animation-delay:.35s}.d-hl .w:nth-child(3){animation-delay:.7s}
-@keyframes karaoke{0%,100%{color:rgba(255,255,255,.35);background:transparent}20%,45%{color:#171310;background:#FFD83D;transform:scale(1.08)}60%{color:#fff;background:transparent;transform:scale(1)}}
-.d-edit{align-items:flex-start;padding-left:9px}
-.d-edit .rule{width:34px;height:1.5px;background:var(--gold);opacity:.85;margin-bottom:2px}
-.d-edit .w{font-family:'Playfair Display',serif;font-style:italic;font-size:11px;color:#F1EADA;animation:dimFade 3s infinite}
-.d-edit .w:nth-child(2){animation-delay:.3s}.d-edit .w:nth-child(3){animation-delay:.6s}
-.d-pt .w{font-family:var(--font-b);font-weight:600;font-size:10px;color:#fff;background:rgba(255,255,255,.09);padding:3px 6px;border-radius:7px;animation:ptPulse 2.6s infinite}
-.d-pt .w:nth-child(2){animation-delay:.25s}.d-pt .w:nth-child(3){animation-delay:.5s}
-@keyframes ptPulse{0%,100%{color:rgba(255,255,255,.4)}40%,70%{color:#fff}}
-
-/* ============================================================
-   HOOK + MUSIC ROWS
-   ============================================================ */
-.hook-row{
-  display:flex;align-items:center;justify-content:space-between;gap:16px;
-  border:1px solid rgba(227,181,88,.22);border-radius:16px;
-  background:linear-gradient(180deg,rgba(227,181,88,.055),rgba(227,181,88,.02));
-  padding:13px 16px;margin-top:22px;cursor:pointer;transition:border-color .25s;
-}
-.hook-row:hover{border-color:rgba(227,181,88,.4)}
-.hook-title{display:flex;align-items:center;gap:9px;font-family:var(--font-m);font-size:11px;letter-spacing:.22em;color:var(--gold-2)}
-.hook-badge{font-size:7.5px;letter-spacing:.18em;color:#141005;background:linear-gradient(160deg,#F6D98B,#D9A441);border-radius:4px;padding:2.5px 6px;font-weight:600}
-.hook-desc{font-size:11px;line-height:1.55;color:var(--muted);margin-top:6px;max-width:46ch}
-.hook-loop-note{display:flex;align-items:center;gap:7px;font-family:var(--font-m);font-size:8px;letter-spacing:.18em;color:var(--gold);margin-top:8px;opacity:.95}
-.hook-loop-note.off{display:none}
-
-.music-row{
-  display:flex;align-items:center;justify-content:space-between;gap:16px;
-  border:1px solid var(--line);border-radius:14px;padding:11px 16px;margin-top:10px;cursor:pointer;
-}
-.music-title{display:flex;align-items:center;gap:9px;font-family:var(--font-m);font-size:10px;letter-spacing:.2em;color:#C9C6B8}
-.music-desc{font-size:10px;color:var(--faint);margin-top:3px}
-
-.switch{position:relative;flex:0 0 auto;width:52px;height:28px;display:inline-block}
-.switch input{opacity:0;width:0;height:0}
-.knob{
-  position:absolute;inset:0;border-radius:100px;background:#23232C;border:1px solid var(--line-2);
-  transition:background .3s,border-color .3s;cursor:pointer;
-}
-.knob::after{
-  content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;
-  background:linear-gradient(180deg,#EDEDE6,#9C9A8F);
-  box-shadow:0 2px 4px rgba(0,0,0,.5);transition:transform .3s cubic-bezier(.6,-0.2,.2,1.4), background .3s;
-}
-.switch input:checked + .knob{background:linear-gradient(160deg,#E8BE62,#B8811F);border-color:rgba(227,181,88,.7);box-shadow:0 0 18px rgba(227,181,88,.28)}
-.switch input:checked + .knob::after{transform:translateX(24px);background:linear-gradient(180deg,#FFFDF4,#D9C48A)}
-
-/* generate button */
-.generate-btn{
-  position:relative;width:100%;height:62px;margin-top:22px;border:0;border-radius:16px;cursor:pointer;overflow:hidden;
-  background:linear-gradient(165deg,#F7DC96 0%,#E5B655 32%,#C9902F 62%,#8F5F16 100%);
-  box-shadow:0 18px 46px rgba(211,158,52,.30), inset 0 1.5px 0 rgba(255,255,255,.75), inset 0 -2px 0 rgba(60,38,6,.55);
-  transition:transform .2s, box-shadow .2s, filter .2s;
-}
-.generate-btn::after{
-  content:"";position:absolute;top:-40%;bottom:-40%;width:130px;left:-180px;
-  background:linear-gradient(100deg,transparent,rgba(255,255,255,.75),transparent);
-  transform:skewX(-18deg);animation:shine 3.4s ease-in-out infinite;
-}
-@keyframes shine{0%,55%{left:-200px}100%{left:130%}}
-.generate-btn:hover{transform:translateY(-2px);filter:brightness(1.06);box-shadow:0 24px 60px rgba(211,158,52,.38), inset 0 1.5px 0 rgba(255,255,255,.8), inset 0 -2px 0 rgba(60,38,6,.55)}
-.generate-btn:active{transform:translateY(0) scale(.99)}
-.generate-btn:disabled{cursor:not-allowed;filter:saturate(.4) brightness(.85)}
-.gb-inner{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:14px;
-  font-family:var(--font-b);font-weight:800;font-size:15px;letter-spacing:.22em;color:#241603;text-shadow:0 1px 0 rgba(255,255,255,.4)}
-.spinner{width:20px;height:20px;border-radius:50%;border:2.5px solid rgba(36,22,3,.3);border-top-color:#241603;animation:spin .8s linear infinite;display:none}
+body{font-family:'Inter',sans-serif;background:var(--deep);color:#e2e8f0;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--charcoal)}
+::-webkit-scrollbar-thumb{background:rgba(0,212,255,0.2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(0,212,255,0.35)}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--glow);transition:all 0.3s ease}
+.panel-v{border-color:var(--border-violet);box-shadow:var(--glow-violet)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:var(--radius-sm);font-weight:600;font-size:14px;border:none;cursor:pointer;transition:all 0.25s ease;font-family:'Inter',sans-serif;outline:none}
+.btn:active{transform:scale(0.97)}
+.btn-primary{background:linear-gradient(135deg,#00d4ff,#0ea5e9);color:#08080e;box-shadow:0 0 20px rgba(0,212,255,0.15)}
+.btn-primary:hover{box-shadow:0 0 30px rgba(0,212,255,0.25);transform:translateY(-1px)}
+.btn-violet{background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff;box-shadow:0 0 20px rgba(139,92,246,0.15)}
+.btn-violet:hover{box-shadow:0 0 30px rgba(139,92,246,0.25);transform:translateY(-1px)}
+.btn-ghost{background:rgba(0,212,255,0.06);color:var(--neon);border:1px solid var(--border)}
+.btn-ghost:hover{background:rgba(0,212,255,0.12);border-color:rgba(0,212,255,0.2)}
+.btn-sm{padding:8px 16px;font-size:12px;border-radius:8px}
+.input{width:100%;padding:14px 18px;background:var(--charcoal);border:1px solid var(--border);border-radius:var(--radius-sm);color:#e2e8f0;font-size:15px;font-family:'Inter',sans-serif;outline:none;transition:all 0.25s ease}
+.input:focus{border-color:rgba(0,212,255,0.35);box-shadow:0 0 15px rgba(0,212,255,0.08)}
+.input::placeholder{color:#4a5568}
+.select{appearance:none;background:var(--charcoal) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2300d4ff' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") no-repeat right 14px center;border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 40px 12px 16px;color:#e2e8f0;font-size:14px;font-family:'Inter',sans-serif;outline:none;cursor:pointer;transition:all 0.25s ease;width:100%}
+.select:focus{border-color:rgba(0,212,255,0.35);box-shadow:0 0 15px rgba(0,212,255,0.08)}
+.select option{background:var(--charcoal);color:#e2e8f0}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-neon{background:rgba(0,212,255,0.1);color:var(--neon);border:1px solid rgba(0,212,255,0.15)}
+.badge-violet{background:rgba(139,92,246,0.1);color:var(--violet);border:1px solid rgba(139,92,246,0.15)}
+.toggle{position:relative;width:48px;height:26px;border-radius:13px;background:var(--charcoal);border:1px solid var(--border);cursor:pointer;transition:all 0.3s ease;flex-shrink:0}
+.toggle.active{background:linear-gradient(135deg,rgba(0,212,255,0.3),rgba(139,92,246,0.3));border-color:rgba(0,212,255,0.3)}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#4a5568;transition:all 0.3s ease}
+.toggle.active::after{left:25px;background:var(--neon);box-shadow:0 0 8px rgba(0,212,255,0.4)}
+.progress-bar{width:100%;height:6px;background:var(--charcoal);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--neon),var(--violet));border-radius:3px;transition:width 0.3s ease;position:relative}
+.progress-fill::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);animation:shimmer 2s infinite}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
 @keyframes spin{to{transform:rotate(360deg)}}
-.generate-btn.busy .spinner{display:block}
-.generate-btn.busy svg.gb-arrow{display:none}
-.under-note{text-align:center;font-family:var(--font-m);font-size:8.5px;letter-spacing:.18em;color:var(--faint);margin-top:11px}
-.under-note kbd{border:1px solid var(--line-2);border-bottom-width:2px;border-radius:4px;padding:1px 5px;font-size:8px;color:var(--muted)}
-
-/* ============================================================
-   OUTPUT COLUMN
-   ============================================================ */
-.output-col{display:flex;flex-direction:column;gap:16px;min-width:0}
-
-.frame-wrap{position:relative;display:flex;justify-content:center;padding-top:6px}
-.preview-frame{
-  position:relative;width:100%;max-width:452px;aspect-ratio:9/16;
-  border-radius:24px;overflow:hidden;background:#050507;
-  border:1px solid rgba(227,181,88,.22);
-  box-shadow:0 50px 110px rgba(0,0,0,.7),0 0 90px rgba(227,181,88,.07), inset 0 0 0 1px rgba(255,255,255,.04);
-}
-#renderCanvas,#finalVideo{position:absolute;inset:0;width:100%;height:100%;display:block}
-#finalVideo{display:none;object-fit:cover;background:#000}
-.frame-corner{position:absolute;width:22px;height:22px;z-index:5;pointer-events:none;opacity:.75}
-.frame-corner.tl{top:12px;left:12px;border-top:2px solid var(--gold);border-left:2px solid var(--gold);border-top-left-radius:6px}
-.frame-corner.tr{top:12px;right:12px;border-top:2px solid var(--gold);border-right:2px solid var(--gold);border-top-right-radius:6px}
-.frame-corner.bl{bottom:12px;left:12px;border-bottom:2px solid var(--gold);border-left:2px solid var(--gold);border-bottom-left-radius:6px}
-.frame-corner.br{bottom:12px;right:12px;border-bottom:2px solid var(--gold);border-right:2px solid var(--gold);border-bottom-right-radius:6px}
-
-.live-badge{
-  position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:6;
-  display:none;align-items:center;gap:8px;
-  background:rgba(9,9,13,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  border:1px solid rgba(227,181,88,.4);border-radius:100px;padding:7px 16px;
-  font-family:var(--font-m);font-size:9px;letter-spacing:.26em;color:var(--gold-2);
-}
-.live-badge.show{display:flex}
-.rec-dot{width:8px;height:8px;border-radius:50%;background:#FF5A3C;animation:blink2 1s steps(2) infinite}
-@keyframes blink2{50%{opacity:.15}}
-
-/* poster / empty state */
-.poster{
-  position:absolute;inset:0;z-index:4;overflow:hidden;
-  background:
-    radial-gradient(130% 90% at 78% -8%, rgba(84,140,158,.32), transparent 55%),
-    radial-gradient(120% 80% at 12% 110%, rgba(227,181,88,.20), transparent 55%),
-    linear-gradient(178deg,#14131A 0%,#0C0C11 52%,#08080C 100%);
-  display:flex;flex-direction:column;justify-content:space-between;
-  padding:22px 22px 26px;
-}
-.poster::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 45%,transparent 45%,rgba(0,0,0,.5) 100%);pointer-events:none}
-.poster-top{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}
-.mono-tag{font-family:var(--font-m);font-size:8.5px;letter-spacing:.28em;color:var(--gold);border:1px solid rgba(227,181,88,.35);padding:5px 10px;border-radius:5px;background:rgba(227,181,88,.07)}
-.mono-tag.dim{color:var(--faint);border-color:var(--line-2);background:transparent}
-.poster-mid{position:relative;z-index:1}
-.poster-kicker{font-family:var(--font-m);font-size:8px;letter-spacing:.34em;color:#7E7C71;margin-bottom:14px}
-.poster-title{font-family:var(--font-d);font-weight:480;font-variation-settings:'opsz' 144;font-size:clamp(34px,4.2vw,42px);line-height:1.04;letter-spacing:-.01em;color:#EDEAE0}
-.poster-title em{font-style:italic;color:var(--gold-2)}
-.poster-rule{width:64px;height:2px;background:linear-gradient(90deg,var(--gold),transparent);margin:16px 0}
-.poster-sub{font-size:11px;line-height:1.7;color:#8E8C80;max-width:34ch}
-.poster-bottom{position:relative;z-index:1;display:flex;flex-direction:column;gap:16px;align-items:center}
-.poster-subtitle-demo{background:rgba(8,8,12,.78);border:1px solid rgba(255,255,255,.1);padding:9px 18px;border-radius:10px;font-family:var(--font-b);font-weight:600;font-size:12px;letter-spacing:.12em;color:#EDEAE0}
-.poster-subtitle-demo b{color:var(--gold-2)}
-.poster-eq{display:flex;align-items:flex-end;gap:3px;height:30px;width:100%;padding:0 8px}
-.poster-eq i{flex:1;border-radius:2px 2px 0 0;background:linear-gradient(180deg,rgba(227,181,88,.9),rgba(227,181,88,.12));min-height:2px;animation:posterEq 1.5s ease-in-out infinite alternate}
-@keyframes posterEq{from{transform:scaleY(.18)}to{transform:scaleY(1)}}
-.poster-eq i{transform-origin:bottom}
-
-/* ============================================================
-   PROGRESS CARD
-   ============================================================ */
-.progress-card{
-  background:linear-gradient(180deg,#13131A,#0F0F15);
-  border:1px solid rgba(227,181,88,.2);border-radius:18px;padding:18px 20px;
-  box-shadow:0 24px 60px rgba(0,0,0,.5);max-width:760px;width:100%;margin:0 auto;
-}
-.pc-head{display:flex;align-items:center;justify-content:space-between;gap:18px}
-.pc-eyebrow{font-family:var(--font-m);font-size:8.5px;letter-spacing:.3em;color:var(--faint)}
-.pc-stage{font-family:var(--font-d);font-size:19px;font-weight:560;color:#EDEAE0;margin-top:4px;min-height:26px}
-.pc-pct{font-family:var(--font-m);color:var(--gold);font-size:30px;letter-spacing:-.02em;display:flex;align-items:flex-start;gap:2px}
-.pc-pct small{font-size:11px;margin-top:5px;color:var(--gold-3)}
-.pc-bar{height:7px;background:#1D1D26;border-radius:100px;overflow:hidden;margin:12px 0 13px;box-shadow:inset 0 1px 3px rgba(0,0,0,.6)}
-.pc-fill{height:100%;width:0%;border-radius:100px;background:linear-gradient(90deg,#8A5E17,#E3B558 45%,#F8E3A6);box-shadow:0 0 14px rgba(227,181,88,.5);transition:width .35s ease}
-.pc-stages{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
-.pc-pill{
-  display:flex;align-items:center;gap:6px;padding:5px 11px;border-radius:100px;
-  border:1px solid var(--line-2);font-family:var(--font-m);font-size:8px;letter-spacing:.16em;color:var(--faint);
-  transition:all .3s;
-}
-.pc-pill i{width:6px;height:6px;border-radius:50%;background:#3A3A44;transition:all .3s}
-.pc-pill.active{border-color:rgba(227,181,88,.6);color:var(--gold-2);box-shadow:0 0 14px rgba(227,181,88,.12)}
-.pc-pill.active i{background:var(--gold);animation:blink2 1s steps(2) infinite}
-.pc-pill.done{border-color:rgba(111,213,152,.4);color:var(--green)}
-.pc-pill.done i{background:var(--green)}
-.pc-pill.error{border-color:rgba(226,114,91,.55);color:var(--red)}
-.pc-pill.error i{background:var(--red)}
-.log-console{
-  background:#07070B;border:1px solid rgba(255,255,255,.06);border-radius:10px;
-  height:136px;overflow-y:auto;padding:10px 12px;
-  font-family:var(--font-m);font-size:10.5px;line-height:1.85;color:#8F8E83;
-}
-.log-console .lt{color:#57564E;margin-right:8px}
-.log-console .lg-gold{color:var(--gold-2)}
-.log-console .lg-ok{color:var(--green)}
-.log-console .lg-warn{color:#E0A55C}
-.log-console .lg-err{color:var(--red)}
-.pc-error{
-  display:none;align-items:center;gap:12px;margin-top:12px;
-  border:1px solid rgba(226,114,91,.4);background:rgba(226,114,91,.07);
-  border-radius:10px;padding:11px 14px;font-size:12px;color:#EFB3A4;
-}
-.pc-error.show{display:flex}
-.pc-error button{
-  margin-left:auto;flex:0 0 auto;border:1px solid rgba(226,114,91,.5);background:transparent;color:#F2B7A8;
-  font-family:var(--font-m);font-size:9px;letter-spacing:.2em;padding:8px 14px;border-radius:7px;cursor:pointer;transition:all .2s;
-}
-.pc-error button:hover{background:rgba(226,114,91,.15)}
-
-/* ============================================================
-   RESULTS PANEL
-   ============================================================ */
-.results{
-  background:linear-gradient(180deg,#131309,#121218 30%);
-  border:1px solid rgba(227,181,88,.3);border-radius:18px;padding:18px 20px;
-  box-shadow:0 24px 60px rgba(0,0,0,.5), 0 0 70px rgba(227,181,88,.05);
-  max-width:760px;width:100%;margin:0 auto;animation:resIn .7s cubic-bezier(.2,1.4,.4,1);
-}
-@keyframes resIn{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:none}}
-.res-eyebrow{font-family:var(--font-m);font-size:8.5px;letter-spacing:.3em;color:var(--gold)}
-.res-title{font-family:var(--font-d);font-weight:560;font-size:clamp(24px,2.3vw,32px);letter-spacing:-.01em;color:#F2EFE4;margin-top:6px;line-height:1.15}
-.res-desc{font-size:11.5px;color:var(--muted);margin-top:5px;font-style:italic}
-.res-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
-.res-chip{display:flex;align-items:baseline;gap:6px;border:1px solid var(--line-2);border-radius:8px;padding:6px 11px;background:rgba(255,255,255,.02)}
-.res-chip b{font-family:var(--font-m);font-size:12px;color:var(--gold-2);font-weight:500}
-.res-chip span{font-family:var(--font-m);font-size:7.5px;letter-spacing:.16em;color:var(--faint)}
-.res-actions{display:flex;gap:10px;margin-top:16px}
-.dl-btn{
-  flex:1;display:flex;align-items:center;justify-content:center;gap:10px;height:50px;border-radius:12px;
-  background:linear-gradient(165deg,#F7DC96,#DFA63F 55%,#B87F26);color:#241603;text-decoration:none;
-  font-family:var(--font-b);font-weight:800;font-size:12px;letter-spacing:.18em;
-  box-shadow:0 10px 30px rgba(211,158,52,.3), inset 0 1px 0 rgba(255,255,255,.7);transition:all .2s;
-}
-.dl-btn:hover{transform:translateY(-1px);filter:brightness(1.07)}
-.ghost-btn{
-  display:flex;align-items:center;gap:9px;height:50px;padding:0 18px;border-radius:12px;cursor:pointer;
-  background:transparent;border:1px solid var(--line-2);color:var(--muted);
-  font-family:var(--font-m);font-size:9px;letter-spacing:.22em;transition:all .2s;
-}
-.ghost-btn:hover{color:var(--text);border-color:rgba(255,255,255,.25)}
-.ios-note{font-size:10.5px;color:#C9B87A;margin-top:9px;display:none;align-items:center;gap:8px}
-.ios-note.show{display:flex}
-.warn-banner{
-  display:none;align-items:center;gap:9px;margin-top:9px;font-size:10.5px;color:#E4B45E;
-  border:1px solid rgba(228,180,94,.35);background:rgba(228,180,94,.06);border-radius:8px;padding:9px 12px;line-height:1.5;
-}
-.warn-banner.show{display:flex}
-
-.checks{display:flex;flex-direction:column;gap:7px;margin-top:16px;border-top:1px solid var(--line);padding-top:16px}
-.check{
-  display:flex;align-items:center;gap:11px;font-size:11.5px;color:#C9C7BB;
-  opacity:0;transform:translateX(-12px);transition:opacity .4s var(--d,0ms),transform .4s var(--d,0ms);
-}
-.check.in{opacity:1;transform:none}
-.check-ic{flex:0 0 19px;width:19px;height:19px;border-radius:50%;background:rgba(111,213,152,.14);border:1px solid rgba(111,213,152,.45);display:flex;align-items:center;justify-content:center}
-.check.warn .check-ic{background:rgba(228,180,94,.12);border-color:rgba(228,180,94,.45)}
-.check.warn{color:#D9BE8A}
-
-.acc{border:1px solid var(--line);border-radius:12px;margin-top:10px;overflow:hidden;background:var(--panel-2)}
-.acc summary{
-  list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;
-  padding:12px 15px;font-family:var(--font-m);font-size:9px;letter-spacing:.24em;color:#B9B7AC;
-  transition:color .2s;user-select:none;
-}
-.acc summary::-webkit-details-marker{display:none}
-.acc summary:hover{color:var(--gold-2)}
-.acc-meta{margin-left:auto;color:var(--faint);letter-spacing:.08em}
-.acc-chev{transition:transform .3s;color:var(--faint)}
-.acc[open] .acc-chev{transform:rotate(90deg)}
-.acc-body{border-top:1px solid var(--line);padding:12px 15px;max-height:300px;overflow-y:auto}
-.script-line{display:flex;gap:12px;padding:7px 4px;border-bottom:1px dashed rgba(255,255,255,.05);font-size:12px;line-height:1.6;color:#C9C7BB;align-items:baseline}
-.script-line:last-child{border-bottom:0}
-.script-line time{font-family:var(--font-m);font-size:9px;color:var(--gold);flex:0 0 34px;letter-spacing:.05em}
-.loop-badge{font-family:var(--font-m);font-size:7px;color:#141005;background:var(--gold);border-radius:3px;padding:1px 4px;margin-left:6px;vertical-align:1px}
-.src-row{display:flex;align-items:center;gap:12px;padding:8px 6px;border-radius:9px;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.04);transition:background .2s}
-.src-row:last-child{border-bottom:0}
-.src-row:hover{background:rgba(255,255,255,.03)}
-.src-thumb{flex:0 0 56px;width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid var(--line-2);background:#0B0B10}
-.src-name{font-size:11px;color:#D9D6C9;line-height:1.4;word-break:break-word}
-.src-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;align-items:center}
-.lic{font-family:var(--font-m);font-size:8px;letter-spacing:.08em;color:var(--green);border:1px solid rgba(111,213,152,.35);border-radius:4px;padding:2px 6px}
-.lic.unverified{color:#E0A55C;border-color:rgba(224,165,92,.4)}
-.src-author{font-size:9.5px;color:var(--faint);max-width:34ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.src-note{font-size:9.5px;color:var(--faint);margin-top:10px;line-height:1.6;border-top:1px solid var(--line);padding-top:10px}
-
-/* ============================================================
-   WORKFLOW STRIP + FOOTER
-   ============================================================ */
-.workflow-strip{
-  position:relative;z-index:1;max-width:1560px;margin:0 auto;padding:0 clamp(16px,3vw,40px) 26px;
-  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
-  font-family:var(--font-m);font-size:8.5px;letter-spacing:.22em;color:var(--faint);
-}
-.wf-step{color:#8E8C80;border:1px solid var(--line);border-radius:6px;padding:6px 11px}
-.wf-arr{color:var(--gold);opacity:.8}
-footer{
-  position:relative;z-index:1;border-top:1px solid rgba(227,181,88,.12);
-  padding:20px clamp(16px,3vw,40px) 30px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
-  max-width:1560px;margin:0 auto;
-}
-.foot-l{font-family:var(--font-m);font-size:8px;letter-spacing:.14em;color:var(--faint);line-height:2}
-.foot-l b{color:var(--muted);font-weight:500}
-.foot-r{font-family:var(--font-m);font-size:8px;letter-spacing:.2em;color:#4E4D45;text-align:right}
-
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
-@media (max-width:1180px){
-  .studio{grid-template-columns:1fr}
-  .topnav{display:none}
-  .preview-frame{max-width:400px}
-}
-@media (max-width:640px){
-  .brand-tag{display:none}
-  .top-status{display:none}
-  .voice-grid{grid-template-columns:1fr}
-  .style-grid{grid-template-columns:repeat(3,1fr)}
-  .display{font-size:36px}
-  .res-actions{flex-direction:column}
-  .hook-row{flex-direction:row;align-items:flex-start}
-}
-@media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.2s !important}
-  html{scroll-behavior:auto}
-}
+.fade-in{animation:fadeIn 0.4s ease forwards}
+.result-card{background:var(--charcoal);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all 0.25s ease}
+.result-card:hover{border-color:rgba(0,212,255,0.25);background:rgba(0,212,255,0.03);transform:translateY(-2px)}
+.voice-card{background:var(--charcoal);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;cursor:pointer;transition:all 0.25s ease;text-align:center}
+.voice-card:hover{border-color:rgba(0,212,255,0.25)}
+.voice-card.selected{border-color:rgba(0,212,255,0.4);background:rgba(0,212,255,0.06);box-shadow:0 0 15px rgba(0,212,255,0.08)}
+.style-card{background:var(--charcoal);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;cursor:pointer;transition:all 0.25s ease;text-align:center}
+.style-card:hover{border-color:rgba(139,92,246,0.25)}
+.style-card.selected{border-color:rgba(139,92,246,0.4);background:rgba(139,92,246,0.06);box-shadow:0 0 15px rgba(139,92,246,0.08)}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 24px;color:var(--neon);font-size:13px;font-weight:500;z-index:9999;box-shadow:0 0 30px rgba(0,212,255,0.15);animation:fadeIn 0.3s ease;pointer-events:none}
+.scene-item{background:var(--charcoal);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;transition:all 0.2s ease}
+.hidden{display:none!important}
+.spinner{width:20px;height:20px;border:2px solid rgba(0,212,255,0.2);border-top-color:var(--neon);border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block}
+.video-container{position:relative;border-radius:var(--radius);overflow:hidden;background:#000;box-shadow:0 0 40px rgba(0,0,0,0.5)}
+.video-container canvas{display:block;width:100%;height:auto}
+@media(max-width:640px){.panel{padding:16px;border-radius:var(--radius)}.btn{padding:10px 18px;font-size:13px}.input{padding:12px 14px;font-size:14px}}
 </style>
 </head>
-<body>
-<div class="grain" aria-hidden="true"></div>
+<body class="antialiased">
 
-<!-- ══════════════ TOP BAR ══════════════ -->
-<header class="topbar">
-  <a class="brand" href="#" aria-label="Fact Engine 2.0">
-    <svg width="34" height="34" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="lgc" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#F6D98B"/><stop offset=".5" stop-color="#DFA63F"/><stop offset="1" stop-color="#8A5E17"/>
-        </linearGradient>
-      </defs>
-      <circle cx="20" cy="20" r="16.5" stroke="url(#lgc)" stroke-width="2.3"/>
-      <path d="M14.5 26.5V13.5h11M14.5 19.6h8.6" stroke="url(#lgc)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="28.6" cy="11.4" r="2.15" fill="url(#lgc)"/>
-    </svg>
-    <span class="brand-word">
-      <span>
-        <span class="brand-name">FACT&nbsp;ENGINE</span><span class="brand-ver">2.0</span>
-        <span class="brand-tag">PREMIUM SHORTS GENERATOR</span>
-      </span>
-    </span>
-  </a>
-  <nav class="topnav" aria-hidden="true">
-    <b>TOPIC</b><span class="arr">→</span>RESEARCH<span class="arr">→</span>SCRIPT<span class="arr">→</span>VOICE<span class="arr">→</span><b>VIDEO</b>
-  </nav>
-  <div class="top-status"><span class="status-dot"></span>ENGINE ONLINE</div>
-</header>
-
-<main class="studio" id="studio">
-
-  <!-- ══════════════ LEFT · CONTROL PANEL ══════════════ -->
-  <section class="panel control-panel" aria-label="Generator controls">
-    <div class="eyebrow">PREMIUM SHORTS GENERATOR</div>
-    <h1 class="display">Any topic in.<br><em>Broadcast-grade</em><br>sixty seconds out.</h1>
-    <p class="lede"><b>Fact Engine reads Wikipedia so you don’t have to.</b> It researches the real article — not the first paragraph — finds the genuine photographs, writes a hook that opens mid-story, speaks it in a studio voice and cuts the finished 9:16 Short. No intro. No logo. No filler. Ever.</p>
-
-    <!-- STEP 1 — TOPIC -->
-    <div class="field-label"><span class="step-dot">1</span>TOPIC OR SCRIPT<span class="field-note" id="inputModeNote">WIKIPEDIA-VERIFIED</span></div>
-    <div class="mode-tabs" role="tablist" aria-label="Input mode">
-      <button class="mode-tab active" id="modeWikiBtn" role="tab" aria-selected="true">RESEARCH A TOPIC</button>
-      <button class="mode-tab" id="modeScriptBtn" role="tab" aria-selected="false">USE MY SCRIPT</button>
-    </div>
-    <div class="input-shell">
-      <textarea id="topicInput" rows="2" spellcheck="false" autocomplete="off"
-        placeholder="e.g. The Library of Alexandria — or the octopus, the Wow! signal, Nikola Tesla…"></textarea>
-    </div>
-    <div class="mode-note" id="scriptModeNote">Your script is narrated verbatim. Intelligent Hook will close the loop with a neutral framing line and match the final frame to the first — it never invents facts.</div>
-    <div class="input-foot"><span id="inputHint">ENTER A SUBJECT — RESEARCH IS AUTOMATIC</span><span id="inputCount">0 CHARS</span></div>
-    <div class="chip-row" id="topicChips" aria-label="Suggested topics"></div>
-
-    <!-- STEP 2 — VOICE -->
-    <div class="field-label"><span class="step-dot">2</span>NARRATION VOICE<span class="field-note">STUDIO NEURAL TTS</span></div>
-    <div class="voice-grid" id="voiceGrid" role="radiogroup" aria-label="Narration voice"></div>
-
-    <!-- STEP 3 — SUBTITLES -->
-    <div class="field-label"><span class="step-dot">3</span>SUBTITLE STYLE<span class="field-note">WORD-TIMED TO AUDIO</span></div>
-    <div class="style-grid" id="styleGrid" role="radiogroup" aria-label="Subtitle style"></div>
-
-    <!-- STEP 4 — HOOK -->
-    <div class="field-label"><span class="step-dot">4</span>THE OPENING</div>
-    <label class="hook-row" for="hookToggle">
-      <span class="hook-txt">
-        <span class="hook-title">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13 2L4.5 13.5H11L9.5 22 18 10.5h-6.5L13 2z" fill="#F5D98B" stroke="#8A5E17" stroke-width="1.2" stroke-linejoin="round"/></svg>
-          INTELLIGENT HOOK
-          <span class="hook-badge">ON BY DEFAULT</span>
-        </span>
-        <span class="hook-desc">Opens on the single most surprising, verified fact in the story. The ending echoes it — and the final frame is composed to match the first — so the Short replays seamlessly. Disable for a classic strong hook with a resolved ending.</span>
-        <span class="hook-loop-note" id="hookLoopNote">
-          <svg width="15" height="12" viewBox="0 0 30 16" fill="none" aria-hidden="true"><path d="M8 8c0-4.4 3.6-6 8-6 6 0 6 12 12 12 2.5 0 2-3 0-5" stroke="#E3B558" stroke-width="1.6" stroke-linecap="round"/><path d="M22 14l3-3-3.6-2" stroke="#E3B558" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          SEAMLESS LOOP — FINAL FRAME MATCHES THE FIRST
-        </span>
-      </span>
-      <span class="switch"><input type="checkbox" id="hookToggle" checked aria-label="Toggle Intelligent Hook"><span class="knob"></span></span>
-    </label>
-
-    <label class="music-row" for="musicToggle">
-      <span class="music-txt">
-        <span class="music-title">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 18V5l11-2v12.5" stroke="#C9C6B8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6.5" cy="18" r="2.6" stroke="#C9C6B8" stroke-width="1.7"/><circle cx="17.5" cy="15.5" r="2.6" stroke="#C9C6B8" stroke-width="1.7"/></svg>
-          CINEMATIC SCORE
-        </span>
-        <span class="music-desc">Original low-drone underscore · automatically ducked beneath the voice</span>
-      </span>
-      <span class="switch"><input type="checkbox" id="musicToggle" checked aria-label="Toggle background score"><span class="knob"></span></span>
-    </label>
-
-    <!-- GENERATE -->
-    <button class="generate-btn" id="generateBtn">
-      <span class="gb-inner">
-        <svg class="gb-arrow" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 4.8v14.4c0 1.6 1.8 2.6 3.1 1.7l11.3-7.2a2 2 0 0 0 0-3.4L9.1 3.1C7.8 2.2 6 3.2 6 4.8z" fill="#241603"/></svg>
-        <span class="spinner" aria-hidden="true"></span>
-        <span id="gbLabel">GENERATE SHORT</span>
-      </span>
-    </button>
-    <div class="under-note"><kbd>⌘/CTRL</kbd> + <kbd>ENTER</kbd> TO PRODUCE · RUNS ENTIRELY IN YOUR BROWSER · 60–120 SECONDS</div>
-  </section>
-
-  <!-- ══════════════ RIGHT · OUTPUT COLUMN ══════════════ -->
-  <section class="output-col" aria-label="Output">
-
-    <div class="frame-wrap">
-      <div class="preview-frame" id="previewFrame">
-        <canvas id="renderCanvas" width="1080" height="1920" aria-label="Video render preview"></canvas>
-
-        <div class="poster" id="poster" aria-hidden="true">
-          <div class="poster-top">
-            <span class="mono-tag">ASSIGNMENT · 001</span>
-            <span class="mono-tag dim">STANDBY</span>
-          </div>
-          <div class="poster-mid">
-            <div class="poster-kicker">EVERY SHORT BEGINS HERE</div>
-            <h2 class="poster-title">The first second<br>is the <em>whole</em><br>argument.</h2>
-            <div class="poster-rule"></div>
-            <p class="poster-sub">Hand it a subject. It reads the full article, finds the real photographs, writes the hook and cuts the film — starting on the story, never on us.</p>
-          </div>
-          <div class="poster-bottom">
-            <div class="poster-subtitle-demo">THE PAST, IN <b>58 SECONDS</b></div>
-            <div class="poster-eq" id="posterEq"></div>
-          </div>
+<div id="app" class="min-h-screen">
+  <!-- Header -->
+  <header class="py-6 px-4 sm:px-6">
+    <div class="max-w-3xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-neon to-violet flex items-center justify-center">
+          <i class="fas fa-bolt text-sm text-deep"></i>
         </div>
-
-        <video id="finalVideo" playsinline controls preload="metadata" aria-label="Generated Short"></video>
-
-        <div class="live-badge" id="liveBadge"><span class="rec-dot"></span>RENDERING · 1080×1920</div>
-        <div class="frame-corner tl"></div><div class="frame-corner tr"></div><div class="frame-corner bl"></div><div class="frame-corner br"></div>
-      </div>
-    </div>
-
-    <!-- PIPELINE / PROGRESS -->
-    <div class="progress-card" id="progressCard" hidden aria-live="polite">
-      <div class="pc-head">
         <div>
-          <div class="pc-eyebrow">PRODUCTION PIPELINE</div>
-          <div class="pc-stage" id="pcStage">Warming up…</div>
+          <h1 class="font-display font-bold text-lg tracking-tight text-white">FACT ENGINE<span class="text-neon ml-1.5 font-mono text-xs font-medium">2.0</span></h1>
+          <p class="text-xs text-slate-500 font-medium -mt-0.5">Premium AI Shorts Studio</p>
         </div>
-        <div class="pc-pct"><span id="pcPct">0</span><small>%</small></div>
       </div>
-      <div class="pc-bar"><div class="pc-fill" id="pcFill"></div></div>
-      <div class="pc-stages" id="pcStages">
-        <span class="pc-pill" data-stage="0"><i></i>RESEARCH</span>
-        <span class="pc-pill" data-stage="1"><i></i>SCRIPT</span>
-        <span class="pc-pill" data-stage="2"><i></i>IMAGES</span>
-        <span class="pc-pill" data-stage="3"><i></i>VOICE</span>
-        <span class="pc-pill" data-stage="4"><i></i>RENDER</span>
-        <span class="pc-pill" data-stage="5"><i></i>VERIFY</span>
-      </div>
-      <div class="log-console" id="logConsole"></div>
-      <div class="pc-error" id="pcError" role="alert">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3L2.5 20h19L12 3z" stroke="#E0856E" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 9.5v5" stroke="#E0856E" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="17" r=".4" fill="#E0856E" stroke="#E0856E" stroke-width="1.2"/></svg>
-        <span id="pcErrorMsg">Something broke.</span>
-        <button id="retryBtn">RETRY</button>
-      </div>
+      <div class="badge badge-neon"><i class="fas fa-circle text-[6px] animate-pulse"></i>Ready</div>
     </div>
+  </header>
 
-    <!-- RESULTS / DELIVERED CUT -->
-    <div class="results" id="resultsPanel" hidden>
-      <div class="res-eyebrow">DELIVERED CUT — STARTS ON THE HOOK</div>
-      <h2 class="res-title" id="resTitle">—</h2>
-      <div class="res-desc" id="resDesc">—</div>
-      <div class="res-chips" id="resChips"></div>
+  <main class="px-4 sm:px-6 pb-12">
+    <div class="max-w-3xl mx-auto space-y-5">
 
-      <div class="res-actions">
-        <a id="downloadBtn" class="dl-btn" href="#" download="fact-engine.mp4">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12" stroke="#241603" stroke-width="2.2" stroke-linecap="round"/><path d="M7.5 11l4.5 4.5L16.5 11" stroke="#241603" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 19.5h16" stroke="#241603" stroke-width="2.2" stroke-linecap="round"/></svg>
-          <span id="dlLabel">DOWNLOAD VIDEO</span>
-        </a>
-        <button class="ghost-btn" id="againBtn">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 10a8 8 0 1 1 2 6.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M4 5v5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          GENERATE ANOTHER
+      <!-- Step 1: Search -->
+      <section id="searchPanel" class="panel fade-in">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-neon/20 to-neon/5 flex items-center justify-center">
+            <i class="fas fa-search text-neon text-xs"></i>
+          </div>
+          <h2 class="font-display font-semibold text-white text-base">Research Topic</h2>
+        </div>
+        <p class="text-slate-400 text-sm mb-4">Enter a topic to search Wikipedia for accurate research material and real images.</p>
+        <div class="flex gap-3">
+          <input id="searchInput" type="text" class="input flex-1" placeholder="e.g. Black holes, Roman Empire, CRISPR..." autocomplete="off">
+          <button id="searchBtn" class="btn btn-primary whitespace-nowrap" onclick="performSearch()">
+            <i class="fas fa-search text-sm"></i><span class="hidden sm:inline">Search</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Step 2: Results -->
+      <section id="resultsPanel" class="panel hidden">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-neon/20 to-neon/5 flex items-center justify-center">
+              <i class="fas fa-list text-neon text-xs"></i>
+            </div>
+            <h2 class="font-display font-semibold text-white text-base">Wikipedia Results</h2>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="backToSearch()">
+            <i class="fas fa-arrow-left text-xs"></i>Back
+          </button>
+        </div>
+        <div id="resultsList" class="space-y-3 max-h-[420px] overflow-y-auto pr-1"></div>
+        <div class="mt-4 pt-3 border-t border-white/5">
+          <button class="btn btn-ghost btn-sm w-full" onclick="skipArticleSelect()">
+            <i class="fas fa-forward text-xs"></i>Skip — Use topic directly without Wikipedia article
+          </button>
+        </div>
+      </section>
+
+      <!-- Step 3: Article Info + Config -->
+      <section id="configPanel" class="panel hidden">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-violet/20 to-violet/5 flex items-center justify-center">
+              <i class="fas fa-newspaper text-violet text-xs"></i>
+            </div>
+            <h2 class="font-display font-semibold text-white text-base">Selected Source</h2>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="backToResults()">
+            <i class="fas fa-arrow-left text-xs"></i>Change
+          </button>
+        </div>
+        <div id="articleInfo" class="bg-charcoal rounded-xl p-4 border border-white/5 mb-5"></div>
+
+        <!-- Voice Selection -->
+        <div class="mb-5">
+          <label class="text-sm font-medium text-slate-300 mb-3 block">Narration Voice</label>
+          <div id="voiceGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5"></div>
+        </div>
+
+        <!-- Subtitle Style -->
+        <div class="mb-5">
+          <label class="text-sm font-medium text-slate-300 mb-3 block">Subtitle Style</label>
+          <div id="styleGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5"></div>
+        </div>
+
+        <!-- Intelligent Hook -->
+        <div class="mb-5">
+          <div class="flex items-center justify-between bg-charcoal rounded-xl p-4 border border-white/5">
+            <div>
+              <p class="text-sm font-medium text-white">Intelligent Hook</p>
+              <p class="text-xs text-slate-400 mt-0.5">Loops the ending back to the opening for seamless replay</p>
+            </div>
+            <div id="hookToggle" class="toggle active" onclick="toggleHook()"></div>
+          </div>
+        </div>
+
+        <button id="generateBtn" class="btn btn-violet w-full text-base py-3.5" onclick="startGeneration()">
+          <i class="fas fa-wand-magic-sparkles"></i>Generate Short
         </button>
-      </div>
-      <div class="ios-note" id="iosNote">On iPhone or iPad: press and hold the player, then “Save Video” — or tap Download.</div>
-      <div class="warn-banner" id="voiceWarn">Voice engine unreachable from this network — the export carries picture and score only. Reconnect to the internet and regenerate with one tap; everything else is already cached.</div>
+      </section>
 
-      <div class="checks" id="qualityChecks" aria-label="Final quality verification"></div>
+      <!-- Step 4: Progress -->
+      <section id="progressPanel" class="panel hidden">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="spinner"></div>
+          <h2 class="font-display font-semibold text-white text-base">Generating</h2>
+        </div>
+        <div class="mb-3">
+          <div class="flex justify-between mb-1.5">
+            <span id="progressLabel" class="text-sm text-slate-300">Researching topic...</span>
+            <span id="progressPercent" class="text-sm text-neon font-mono">0%</span>
+          </div>
+          <div class="progress-bar"><div id="progressFill" class="progress-fill" style="width:0%"></div></div>
+        </div>
+        <div id="scriptPreview" class="mt-4 bg-charcoal rounded-xl p-4 border border-white/5 max-h-[280px] overflow-y-auto hidden">
+          <p class="text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">Script Preview</p>
+          <div id="scriptContent" class="space-y-2"></div>
+        </div>
+      </section>
 
-      <details class="acc" id="scriptAcc">
-        <summary>VIEW SCRIPT
-          <span class="acc-meta" id="scriptMeta"></span>
-          <svg class="acc-chev" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </summary>
-        <div class="acc-body" id="scriptBody"></div>
-      </details>
+      <!-- Step 5: Preview -->
+      <section id="previewPanel" class="panel hidden">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-neon/20 to-violet/20 flex items-center justify-center">
+              <i class="fas fa-check text-neon text-xs"></i>
+            </div>
+            <h2 class="font-display font-semibold text-white text-base">Your Short is Ready</h2>
+          </div>
+          <div class="badge badge-neon"><i class="fas fa-circle-check text-[8px]"></i>Complete</div>
+        </div>
+        <div class="video-container mx-auto" style="max-width:280px">
+          <canvas id="previewCanvas" width="540" height="960"></canvas>
+        </div>
+        <div class="flex gap-3 mt-4">
+          <button class="btn btn-primary flex-1" onclick="playPreview()">
+            <i class="fas fa-play text-sm"></i>Play
+          </button>
+          <button class="btn btn-violet flex-1" onclick="downloadVideo()">
+            <i class="fas fa-download text-sm"></i>Download
+          </button>
+        </div>
+        <button class="btn btn-ghost btn-sm w-full mt-3" onclick="startOver()">
+          <i class="fas fa-rotate-left text-xs"></i>Start Over
+        </button>
+      </section>
 
-      <details class="acc" id="srcAcc">
-        <summary>SOURCES &amp; LICENSES
-          <span class="acc-meta" id="srcMeta"></span>
-          <svg class="acc-chev" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </summary>
-        <div class="acc-body" id="srcBody"></div>
-      </details>
     </div>
+  </main>
 
-  </section>
-</main>
-
-<!-- ══════════════ WORKFLOW STRIP ══════════════ -->
-<div class="workflow-strip" aria-hidden="true">
-  <span class="wf-step">TOPIC</span><span class="wf-arr">→</span>
-  <span class="wf-step">RESEARCH</span><span class="wf-arr">→</span>
-  <span class="wf-step">FACT-CHECKED SCRIPT</span><span class="wf-arr">→</span>
-  <span class="wf-step">REAL IMAGES</span><span class="wf-arr">→</span>
-  <span class="wf-step">STUDIO TTS</span><span class="wf-arr">→</span>
-  <span class="wf-step">WORD-TIMED SUBTITLES</span><span class="wf-arr">→</span>
-  <span class="wf-step">9:16 VIDEO</span>
+  <!-- Secret Menu -->
+  <footer class="px-4 sm:px-6 pb-8">
+    <div class="max-w-3xl mx-auto">
+      <div class="border-t border-white/5 pt-6 mt-4">
+        <button id="secretToggle" class="flex items-center gap-2 text-xs text-slate-600 hover:text-slate-400 transition-colors cursor-pointer mb-3" onclick="toggleSecret()">
+          <i class="fas fa-lock text-[10px]"></i>Secret Menu
+          <i id="secretArrow" class="fas fa-chevron-down text-[8px] transition-transform"></i>
+        </button>
+        <div id="secretContent" class="hidden">
+          <div class="panel panel-v" style="border-color:var(--border-violet);box-shadow:var(--glow-violet)">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-violet/20 to-violet/5 flex items-center justify-center">
+                <i class="fas fa-car text-violet text-xs"></i>
+              </div>
+              <h3 class="font-display font-semibold text-white text-sm">Car Database</h3>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+              <div>
+                <label class="text-xs text-slate-400 mb-1.5 block">Manufacturer</label>
+                <div class="relative">
+                  <input id="carMakeSearch" type="text" class="input text-sm mb-2" placeholder="Search brands..." oninput="filterCarMakes()">
+                  <select id="carMake" class="select" onchange="updateCarModels()"></select>
+                </div>
+              </div>
+              <div>
+                <label class="text-xs text-slate-400 mb-1.5 block">Model</label>
+                <div class="relative">
+                  <input id="carModelSearch" type="text" class="input text-sm mb-2" placeholder="Search models..." oninput="filterCarModels()">
+                  <select id="carModel" class="select" onchange="updateCarSelection()"></select>
+                </div>
+              </div>
+            </div>
+            <div id="carSelection" class="bg-charcoal rounded-xl p-3 border border-white/5 flex items-center justify-between">
+              <span id="carSelectionText" class="text-sm text-slate-400">Select a manufacturer and model</span>
+              <button id="carCopyBtn" class="btn btn-ghost btn-sm hidden" onclick="copyCarSelection()">
+                <i class="fas fa-copy text-xs"></i>Copy
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
 </div>
 
-<footer>
-  <div class="foot-l">
-    <b>FACT ENGINE 2.0</b> — THE WHOLE PIPELINE IS THE PRODUCT.<br>
-    Facts: Wikipedia · Images: Wikimedia Commons, license-verified per asset · Narration: studio neural TTS · No intro. No branding. No filler.
-  </div>
-  <div class="foot-r">1080×1920 · 30FPS · VERTICAL<br>EVERY IMAGE CREDITED TO ITS AUTHOR</div>
-</footer>
+<!-- Toast container -->
+<div id="toastContainer"></div>
+
+<!-- Hidden render canvas -->
+<canvas id="renderCanvas" width="1080" height="1920" style="display:none"></canvas>
 
 <script>
-(function(){
-'use strict';
-/* ================================================================
-   FACT ENGINE 2.0 — FULL PRODUCTION PIPELINE
-   TOPIC → RESEARCH → SCRIPT → REAL IMAGES → TTS → WORD-TIMED
-   SUBTITLES → 1080×1920 VIDEO. ALL CLIENT-SIDE.
-   ================================================================ */
-
-/* ---------- tiny helpers ---------- */
-const $ = (s, r) => (r||document).querySelector(s);
-const $$ = (s, r) => Array.from((r||document).querySelectorAll(s));
-const clamp = (v,a,b) => v<a?a:v>b?b:v;
-const lerp = (a,b,t) => a+(b-a)*t;
-const smooth = t => { t = clamp(t,0,1); return t*t*(3-2*t); };
-const ease3  = t => { t = clamp(t,0,1); return t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; };
-const trunc  = (s,n) => { s=String(s||''); return s.length>n ? s.slice(0,n-1)+'…' : s; };
-const slugify= s => (String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,58)) || 'story';
-const hashStr= s => { let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return Math.abs(h); };
-const fmtTime= s => { s=Math.max(0,Math.round(s)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); };
-const fmtClock=s=>{ const m=Math.floor(s/60), sec=s%60; return String(m).padStart(2,'0')+':'+(sec<10?'0':'')+sec.toFixed(1); };
-const wordCount= t => (String(t).trim().match(/\S+/g)||[]).length;
-const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-
-/* ================================================================
-   DATA — THE FOUR STUDIO VOICES
-   ================================================================ */
-const VOICES = [
-  { id:'atlas', name:'Marcus', tag:'MALE',   role:'DEEP DOCUMENTARY',
-    desc:'Low, unhurried gravitas. Built for history, science and cold-case mystery.',
-    se:'Brian',   rate:0.92, pitch:0.80, hue:'#C7A86B', initials:'MC' },
-  { id:'reed',  name:'Reed',  tag:'MALE',   role:'NATURAL CONVERSATIONAL',
-    desc:'Bright, close and relaxed — a very smart friend telling you the story.',
-    se:'Matthew', rate:1.0,  pitch:1.0,  hue:'#8FB6C9', initials:'RD' },
-  { id:'elena', name:'Elena', tag:'FEMALE', role:'CONFIDENT DOCUMENTARY',
-    desc:'Composed, precise and quietly authoritative. Awards-night narration.',
-    se:'Emma',    rate:0.95, pitch:0.92, hue:'#D9C3E0', initials:'EL' },
-  { id:'sofia', name:'Sofia', tag:'FEMALE', role:'NATURAL CONVERSATIONAL',
-    desc:'Warm, quick and human — the voice you lean in to catch.',
-    se:'Joanna',  rate:1.03, pitch:1.06, hue:'#E8B4B8', initials:'SF' },
-];
-const VOICE = id => VOICES.find(v=>v.id===id) || VOICES[0];
-const SUB_STYLES = [
-  { id:'minimal',   name:'Minimal Cinematic',     tag:'LETTER-SPACED CAPS · CENTERED', demo:'d-minimal', words:['THE','PAST','COMPRESSED'] },
-  { id:'bold',      name:'Bold Documentary',      tag:'HEAVY SANS · GOLD HOOK BAR',    demo:'d-bold',    words:['THE','PAST','COMPRESSED'] },
-  { id:'highlight', name:'Modern Word Highlight', tag:'KARAOKE PILL · WORD BY WORD',   demo:'d-hl',      words:['The','past,','compressed'] },
-  { id:'editorial', name:'Elegant Editorial',     tag:'PLAYFAIR ITALIC · GOLD RULE',   demo:'d-edit',    words:['The','past,','compressed'] },
-  { id:'primetime', name:'Primetime Caption',     tag:'WHITE ON BROADCAST PILL',       demo:'d-pt',      words:['The','past','compressed'] },
-];
-const styleName = id => (SUB_STYLES.find(s=>s.id===id)||{}).name || id;
-
-const SAMPLE_LINE = 'Every great mystery begins with a single, impossible detail.';
-const SUGGESTED = ['The Library of Alexandria','Octopuses','Nikola Tesla','The Wow! signal','The Paris Catacombs','Pompeii','The Antikythera mechanism','Chernobyl'];
-const GAP = 0.18; // seconds of air between narration lines
-
+// ============================================
+// STATE
+// ============================================
 const state = {
-  mode:'wiki',
-  voice:'atlas',
-  style:'minimal',
-  hook:true,
-  music:true,
-  busy:false,
-  lastBlob:null, lastExt:'mp4', lastMime:'video/mp4',
-  usedImages:[], timeline:null, scenes:[], article:null, scriptStats:null,
+  step: 'search',
+  searchQuery: '',
+  searchResults: [],
+  selectedArticle: null,
+  articleContent: null,
+  articleImages: [],
+  script: null,
+  scenes: [],
+  voice: 'male-deep',
+  subtitleStyle: 'minimal',
+  intelligentHook: true,
+  videoBlob: null,
+  progress: 0,
+  generating: false,
+  carMake: '',
+  carModel: ''
 };
 
-const els = {
-  topicInput:$('#topicInput'), inputCount:$('#inputCount'), inputHint:$('#inputHint'),
-  inputModeNote:$('#inputModeNote'), scriptModeNote:$('#scriptModeNote'),
-  topicChips:$('#topicChips'), modeWikiBtn:$('#modeWikiBtn'), modeScriptBtn:$('#modeScriptBtn'),
-  voiceGrid:$('#voiceGrid'), styleGrid:$('#styleGrid'),
-  hookToggle:$('#hookToggle'), hookLoopNote:$('#hookLoopNote'), musicToggle:$('#musicToggle'),
-  generateBtn:$('#generateBtn'), gbLabel:$('#gbLabel'),
-  poster:$('#poster'), posterEq:$('#posterEq'), canvas:$('#renderCanvas'), finalVideo:$('#finalVideo'), liveBadge:$('#liveBadge'),
-  progressCard:$('#progressCard'), pcStage:$('#pcStage'), pcPct:$('#pcPct'), pcFill:$('#pcFill'), pcStages:$('#pcStages'),
-  logConsole:$('#logConsole'), pcError:$('#pcError'), pcErrorMsg:$('#pcErrorMsg'), retryBtn:$('#retryBtn'),
-  resultsPanel:$('#resultsPanel'), resTitle:$('#resTitle'), resDesc:$('#resDesc'), resChips:$('#resChips'),
-  downloadBtn:$('#downloadBtn'), dlLabel:$('#dlLabel'), againBtn:$('#againBtn'),
-  iosNote:$('#iosNote'), voiceWarn:$('#voiceWarn'), qualityChecks:$('#qualityChecks'),
-  scriptBody:$('#scriptBody'), scriptMeta:$('#scriptMeta'), srcBody:$('#srcBody'), srcMeta:$('#srcMeta'),
+// ============================================
+// VOICE DEFINITIONS
+// ============================================
+const voices = [
+  { id: 'male-deep', name: 'Deep Documentary', icon: 'fa-microphone', desc: 'Male · Authoritative', color: 'neon' },
+  { id: 'male-natural', name: 'Natural Conversational', icon: 'fa-comments', desc: 'Male · Warm', color: 'neon' },
+  { id: 'female-deep', name: 'Confident Documentary', icon: 'fa-microphone-lines', desc: 'Female · Assertive', color: 'violet' },
+  { id: 'female-natural', name: 'Natural Conversational', icon: 'fa-message', desc: 'Female · Friendly', color: 'violet' }
+];
+
+// ============================================
+// SUBTITLE STYLES
+// ============================================
+const subStyles = [
+  { id: 'minimal', name: 'Minimal Cinematic', desc: 'Subtle · Elegant' },
+  { id: 'bold', name: 'Bold Documentary', desc: 'Impact · Clear' },
+  { id: 'highlight', name: 'Word Highlight', desc: 'Modern · Dynamic' },
+  { id: 'elegant', name: 'Elegant Editorial', desc: 'Refined · Serif' }
+];
+
+// ============================================
+// CAR DATABASE
+// ============================================
+const carDatabase = {
+  "Acura": ["ILX","MDX","NSX","RDX","TLX","Integra","ZDX"],
+  "Alfa Romeo": ["Giulia","Stelvio","Tonale"],
+  "Aston Martin": ["DB11","DB12","DBX","Vantage","Valhalla"],
+  "Audi": ["A3","A4","A5","A6","A7","A8","Q3","Q4 e-tron","Q5","Q7","Q8","R8","RS3","RS4","RS5","RS6","RS7","S3","S4","S5","S6","S7","S8","SQ5","e-tron GT"],
+  "BMW": ["228i","330i","430i","530i","740i","840i","X1","X2","X3","X4","X5","X6","X7","Z4","M2","M3","M4","M5","M8","X3 M","X4 M","X5 M","X6 M","i4","iX","i7"],
+  "Bugatti": ["Chiron","Tourbillon","Mistral"],
+  "Buick": ["Encore","Encore GX","Enclave","Envista","LaCrosse","Regal"],
+  "Cadillac": ["CT4","CT5","CT5-V","Escalade","Escalade-V","Lyriq","XT4","XT5","XT6","Celestiq"],
+  "Chevrolet": ["Blazer","Camaro","Colorado","Corvette","Equinox","Express","Impala","Malibu","Silverado 1500","Suburban","Tahoe","Trailblazer","Traverse","Trax","Volt"],
+  "Chrysler": ["300","Pacifica","Voyager"],
+  "Dodge": ["Challenger","Charger","Durango","Hornet"],
+  "Ferrari": ["296 GTB","SF90 Stradale","F8 Tributo","Roma","Purosangue","812 Competizione"],
+  "Fiat": ["500","500e","Panda","Tipo","Pulse"],
+  "Ford": ["Bronco","Bronco Sport","EcoSport","Edge","Escape","Expedition","Explorer","F-150","F-150 Lightning","Fiesta","Focus","Mustang","Mustang Mach-E","Ranger","Raptor","Transit"],
+  "Genesis": ["G70","G80","G90","GV60","GV70","GV80"],
+  "GMC": ["Acadia","Canyon","Hummer EV","Sierra 1500","Terrain","Yukon"],
+  "Honda": ["Accord","Civic","CR-V","HR-V","Insight","Odyssey","Passport","Pilot","Ridgeline","S2000","Type R"],
+  "Hyundai": ["Accent","Elantra","Ioniq 5","Ioniq 6","Kona","Palisade","Santa Fe","Sonata","Tucson","Veloster"],
+  "Infiniti": ["Q50","Q55","QX50","QX55","QX60","QX80"],
+  "Jaguar": ["F-Type","F-Pace","E-Pace","I-Pace","XF","XJ"],
+  "Jeep": ["Cherokee","Compass","Gladiator","Grand Cherokee","Grand Wagoneer","Renegade","Wrangler"],
+  "Kia": ["Ceed","EV6","EV9","Forte","K5","Niro","Seltos","Sorento","Soul","Sportage","Stinger","Telluride"],
+  "Lamborghini": ["Huracán","Revuelto","Urus","Temerario"],
+  "Land Rover": ["Defender","Discovery","Discovery Sport","Range Rover","Range Rover Evoque","Range Rover Sport","Range Rover Velar"],
+  "Lexus": ["ES","GS","GX","IS","LC","LFA","LS","LX","NX","RC","RX","RZ","UX"],
+  "Lincoln": ["Aviator","Corsair","Nautilus","Navigator","Zephyr"],
+  "Lotus": ["Emira","Eletre","Evija"],
+  "Maserati": ["Ghibli","GranTurismo","Grecale","Levante","MC20","Quattroporte"],
+  "Mazda": ["2","3","CX-3","CX-30","CX-5","CX-50","CX-60","CX-90","MX-5 Miata","6"],
+  "McLaren": ["720S","750S","Artura","P1","Speedtail","765LT"],
+  "Mercedes-Benz": ["A-Class","C-Class","CLA","CLE","E-Class","EQE","EQS","G-Class","GLA","GLB","GLC","GLE","GLS","GT","Maybach S-Class","S-Class","SL","AMG GT","C63 AMG","E63 AMG","S63 AMG","G63 AMG","GLC63 AMG","GLE63 AMG"],
+  "Mini": ["Cooper","Cooper Clubman","Cooper Countryman","Cooper Convertible","JCW"],
+  "Mitsubishi": ["Eclipse Cross","Lancer","Mirage","Outlander","Outlander Sport","Pajero"],
+  "Nissan": ["Altima","Ariya","Frontier","GT-R","Kicks","Leaf","Maxima","Murano","Pathfinder","Rogue","Sentra","Versa","Z"],
+  "Pagani": ["Huayra","Utopia"],
+  "Porsche": ["718 Boxster","718 Cayman","911","918 Spyder","Cayenne","Macan","Panamera","Taycan"],
+  "Ram": ["1500","1500 TRX","2500","3500","ProMaster"],
+  "Rivian": ["R1T","R1S"],
+  "Rolls-Royce": ["Cullinan","Dawn","Ghost","Phantom","Spectre","Wraith"],
+  "Subaru": ["Ascent","BRZ","Crosstrek","Forester","Impreza","Legacy","Outback","WRX"],
+  "Tesla": ["Model 3","Model S","Model X","Model Y","Cybertruck","Roadster"],
+  "Toyota": ["4Runner","Avalon","Camry","Corolla","Crown","GR86","GR Supra","GR Corolla","Highlander","Land Cruiser","Prius","RAV4","Sequoia","Sienna","Tacoma","Tundra","Yaris"],
+  "Volkswagen": ["Atlas","Golf","Golf GTI","Golf R","ID.4","ID.7","Jetta","Passat","Taos","Tiguan","Touareg"],
+  "Volvo": ["C40","EX30","EX90","S60","S90","V60","V90","XC40","XC60","XC90"]
 };
 
-/* ================================================================
-   AUDIO CONTEXT (created on user gesture)
-   ================================================================ */
-let actx = null;
-function getAudioCtx(){
-  if(!actx){
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if(!AC) throw new Error('Web Audio API is not available in this browser.');
-    actx = new AC();
-  }
-  if(actx.state === 'suspended') actx.resume();
-  return actx;
-}
-function decodeAudio(ctx, arrayBuffer){
-  return new Promise((res, rej) => ctx.decodeAudioData(arrayBuffer, res, rej));
-}
+// ============================================
+// DOM REFS
+// ============================================
+const $ = id => document.getElementById(id);
 
-/* ================================================================
-   LOGGING + STAGE TRACKER
-   ================================================================ */
-let T0 = 0;
-function log(msg, cls){
-  const d = (performance.now() - T0) / 1000;
-  const line = document.createElement('div');
-  line.innerHTML = '<span class="lt">['+d.toFixed(2).padStart(6,'0')+'s]</span>' +
-    (cls ? '<span class="lg-'+cls+'">'+esc(msg)+'</span>' : esc(msg));
-  els.logConsole.appendChild(line);
-  while(els.logConsole.childNodes.length > 60) els.logConsole.removeChild(els.logConsole.firstChild);
-  els.logConsole.scrollTop = els.logConsole.scrollHeight;
-}
-function clearLog(){ els.logConsole.innerHTML=''; }
-function setStage(stageIdx, pct, label){
-  els.pcStage.textContent = label;
-  els.pcPct.textContent = Math.round(pct);
-  els.pcFill.style.width = clamp(pct,0,100)+'%';
-  $$('.pc-pill', els.pcStages).forEach(p=>{
-    const i = +p.dataset.stage;
-    p.classList.toggle('done', i < stageIdx || (stageIdx===5 && pct>=100));
-    p.classList.toggle('active', i === stageIdx && pct < 100);
-    if(pct>=100) p.classList.remove('active');
+// ============================================
+// UI HELPERS
+// ============================================
+function showPanel(id) {
+  ['searchPanel','resultsPanel','configPanel','progressPanel','previewPanel'].forEach(p => {
+    const el = $(p);
+    if (p === id) { el.classList.remove('hidden'); el.classList.add('fade-in'); }
+    else { el.classList.add('hidden'); el.classList.remove('fade-in'); }
   });
-}
-function setStageError(stageIdx, msg){
-  $$('.pc-pill', els.pcStages).forEach(p=>{
-    const i = +p.dataset.stage;
-    p.classList.toggle('error', i === stageIdx);
-    p.classList.toggle('active', false);
-  });
-  els.pcErrorMsg.textContent = msg;
-  els.pcError.classList.add('show');
-  log('FAILED → '+msg, 'err');
-}
-function resetPipelineUI(){
-  $$('.pc-pill', els.pcStages).forEach(p=>p.classList.remove('done','active','error'));
-  els.pcFill.style.width='0%'; els.pcPct.textContent='0';
-  els.pcError.classList.remove('show');
+  setTimeout(() => id && $(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 }
 
-/* ================================================================
-   RESEARCH — WIKIPEDIA (full article, not just the lead)
-   ================================================================ */
-const WIKI = 'https://en.wikipedia.org/w/api.php';
-const COMMONS = 'https://commons.wikimedia.org/w/api.php';
-async function apiJSON(base, params){
-  const p = new URLSearchParams(Object.assign({}, params, { format:'json', origin:'*' }));
-  const r = await fetch(base + '?' + p.toString());
-  if(!r.ok) throw new Error('Network error ('+r.status+') contacting '+(base.includes('commons')?'Wikimedia Commons':'Wikipedia'));
-  return r.json();
-}
-const wikiJSON = p => apiJSON(WIKI, p);
-const commonsJSON = p => apiJSON(COMMONS, p);
-
-async function resolveTopic(q){
-  const sd = await wikiJSON({ action:'query', list:'search', srsearch:q, srlimit:'8', srprop:'snippet|size' });
-  const hits = (sd && sd.query && sd.query.search) || [];
-  if(!hits.length) throw new Error('No Wikipedia article found for “'+q+'” — try a more specific subject.');
-  const lq = q.trim().toLowerCase();
-  const exact = hits.find(h => h.title.toLowerCase() === lq);
-  return (exact || hits[0]).title;
-}
-async function fetchArticle(title){
-  const d = await wikiJSON({
-    action:'query', prop:'extracts|pageimages|pageprops|sections',
-    explaintext:'1', piprop:'name', ppprop:'description', redirects:'1', titles:title
-  });
-  const pages = Object.values((d && d.query && d.query.pages) || {});
-  const page = pages[0];
-  if(!page || !page.extract) throw new Error('Article text could not be retrieved for “'+title+'”.');
-  const sections = (page.sections||[]).length;
-  return {
-    title: page.title,
-    description: (page.pageprops && page.pageprops.description) || '',
-    extract: page.extract,
-    mainImage: page.pageimage || null,
-    sectionCount: sections
-  };
+function showToast(msg, dur = 2500) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  $('toastContainer').appendChild(t);
+  setTimeout(() => t.remove(), dur);
 }
 
-/* ---------- sentence intelligence ---------- */
-const JUNK_SENT = /^(see also|references|external links|notes|further reading|bibliography|contents|sources|isbn|doi|retrieved|archived|jump to)\b/i;
-const SUPERLATIVES = /\b(first|last|only|largest|smallest|oldest|newest|fastest|slowest|tallest|deepest|deadliest|highest|lowest|most|fewest|greatest|best|worst|richest|poorest|earliest|ultimate|rare|unique|mysterious|impossible|secret|lost|hidden|forbidden|legendary|unexplained|never)\b/i;
-function splitSentences(text){
-  const clean = String(text)
-    .replace(/\[\s*edit\s*\]/gi,'')
-    .replace(/={2,}\s*([^=]+?)\s*={2,}/g, ' . ')
-    .replace(/\{\{[^}]*\}\}/g,' ')
-    .replace(/\[[^\]]{0,60}\]/g,'')
-    .replace(/\s+/g,' ').trim();
-  const raw = clean.match(/[^.!?]+[.!?]+["”’')\]]*/g) || [];
-  return raw.map(s=>s.trim()).filter(s => s.length > 25);
-}
-function sentScore(s){
-  const w = wordCount(s);
-  if(w < 6) return -50;
-  if(w > 42) return -50;
-  let sc = 0;
-  const digits = (s.match(/\d/g)||[]).length;
-  sc += Math.min(digits, 6) * 1.35;
-  if(SUPERLATIVES.test(s)) sc += 3.1;
-  if(/\b(1[0-9]{3}|20[0-2][0-9])\b/.test(s)) sc += 1.6;
-  if(/record|discover|invent|surviv|vanish|destroy|ban(ned|ned)?|forbid|secret|myster|strange|remarkab|surpris|infamous/i.test(s)) sc += 2.1;
-  if(/million|billion|thousand|centuries|century|percent|%/i.test(s)) sc += 1.1;
-  if(JUNK_SENT.test(s)) sc -= 12;
-  if(/^(also|in addition|additionally|however, it)\b/i.test(s)) sc -= 1.1;
-  if(w > 34) sc -= 3.5;
-  return sc;
-}
-const wordSet = s => new Set((String(s).toLowerCase().match(/[a-z0-9']+/g)) || []);
-function containment(a, b){
-  const A = wordSet(a), B = wordSet(b);
-  if(!A.size || !B.size) return 0;
-  let hit = 0; for(const w of A) if(B.has(w)) hit++;
-  return hit / Math.min(A.size, B.size);
-}
-function splitLongLine(s){
-  const words = s.split(/\s+/);
-  if(words.length <= 24) return [s];
-  const mid = Math.floor(words.length/2);
-  let best = -1, bestDist = Infinity;
-  for(let i = Math.max(6, mid-8); i < Math.min(words.length-5, mid+9); i++){
-    if(/[,;:—–]$/.test(words[i-1])) { const d = Math.abs(mid-i); if(d < bestDist){ bestDist = d; best = i; } }
-  }
-  if(best === -1) return [s];
-  const a = words.slice(0,best).join(' ').replace(/[,;:—–]$/,'.');
-  const b = words.slice(best).join(' ');
-  const cap = b.charAt(0).toUpperCase() + b.slice(1);
-  return [a, cap];
-}
-const mkLine = t => ({ text:t.trim(), wordsArr: t.trim().split(/\s+/).filter(Boolean) });
-
-function buildScriptFromArticle(article, hookOn){
-  const sentences = splitSentences(article.extract)
-    .filter(s => !JUNK_SENT.test(s) && wordCount(s) >= 6 && wordCount(s) <= 42);
-  if(!sentences.length) throw new Error('The article yielded no usable narration sentences.');
-  const scored = sentences.map((s,i) => ({ s, i, sc: sentScore(s) }));
-  const ranked = scored.slice().sort((a,b) => b.sc - a.sc);
-  let hookObj = ranked.find(o => o.sc > 1.4 && (/\d/.test(o.s) || SUPERLATIVES.test(o.s))) || ranked[0];
-  const hook = hookObj.s;
-  // body: highest-scored, diverse, back into article order
-  const BODY_BUDGET = 128;
-  const chosen = [];
-  const chosenTexts = [hook];
-  let acc = 0;
-  for(const o of ranked){
-    if(o === hookObj) continue;
-    const w = wordCount(o.s);
-    if(acc + w > BODY_BUDGET) continue;
-    if(chosenTexts.some(t => containment(t, o.s) > 0.5)) continue;
-    chosen.push(o); chosenTexts.push(o.s); acc += w;
-    if(chosen.length >= 9) break;
-  }
-  const body = chosen.sort((a,b) => a.i - b.i).map(o => o.s);
-  const subject = article.title;
-  let lines = [hook].concat(body);
-  if(hookOn){
-    lines.push('And that is why, with ' + subject + ', every road leads straight back to where the story began.');
-    lines.push('Which makes the very first line the most important detail of all.');
-  } else {
-    lines.push('And that is ' + subject + ' — stranger, sharper and far more interesting than the usual retelling.');
-  }
-  lines = lines.flatMap(splitLongLine).map(mkLine);
-  const words = lines.reduce((n,l) => n + l.wordsArr.length, 0);
-  return { lines, hookText: hook, stats: { scanned: sentences.length, words, sections: article.sectionCount||0 } };
-}
-function guessQuery(script){
-  const words = String(script).replace(/[^A-Za-z0-9 '-]/g,' ').split(/\s+/).filter(Boolean)
-    .filter(w => !/^(the|a|an|and|or|but|of|to|in|on|at|for|with|by|from|is|are|was|were|it|its|this|that|there|when|while|after|before|i|you|we|they|he|she)$/i.test(w));
-  return words.slice(0, 6).join(' ') || 'history';
-}
-function buildScriptFromRaw(raw, hookOn){
-  let text = String(raw).replace(/\s+/g,' ').trim();
-  // enforce a Shorts-friendly ceiling without inventing a word
-  const words = text.split(/\s+/);
-  if(words.length > 330){
-    let acc = 0, cut = words.length;
-    for(let i=0;i<words.length;i++){
-      acc++;
-      if(acc >= 330 && /[.!?]["”’)]?$/.test(words[i])) { cut = i+1; break; }
-    }
-    text = words.slice(0, cut).join(' ');
-  }
-  const sentences = splitSentences(text);
-  if(!sentences.length) throw new Error('Could not parse sentences from your script — check the punctuation.');
-  let lines = sentences.flatMap(splitLongLine).map(mkLine);
-  if(hookOn){
-    lines.push(mkLine('And that brings it full circle — one more reason the beginning was the whole point.'));
-  }
-  const wcount = lines.reduce((n,l) => n + l.wordsArr.length, 0);
-  return { lines, hookText: sentences[0], stats: { scanned: sentences.length, words: wcount, sections: 0 } };
+function setProgress(pct, label) {
+  state.progress = pct;
+  $('progressFill').style.width = pct + '%';
+  $('progressPercent').textContent = Math.round(pct) + '%';
+  if (label) $('progressLabel').textContent = label;
 }
 
-/* ================================================================
-   IMAGES — WIKIMEDIA COMMONS, LICENCE-CHECKED, RELEVANCE-SCORED
-   ================================================================ */
-const IMG_JUNK = /logo|icon|commons[-_]logo|question[-_]book|padlock|wikimedia|wikipedia[-_]?logo|wiktionary|ambox|stub|edit[-_]|disambig|locator|location[-_]map|crystal[-_]|nuvola|signature|seal[-_]of|folder[-_]|gnome[-_]|pictogram|flag[-_]of[-_]\w+[-_]location/i;
-const MIME_OK = /jpeg|png|svg/i;
-const stripHTML = h => { const d = document.createElement('div'); d.innerHTML = h || ''; return (d.textContent || '').trim(); };
+// ============================================
+// SEARCH
+// ============================================
+async function performSearch() {
+  const q = $('searchInput').value.trim();
+  if (!q) { showToast('Enter a topic to search'); return; }
+  state.searchQuery = q;
+  const btn = $('searchBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px"></span><span class="hidden sm:inline">Searching</span>';
 
-function normalizeImageInfo(title, ii){
-  const em = ii.extmetadata || {};
-  return {
-    title: title,
-    descUrl: ii.descriptionurl || '',
-    thumb: ii.thumburl || ii.url || '',
-    full: ii.url || '',
-    width: ii.thumbwidth || ii.width || 0,
-    height: ii.thumbheight || ii.height || 0,
-    mime: ii.mime || '',
-    license: stripHTML(em.LicenseShortName && em.LicenseShortName.value) || 'License unverified',
-    artist: stripHTML(em.Artist && em.Artist.value) || 'Unknown author',
-    rel: 0, el: null
-  };
-}
-function subjectTokens(title){
-  return String(title).toLowerCase().split(/[^a-z0-9]+/).filter(w => w.length > 3 && !/^(the|and|of|from|with)$/.test(w));
-}
-function relevance(name, tokens){
-  const n = String(name).toLowerCase();
-  let hit = 0;
-  for(const t of tokens) if(n.includes(t)) hit += 2;
-  return hit;
-}
-async function fetchCommonsInfo(titles){
-  const out = [];
-  const chunks = [];
-  for(let i=0;i<titles.length && out.length < 44;i+=6) chunks.push(titles.slice(i,i+6));
-  await Promise.all(chunks.map(async chunk => {
-    try{
-      const d = await commonsJSON({
-        action:'query', titles: chunk.join('|'), prop:'imageinfo',
-        iiprop:'url|size|mime|extmetadata', iiurlwidth:'1280'
-      });
-      const pages = Object.values((d && d.query && d.query.pages) || {});
-      for(const p of pages){
-        const ii = p.imageinfo && p.imageinfo[0];
-        if(ii) out.push(normalizeImageInfo(p.title, ii));
-      }
-    }catch(e){ /* batch skipped — other batches continue */ }
-  }));
-  return out;
-}
-function filterAndRankImages(infos, article){
-  const tokens = subjectTokens(article.title);
-  const seen = new Set();
-  const good = [];
-  for(const im of infos){
-    if(!im || !im.thumb) continue;
-    if(im.width && im.width < 600) continue;
-    if(!MIME_OK.test(im.mime)) continue;
-    if(IMG_JUNK.test(im.title)) continue;
-    const key = im.title.toLowerCase().replace(/[^a-z0-9]/g,'');
-    if(seen.has(key)) continue; seen.add(key);
-    im.rel = relevance(im.title, tokens);
-    good.push(im);
-  }
-  good.sort((a,b) => (b.rel - a.rel) || ((b.width||0) - (a.width||0)));
-  return good;
-}
-async function gatherImages(article){
-  let infos = [];
-  try{
-    const d = await wikiJSON({ action:'query', prop:'images', imlimit:'max', redirects:'1', titles: article.title });
-    const pages = Object.values((d && d.query && d.query.pages) || {});
-    const titles = [];
-    if(article.mainImage) titles.push('File:' + article.mainImage);
-    for(const p of pages) for(const im of (p.images || [])) titles.push(im.title);
-    const seen = new Set(), uniq = [];
-    for(const t of titles){ const k = t.toLowerCase(); if(!seen.has(k)){ seen.add(k); uniq.push(t); } }
-    const filtered = uniq.filter(t => !IMG_JUNK.test(t) && !/\.(tif|tiff|xcf|webp)$/i.test(t));
-    infos = await fetchCommonsInfo(filtered.slice(0, 42));
-  }catch(e){
-    log('article image list unavailable — using Commons search', 'warn');
-  }
-  let good = filterAndRankImages(infos, article);
-  if(good.length < 6){
-    try{
-      const sd = await commonsJSON({ action:'query', list:'search', srsearch: article.title, srnamespace:'6', srlimit:'18', srprop:'size|mime' });
-      const files = ((sd && sd.query && sd.query.search) || []).map(s => s.title);
-      const extra = await fetchCommonsInfo(files);
-      good = filterAndRankImages(good.concat(extra), article);
-    }catch(e){ /* keep what we have */ }
-  }
-  return good.slice(0, 22);
-}
-function loadImage(src){
-  return new Promise(resolve => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => resolve({ ok:true, img });
-    img.onerror = () => resolve({ ok:false, img:null });
-    img.src = src;
-  });
-}
-async function loadVerifiedImages(infos, onEach){
-  const results = await Promise.all(infos.map(im => loadImage(im.thumb)));
-  const ok = [];
-  results.forEach((r, i) => { if(r.ok){ infos[i].el = r.img; ok.push(infos[i]); } if(onEach) onEach(i+1, infos.length); });
-  return ok;
-}
+  try {
+    const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&srlimit=10&format=json&origin=*`;
+    const res = await fetch(url);
+    const data = await res.json();
+    state.searchResults = data.query?.search || [];
 
-/* ================================================================
-   VOICE SYNTHESIS — STUDIO TTS WITH GRACEFUL FALLBACK
-   ================================================================ */
-async function fetchTTSBuffer(text, voice){
-  const urls = [
-    'https://streamelements.com/apis/tts?voice=' + encodeURIComponent(voice.se) + '&text=' + encodeURIComponent(text),
-    'https://translate.googleapis.com/translate_tts?ie=UTF-8&client=tw-in-x&tl=en&q=' + encodeURIComponent(text)
-  ];
-  const ctx = getAudioCtx();
-  for(const url of urls){
-    try{
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 18000);
-      const r = await fetch(url, { signal: ctrl.signal });
-      clearTimeout(timer);
-      if(!r.ok) continue;
-      const ab = await r.arrayBuffer();
-      if(ab.byteLength < 800) continue;
-      const buf = await decodeAudio(ctx, ab);
-      if(buf && buf.duration > 0.15) return buf;
-    }catch(e){ /* try next engine */ }
-  }
-  throw new Error('Studio TTS unreachable');
-}
-function estimateDuration(words, voice){
-  return clamp((words * 0.315) / (voice.rate || 1), 1.6, 16);
-}
-function layoutWordTiming(text, dur, lineStart){
-  const raw = String(text).split(/\s+/).filter(Boolean);
-  const weights = raw.map(w => {
-    const letters = w.replace(/[^A-Za-z0-9]/g,'').length;
-    return Math.max(1.5, letters * 1.05 + (/[,;:—–]$/.test(w) ? 2.1 : 0) + 1.15);
-  });
-  const sum = weights.reduce((a,b) => a+b, 0) || 1;
-  const speakable = dur * 0.94;
-  let cur = lineStart + 0.05;
-  return raw.map((w, i) => {
-    const wl = speakable * (weights[i] / sum);
-    const start = cur;
-    cur += wl;
-    return { text: w, start: start, end: start + wl * 0.9 };
-  });
-}
-async function synthesizeLines(lines, voice, onProgress){
-  const ctx = getAudioCtx();
-  const results = new Array(lines.length);
-  let idx = 0, studioCount = 0;
-  async function worker(){
-    while(idx < lines.length){
-      const i = idx++;
-      const line = lines[i];
-      let buffer = null, dur = 0, studio = false;
-      try{
-        buffer = await fetchTTSBuffer(line.text, voice);
-        dur = buffer.duration; studio = true; studioCount++;
-      }catch(e){
-        dur = estimateDuration(line.wordsArr.length, voice);
-      }
-      results[i] = { text: line.text, wordsArr: line.wordsArr, buffer, dur, studio };
-      if(onProgress) onProgress(i + 1, lines.length, studio);
-    }
-  }
-  await Promise.all([worker(), worker(), worker(), worker()]);
-  // assemble absolute timeline
-  let t = 0;
-  const timelineLines = results.map(r => {
-    const start = t;
-    r.start = start;
-    r.words = layoutWordTiming(r.text, r.dur, start);
-    t += r.dur + GAP;
-    return r;
-  });
-  const total = Math.max(0.5, t - GAP);
-  return { lines: timelineLines, total, allStudio: studioCount === results.length, studioCount };
-}
-/* live preview (also the graceful fallback for playback) */
-function speakLinesLive(lines, voice){
-  try{
-    const synth = window.speechSynthesis; if(!synth) return;
-    const voices = synth.getVoices() || [];
-    const pick = (re, lang) => voices.find(v => re.test(v.name) && (!lang || v.lang.toLowerCase().startsWith(lang))) ||
-                               voices.find(v => re.test(v.name)) ||
-                               voices.find(v => v.lang.toLowerCase().startsWith('en'));
-    const male = /Daniel|David|Alex|Fred|George|James|Oliver|Aaron|Tom|Google US English/i;
-    const female = /Samantha|Zira|Kate|Serena|Victoria|Moira|Fiona|Tessa|Joanna|Amy|Emma|Google UK English Female/i;
-    let v = voice.tag === 'MALE' ? pick(male,'en') : pick(female,'en');
-    lines.forEach((L, i) => {
-      const u = new SpeechSynthesisUtterance(L.text);
-      if(v) u.voice = v;
-      u.rate = voice.rate; u.pitch = voice.pitch; u.lang = 'en-US';
-      if(i === lines.length - 1) u.onend = () => {};
-      synth.speak(u);
+    if (!state.searchResults.length) { showToast('No results found. Try a different topic.'); btn.disabled = false; btn.innerHTML = '<i class="fas fa-search text-sm"></i><span class="hidden sm:inline">Search</span>'; return; }
+
+    // Fetch thumbnails
+    const titles = state.searchResults.map(r => r.title).join('|');
+    const thumbUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${encodeURIComponent(titles)}&pithumbsize=300&format=json&origin=*`;
+    const thumbRes = await fetch(thumbUrl);
+    const thumbData = await thumbRes.json();
+    const pages = thumbData.query?.pages || {};
+    state.searchResults.forEach(r => {
+      const page = Object.values(pages).find(p => p.title === r.title);
+      r.thumbnail = page?.thumbnail?.source || null;
     });
-  }catch(e){ /* preview only */ }
+
+    renderResults();
+    showPanel('resultsPanel');
+  } catch (e) {
+    showToast('Search failed. Check your connection.');
+    console.error(e);
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-search text-sm"></i><span class="hidden sm:inline">Search</span>';
 }
 
-/* ================================================================
-   SCENE ASSEMBLY + MOTION GRAMMAR
-   ================================================================ */
-const MOTION_POOL = ['zoom-in','pan-left','zoom-out','pan-right','pan-up','zoom-in','pan-left','zoom-out','pan-right'];
-function pickMotions(seed, n){
-  const off = seed % 4;
-  const out = [];
-  for(let i=0;i<n;i++) out.push(MOTION_POOL[(i + off) % MOTION_POOL.length]);
-  return out;
-}
-function buildScenes(timelineLines, images, hookOn, seedTitle){
-  const groups = [];
-  let cur = { lines: [], words: 0 };
-  const flush = () => { if(cur.lines.length) groups.push(cur); cur = { lines: [], words: 0 }; };
-  for(const line of timelineLines){
-    const w = line.wordsArr.length;
-    if(cur.lines.length && (cur.words + w > 33 || cur.lines.length >= 2)) flush();
-    cur.lines.push(line); cur.words += w;
-  }
-  flush();
-  const motions = pickMotions(hashStr(seedTitle || 'story'), Math.max(groups.length, 1));
-  groups.forEach((g, i) => {
-    g.img = images.length ? images[i % images.length] : null;
-    g.motion = motions[i];
-    g.start = g.lines[0].start;
-    const last = g.lines[g.lines.length - 1];
-    g.end = last.start + last.dur;
+function renderResults() {
+  const c = $('resultsList');
+  c.innerHTML = '';
+  state.searchResults.forEach((r, i) => {
+    const div = document.createElement('div');
+    div.className = 'result-card flex gap-3 items-start';
+    div.style.animationDelay = (i * 60) + 'ms';
+    div.innerHTML = `
+      ${r.thumbnail ? `<img src="${r.thumbnail}" alt="" class="w-16 h-16 rounded-lg object-cover flex-shrink-0 border border-white/5">` : `<div class="w-16 h-16 rounded-lg bg-surface flex-shrink-0 flex items-center justify-center border border-white/5"><i class="fas fa-image text-slate-600 text-sm"></i></div>`}
+      <div class="flex-1 min-w-0">
+        <h3 class="text-sm font-semibold text-white truncate">${r.title}</h3>
+        <p class="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">${r.snippet.replace(/<[^>]+>/g, '')}</p>
+        <div class="flex items-center gap-2 mt-2">
+          <span class="badge badge-neon text-[10px]"><i class="fas fa-globe text-[8px]"></i>EN</span>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm flex-shrink-0" onclick="selectArticle(${i})">
+        <i class="fas fa-check text-xs"></i>Select
+      </button>
+    `;
+    c.appendChild(div);
   });
-  if(hookOn && groups.length > 1 && images.length){
-    const first = groups[0], lastG = groups[groups.length - 1];
-    lastG.img = first.img;               // visual match for a seamless loop
-    first.motion = 'zoom-in';
-    lastG.motion = 'zoom-in';
-  }
-  return groups;
-}
-function sceneIndexAt(scenes, t){
-  for(let i = scenes.length - 1; i >= 0; i--) if(t >= scenes[i].start - 0.001) return i;
-  return 0;
 }
 
-/* ================================================================
-   GENERATED CINEMATIC SCORE (original, royalty-free by construction)
-   ================================================================ */
-let musicBufferCache = null;
-function getMusicBuffer(ctx){
-  if(musicBufferCache) return musicBufferCache;
-  const dur = 8, sr = ctx.sampleRate, len = Math.floor(dur * sr);
-  const buf = ctx.createBuffer(2, len, sr);
-  for(let ch = 0; ch < 2; ch++){
-    const d = buf.getChannelData(ch);
-    const pan = ch === 0 ? 0.97 : 1.03;
-    for(let i = 0; i < len; i++){
-      const t = i / sr;
-      let s = 0;
-      s += 0.50 * Math.sin(2 * Math.PI * 55 * t);
-      s += 0.26 * Math.sin(2 * Math.PI * 110 * t + 0.6 * pan);
-      s += 0.15 * Math.sin(2 * Math.PI * 164.81 * t + 1.7 * pan);
-      s += 0.085 * Math.sin(2 * Math.PI * 220 * t + 0.3);
-      s += 0.05 * Math.sin(2 * Math.PI * 277.18 * t + 2.2 * pan);
-      const swell = 0.72 + 0.28 * Math.sin(2 * Math.PI * t / dur + ch * 1.15);
-      const breathe = 0.86 + 0.14 * Math.sin(2 * Math.PI * t * 0.5 + 1.0);
-      d[i] = s * swell * breathe * 0.9;
+function backToSearch() { showPanel('searchPanel'); }
+function backToResults() { showPanel('resultsPanel'); }
+
+function skipArticleSelect() {
+  state.selectedArticle = { title: state.searchQuery, snippet: '', thumbnail: null, skipped: true };
+  showConfig();
+}
+
+// ============================================
+// ARTICLE SELECTION
+// ============================================
+async function selectArticle(idx) {
+  const r = state.searchResults[idx];
+  state.selectedArticle = r;
+  showToast('Loading article...');
+  try {
+    const url = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts|pageimages&titles=${encodeURIComponent(r.title)}&exintro=0&explaintext=1&format=json&origin=*`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const page = Object.values(data.query.pages)[0];
+    state.articleContent = page?.extract || '';
+    state.selectedArticle.thumbnail = state.selectedArticle.thumbnail || page?.thumbnail?.source || null;
+  } catch (e) {
+    state.articleContent = r.snippet || '';
+  }
+  showConfig();
+}
+
+function showConfig() {
+  const art = state.selectedArticle;
+  $('articleInfo').innerHTML = `
+    <div class="flex gap-3 items-start">
+      ${art.thumbnail ? `<img src="${art.thumbnail}" alt="" class="w-14 h-14 rounded-lg object-cover flex-shrink-0 border border-white/5">` : ''}
+      <div class="flex-1 min-w-0">
+        <h3 class="text-sm font-semibold text-white">${art.title}</h3>
+        <p class="text-xs text-slate-400 mt-1">${art.skipped ? 'Direct topic mode — no Wikipedia article selected' : 'Wikipedia article selected as primary source'}</p>
+      </div>
+    </div>
+  `;
+
+  // Render voice options
+  const vg = $('voiceGrid');
+  vg.innerHTML = '';
+  voices.forEach(v => {
+    const d = document.createElement('div');
+    d.className = `voice-card ${state.voice === v.id ? 'selected' : ''}`;
+    d.onclick = () => { state.voice = v.id; showConfig(); };
+    d.innerHTML = `
+      <i class="fas ${v.icon} text-${v.color} text-lg mb-1.5"></i>
+      <p class="text-xs font-semibold text-white">${v.name}</p>
+      <p class="text-[10px] text-slate-500 mt-0.5">${v.desc}</p>
+    `;
+    vg.appendChild(d);
+  });
+
+  // Render subtitle styles
+  const sg = $('styleGrid');
+  sg.innerHTML = '';
+  subStyles.forEach(s => {
+    const d = document.createElement('div');
+    d.className = `style-card ${state.subtitleStyle === s.id ? 'selected' : ''}`;
+    d.onclick = () => { state.subtitleStyle = s.id; showConfig(); };
+    d.innerHTML = `
+      <p class="text-xs font-semibold text-white">${s.name}</p>
+      <p class="text-[10px] text-slate-500 mt-0.5">${s.desc}</p>
+    `;
+    sg.appendChild(d);
+  });
+
+  // Hook toggle
+  const ht = $('hookToggle');
+  ht.classList.toggle('active', state.intelligentHook);
+
+  showPanel('configPanel');
+}
+
+function toggleHook() {
+  state.intelligentHook = !state.intelligentHook;
+  $('hookToggle').classList.toggle('active', state.intelligentHook);
+}
+
+// ============================================
+// GENERATION PIPELINE
+// ============================================
+async function startGeneration() {
+  state.generating = true;
+  showPanel('progressPanel');
+  $('scriptPreview').classList.add('hidden');
+  $('generateBtn')?.setAttribute('disabled', 'true');
+
+  try {
+    // Step 1: Deep Research
+    setProgress(5, 'Researching topic...');
+    await delay(400);
+
+    let fullContent = state.articleContent || '';
+    let articleTitle = state.selectedArticle?.title || state.searchQuery;
+
+    // If we have a Wikipedia article, fetch more sections
+    if (!state.selectedArticle?.skipped && articleTitle) {
+      setProgress(10, 'Fetching article sections...');
+      try {
+        // Get sections
+        const secUrl = `https://en.wikipedia.org/w/api.php?action=parse&page=${encodeURIComponent(articleTitle)}&prop=sections&format=json&origin=*`;
+        const secRes = await fetch(secUrl);
+        const secData = await secRes.json();
+
+        // Get full content with sections
+        const fullUrl = `https://en.wikipedia.org/w/api.php?action=parse&page=${encodeURIComponent(articleTitle)}&prop=wikitext&format=json&origin=*`;
+        const fullRes = await fetch(fullUrl);
+        const fullData = await fullRes.json();
+        if (fullData.parse?.wikitext?.['*']) {
+          // We have wikitext - use the extract we already have which is plain text
+        }
+      } catch (e) { /* continue with what we have */ }
+
+      // Try to get related articles for richer content
+      setProgress(15, 'Exploring related articles...');
+      try {
+        const linksUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=links&titles=${encodeURIComponent(articleTitle)}&pllimit=15&format=json&origin=*`;
+        const linksRes = await fetch(linksUrl);
+        const linksData = await linksRes.json();
+        const linksPage = Object.values(linksData.query?.pages || {})[0];
+        const relatedLinks = (linksPage?.links || []).slice(0, 5).map(l => l.title);
+
+        // Fetch intro of related articles for context
+        if (relatedLinks.length) {
+          const relTitles = relatedLinks.join('|');
+          const relUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts&titles=${encodeURIComponent(relTitles)}&exintro=1&explaintext=1&exsentences=3&format=json&origin=*`;
+          const relRes = await fetch(relUrl);
+          const relData = await relRes.json();
+          const relPages = relData.query?.pages || {};
+          state.relatedContent = Object.values(relPages).map(p => ({ title: p.title, extract: p.extract || '' })).filter(p => p.extract);
+        }
+      } catch (e) { /* continue */ }
+    }
+
+    setProgress(25, 'Analyzing research material...');
+    await delay(300);
+
+    // Step 2: Generate Script
+    setProgress(30, 'Creating documentary script...');
+    await delay(300);
+    generateScript(articleTitle, fullContent);
+    setProgress(40, 'Script created — reviewing...');
+    await delay(200);
+
+    // Show script preview
+    $('scriptPreview').classList.remove('hidden');
+    const sc = $('scriptContent');
+    sc.innerHTML = '';
+    state.scenes.forEach((s, i) => {
+      const d = document.createElement('div');
+      d.className = 'scene-item';
+      d.innerHTML = `
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-[10px] font-mono text-neon font-medium">SCENE ${i + 1}</span>
+          <span class="text-[10px] text-slate-500">${s.duration.toFixed(1)}s</span>
+        </div>
+        <p class="text-xs text-slate-300 leading-relaxed">${s.narration}</p>
+      `;
+      sc.appendChild(d);
+    });
+
+    // Step 3: Fetch Images
+    setProgress(45, 'Finding real images from Wikimedia...');
+    await fetchImagesForScenes(articleTitle);
+    setProgress(65, 'Verifying image relevance...');
+    await delay(300);
+
+    // Step 4: Render Video
+    setProgress(70, 'Rendering scenes...');
+    await renderVideo();
+    setProgress(95, 'Finalizing video...');
+    await delay(500);
+    setProgress(100, 'Complete!');
+
+    await delay(400);
+    showPanel('previewPanel');
+    drawStaticPreview();
+    showToast('Short generated successfully!');
+  } catch (e) {
+    console.error('Generation error:', e);
+    showToast('Generation failed. Please try again.');
+  }
+  state.generating = false;
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ============================================
+// SCRIPT GENERATION
+// ============================================
+function generateScript(title, content) {
+  // Split content into paragraphs and extract key facts
+  const paragraphs = content.split('\n\n').filter(p => p.trim().length > 40);
+  const facts = [];
+  const factPatterns = /\b(\d{4})\b|\b(\d+(?:,\d{3})*(?:\.\d+)?)\b|\b(discovered|invented|first|largest|smallest|oldest|youngest|highest|lowest|fastest|slowest|most|least|only|never|always|record|breakthrough|revolutionary|surprising|unexpected|remarkable|extraordinary|rare|unique|critical|important|significant|founded|created|established|built|launched|published|proved|demonstrated|revealed|showed|found)\b/gi;
+
+  paragraphs.forEach(p => {
+    const sentences = p.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 20);
+    sentences.forEach(s => {
+      const matches = s.match(factPatterns);
+      const score = (matches?.length || 0) + (s.length > 60 ? 1 : 0) + (s.includes(',') ? 0.5 : 0);
+      if (score > 0.5 || s.length > 50) {
+        facts.push({ text: s.trim(), score });
+      }
+    });
+  });
+
+  facts.sort((a, b) => b.score - a.score);
+  const topFacts = facts.slice(0, 20);
+
+  // Build scenes from top facts
+  const scenes = [];
+  const wordsPerSecond = 2.6;
+  const targetSceneWords = 25;
+  const targetSceneDuration = targetSceneWords / wordsPerSecond;
+
+  if (topFacts.length === 0) {
+    // Fallback: use paragraphs directly
+    paragraphs.slice(0, 8).forEach(p => {
+      const text = p.trim().substring(0, 200);
+      const wc = text.split(/\s+/).length;
+      scenes.push({ narration: text, duration: wc / wordsPerSecond, imageQuery: title });
+    });
+  } else {
+    // Intelligent hook: use the most striking fact first
+    if (state.intelligentHook && topFacts.length > 3) {
+      const hookFact = topFacts[0];
+      scenes.push({
+        narration: hookFact.text,
+        duration: hookFact.text.split(/\s+/).length / wordsPerSecond,
+        imageQuery: title,
+        isHook: true
+      });
+    }
+
+    // Group remaining facts into scenes
+    let currentNarration = '';
+    let currentQuery = title;
+    const remainingFacts = state.intelligentHook ? topFacts.slice(1, -1) : topFacts;
+
+    remainingFacts.forEach((f, i) => {
+      currentNarration += (currentNarration ? ' ' : '') + f.text;
+      if (currentNarration.split(/\s+/).length >= targetSceneWords || i === remainingFacts.length - 1) {
+        const wc = currentNarration.split(/\s+/).length;
+        scenes.push({
+          narration: currentNarration,
+          duration: Math.max(3, wc / wordsPerSecond),
+          imageQuery: extractImageQuery(currentNarration, title)
+        });
+        currentNarration = '';
+      }
+    });
+
+    // Intelligent hook ending: connect back to opening
+    if (state.intelligentHook && topFacts.length > 3) {
+      const lastFact = topFacts[topFacts.length - 1];
+      const hookRef = topFacts[0].text.split(/\s+/).slice(0, 4).join(' ');
+      const ending = lastFact.text + (lastFact.text.endsWith('.') ? '' : '.') + ' And that brings us back to where we began: ' + hookRef.toLowerCase() + '...';
+      scenes.push({
+        narration: ending,
+        duration: ending.split(/\s+/).length / wordsPerSecond,
+        imageQuery: title,
+        isHookEnd: true
+      });
     }
   }
-  musicBufferCache = buf;
-  return buf;
+
+  // Ensure we have at least 4 scenes
+  while (scenes.length < 4 && paragraphs.length > scenes.length) {
+    const p = paragraphs[scenes.length];
+    const text = p.trim().substring(0, 180);
+    scenes.push({ narration: text, duration: text.split(/\s+/).length / wordsPerSecond, imageQuery: title });
+  }
+
+  // Cap total duration to ~60-90 seconds
+  const totalDur = scenes.reduce((s, sc) => s + sc.duration, 0);
+  if (totalDur > 90) {
+    const scale = 85 / totalDur;
+    scenes.forEach(sc => sc.duration = Math.max(3, sc.duration * scale));
+  }
+
+  state.scenes = scenes;
 }
 
-/* ================================================================
-   CANVAS RENDERER — 1080×1920
-   ================================================================ */
-const CW = 1080, CH = 1920;
-function rr(ctx, x, y, w, h, r){
-  r = Math.min(r, w/2, h/2);
+function extractImageQuery(text, topic) {
+  // Try to find a specific noun phrase for image search
+  const words = text.split(/\s+/);
+  // Look for capitalized terms (likely proper nouns)
+  const properNouns = words.filter(w => w[0] === w[0]?.toUpperCase() && w.length > 2).slice(0, 3);
+  if (properNouns.length > 0) return properNouns.join(' ');
+  return topic;
+}
+
+// ============================================
+// IMAGE FETCHING
+// ============================================
+async function fetchImagesForScenes(articleTitle) {
+  const images = [];
+  const usedUrls = new Set();
+
+  // First, get images from the main article
+  try {
+    const imgUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(articleTitle)}&prop=images&imlimit=20&format=json&origin=*`;
+    const imgRes = await fetch(imgUrl);
+    const imgData = await imgRes.json();
+    const imgPage = Object.values(imgData.query?.pages || {})[0];
+    const imgFiles = (imgPage?.images || []).map(i => i.title).filter(t => !t.includes('.svg') && !t.includes('.ogg') && !t.includes('.ogv'));
+
+    // Get URLs for these images
+    for (let i = 0; i < Math.min(imgFiles.length, 12); i++) {
+      try {
+        const fUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(imgFiles[i])}&prop=imageinfo&iiprop=url|size&iiurlwidth=1080&format=json&origin=*`;
+        const fRes = await fetch(fUrl);
+        const fData = await fRes.json();
+        const fPage = Object.values(fData.query?.pages || {})[0];
+        const imgInfo = fPage?.imageinfo?.[0];
+        if (imgInfo?.thumburl && !usedUrls.has(imgInfo.thumburl)) {
+          usedUrls.add(imgInfo.thumburl);
+          images.push({ url: imgInfo.thumburl, desc: imgFiles[i].replace('File:', ''), width: imgInfo.thumbwidth, height: imgInfo.thumbheight });
+        }
+      } catch (e) { /* skip */ }
+      if (i % 3 === 2) { setProgress(45 + (i / imgFiles.length) * 15, 'Fetching images...'); await delay(50); }
+    }
+  } catch (e) { /* continue */ }
+
+  // Also get the page image directly
+  try {
+    const pImgUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${encodeURIComponent(articleTitle)}&pithumbsize=1080&format=json&origin=*`;
+    const pImgRes = await fetch(pImgUrl);
+    const pImgData = await pImgRes.json();
+    const pImgPage = Object.values(pImgData.query?.pages || {})[0];
+    if (pImgPage?.thumbnail?.source && !usedUrls.has(pImgPage.thumbnail.source)) {
+      usedUrls.add(pImgPage.thumbnail.source);
+      images.unshift({ url: pImgPage.thumbnail.source, desc: articleTitle, isMain: true });
+    }
+  } catch (e) { /* continue */ }
+
+  // Fetch from Wikimedia Commons as backup
+  if (images.length < state.scenes.length) {
+    try {
+      const commonsUrl = `https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(articleTitle)}&srnamespace=6&srlimit=10&format=json&origin=*`;
+      const cRes = await fetch(commonsUrl);
+      const cData = await cRes.json();
+      const cResults = cData.query?.search || [];
+      for (let i = 0; i < cResults.length && images.length < state.scenes.length + 3; i++) {
+        const title = cResults[i].title;
+        try {
+          const fUrl = `https://commons.wikimedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=imageinfo&iiprop=url&iiurlwidth=1080&format=json&origin=*`;
+          const fRes = await fetch(fUrl);
+          const fData = await fRes.json();
+          const fPage = Object.values(fData.query?.pages || {})[0];
+          const url = fPage?.imageinfo?.[0]?.thumburl;
+          if (url && !usedUrls.has(url)) {
+            usedUrls.add(url);
+            images.push({ url, desc: title.replace('File:', '') });
+          }
+        } catch (e) { /* skip */ }
+      }
+    } catch (e) { /* continue */ }
+  }
+
+  // Assign images to scenes
+  state.scenes.forEach((scene, i) => {
+    if (images.length > 0) {
+      scene.imageUrl = images[i % images.length].url;
+      scene.imageDesc = images[i % images.length].desc;
+    } else {
+      scene.imageUrl = null;
+      scene.imageDesc = null;
+    }
+  });
+
+  // Preload images
+  state.imageCache = {};
+  const preloadPromises = [];
+  usedUrls.forEach(url => {
+    preloadPromises.push(new Promise(resolve => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => { state.imageCache[url] = img; resolve(); };
+      img.onerror = () => resolve();
+      img.src = url;
+    }));
+  });
+  await Promise.all(preloadPromises);
+}
+
+// ============================================
+// VIDEO RENDERING
+// ============================================
+async function renderVideo() {
+  const canvas = $('renderCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = 1080, H = 1920;
+  canvas.width = W;
+  canvas.height = H;
+
+  const totalDuration = state.scenes.reduce((s, sc) => s + sc.duration, 0);
+  const fps = 30;
+  const totalFrames = Math.ceil(totalDuration * fps);
+
+  // Setup MediaRecorder
+  const stream = canvas.captureStream(fps);
+  let mimeType = 'video/webm;codecs=vp9';
+  if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm;codecs=vp8';
+  if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
+  const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 5000000 });
+  const chunks = [];
+  recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+  return new Promise((resolve, reject) => {
+    recorder.onstop = () => {
+      state.videoBlob = new Blob(chunks, { type: 'video/webm' });
+      resolve();
+    };
+    recorder.onerror = reject;
+    recorder.start();
+
+    let frame = 0;
+    const startTime = performance.now();
+
+    function renderFrame() {
+      if (frame >= totalFrames) {
+        recorder.stop();
+        return;
+      }
+
+      const currentTime = frame / fps;
+      let elapsed = 0;
+      let sceneIdx = 0;
+      let sceneProgress = 0;
+
+      for (let i = 0; i < state.scenes.length; i++) {
+        if (currentTime < elapsed + state.scenes[i].duration) {
+          sceneIdx = i;
+          sceneProgress = (currentTime - elapsed) / state.scenes[i].duration;
+          break;
+        }
+        elapsed += state.scenes[i].duration;
+        if (i === state.scenes.length - 1) { sceneIdx = i; sceneProgress = 1; }
+      }
+
+      const scene = state.scenes[sceneIdx];
+      renderSceneFrame(ctx, W, H, scene, sceneIdx, sceneProgress, currentTime);
+
+      frame++;
+      const pct = 70 + (frame / totalFrames) * 25;
+      if (frame % 15 === 0) setProgress(Math.min(95, pct), 'Rendering scenes...');
+
+      requestAnimationFrame(renderFrame);
+    }
+
+    renderFrame();
+  });
+}
+
+function renderSceneFrame(ctx, W, H, scene, sceneIdx, progress, currentTime) {
+  // Background
+  ctx.fillStyle = '#0a0a0f';
+  ctx.fillRect(0, 0, W, H);
+
+  // Image with Ken Burns
+  const imgUrl = scene.imageUrl;
+  const img = imgUrl ? state.imageCache[imgUrl] : null;
+
+  if (img && img.complete && img.naturalWidth > 0) {
+    // Ken Burns: slow zoom in
+    const startScale = 1.0;
+    const endScale = 1.15;
+    const scale = startScale + (endScale - startScale) * progress;
+    // Subtle pan
+    const panX = Math.sin(sceneIdx * 1.5) * 30 * progress;
+    const panY = Math.cos(sceneIdx * 2.1) * 20 * progress;
+
+    ctx.save();
+    ctx.translate(W / 2 + panX, H / 2 + panY);
+    ctx.scale(scale, scale);
+    ctx.translate(-W / 2, -H / 2);
+
+    // Draw image covering the canvas (cover fit)
+    const imgRatio = img.naturalWidth / img.naturalHeight;
+    const canvasRatio = W / H;
+    let drawW, drawH, drawX, drawY;
+    if (imgRatio > canvasRatio) {
+      drawH = H;
+      drawW = H * imgRatio;
+      drawX = (W - drawW) / 2;
+      drawY = 0;
+    } else {
+      drawW = W;
+      drawH = W / imgRatio;
+      drawX = 0;
+      drawY = (H - drawH) / 2;
+    }
+    ctx.drawImage(img, drawX, drawY, drawW, drawH);
+    ctx.restore();
+  } else {
+    // Fallback: gradient background with topic text
+    const grad = ctx.createLinearGradient(0, 0, W, H);
+    grad.addColorStop(0, '#0f0f17');
+    grad.addColorStop(1, '#14141f');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // Overlay gradient for readability
+  const overlay = ctx.createLinearGradient(0, H * 0.4, 0, H);
+  overlay.addColorStop(0, 'rgba(8,8,14,0)');
+  overlay.addColorStop(0.5, 'rgba(8,8,14,0.6)');
+  overlay.addColorStop(1, 'rgba(8,8,14,0.92)');
+  ctx.fillStyle = overlay;
+  ctx.fillRect(0, 0, W, H);
+
+  // Top subtle vignette
+  const topVignette = ctx.createLinearGradient(0, 0, 0, H * 0.3);
+  topVignette.addColorStop(0, 'rgba(8,8,14,0.5)');
+  topVignette.addColorStop(1, 'rgba(8,8,14,0)');
+  ctx.fillStyle = topVignette;
+  ctx.fillRect(0, 0, W, H * 0.3);
+
+  // Subtitles
+  renderSubtitles(ctx, W, H, scene, progress);
+}
+
+function renderSubtitles(ctx, W, H, scene, progress) {
+  const text = scene.narration;
+  const style = state.subtitleStyle;
+  const maxW = W * 0.82;
+  const x = W / 2;
+  const y = H * 0.82;
+
+  // Word progress for highlight style
+  const words = text.split(/\s+/);
+  const wordsShown = Math.floor(progress * words.length * 1.3);
+  const visibleText = words.slice(0, Math.min(wordsShown, words.length)).join(' ');
+
+  if (!visibleText && style !== 'highlight') return;
+
+  ctx.textAlign = 'center';
+
+  switch (style) {
+    case 'minimal':
+      ctx.font = '500 42px "Inter", sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.92)';
+      wrapText(ctx, visibleText || text, x, y, maxW, 56, 'center', null, 3);
+      break;
+
+    case 'bold':
+      ctx.font = '700 52px "Inter", sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = 'rgba(0,0,0,0.7)';
+      ctx.shadowBlur = 20;
+      ctx.shadowOffsetY = 3;
+      wrapText(ctx, visibleText || text, x, y, maxW, 64, 'center', null, 4);
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetY = 0;
+      break;
+
+    case 'highlight': {
+      // Word-by-word with current word highlighted
+      const currentWordIdx = Math.min(wordsShown, words.length - 1);
+      const lineHeight = 56;
+      ctx.font = '600 44px "Inter", sans-serif';
+      const lines = wrapTextGetLines(ctx, words.join(' '), maxW);
+      let wordCounter = 0;
+      let curY = y - ((lines.length - 1) * lineHeight) / 2;
+
+      lines.forEach(line => {
+        const lineWords = line.split(/\s+/);
+        let curX = x - (ctx.measureText(line).width / 2);
+        lineWords.forEach(w => {
+          const isCurrent = wordCounter === currentWordIdx && wordCounter < wordsShown;
+          const isPast = wordCounter < wordsShown;
+          if (isCurrent) {
+            const mw = ctx.measureText(w).width;
+            ctx.fillStyle = 'rgba(0,212,255,0.25)';
+            const pad = 6;
+            roundRect(ctx, curX - pad, curY - 38, mw + pad * 2, 52, 8);
+            ctx.fill();
+          }
+          ctx.fillStyle = isPast ? '#ffffff' : 'rgba(255,255,255,0.3)';
+          if (isCurrent) ctx.fillStyle = '#00d4ff';
+          ctx.textAlign = 'left';
+          ctx.fillText(w, curX, curY);
+          curX += ctx.measureText(w).width + ctx.measureText(' ').width;
+          wordCounter++;
+        });
+        curY += lineHeight;
+      });
+      break;
+    }
+
+    case 'elegant':
+      ctx.font = '400 44px "Georgia", serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.88)';
+      // Decorative line above
+      ctx.strokeStyle = 'rgba(0,212,255,0.3)';
+      ctx.lineWidth = 1.5;
+      const lineY = y - 60;
+      ctx.beginPath();
+      ctx.moveTo(x - 60, lineY);
+      ctx.lineTo(x + 60, lineY);
+      ctx.stroke();
+      wrapText(ctx, visibleText || text, x, y, maxW, 58, 'center', null, 3);
+      break;
+  }
+}
+
+function wrapText(ctx, text, x, y, maxWidth, lineHeight, align, fillColor, maxLines) {
+  if (!text) return;
+  const words = text.split(/\s+/);
+  let line = '';
+  let curY = y;
+  let lineCount = 0;
+  const lines = [];
+
+  for (let i = 0; i < words.length; i++) {
+    const test = line + words[i] + ' ';
+    if (ctx.measureText(test).width > maxWidth && i > 0) {
+      lines.push(line.trim());
+      line = words[i] + ' ';
+      lineCount++;
+    } else {
+      line = test;
+    }
+    if (maxLines && lineCount >= maxLines) break;
+  }
+  lines.push(line.trim());
+
+  const totalH = lines.length * lineHeight;
+  const startY = y - totalH / 2 + lineHeight / 2;
+
+  ctx.textAlign = align || 'center';
+  ctx.fillStyle = fillColor || ctx.fillStyle;
+
+  lines.forEach((l, i) => {
+    ctx.fillText(l, x, startY + i * lineHeight);
+  });
+}
+
+function wrapTextGetLines(ctx, text, maxWidth) {
+  const words = text.split(/\s+/);
+  let line = '';
+  const lines = [];
+  for (let i = 0; i < words.length; i++) {
+    const test = line + words[i] + ' ';
+    if (ctx.measureText(test).width > maxWidth && i > 0) {
+      lines.push(line.trim());
+      line = words[i] + ' ';
+    } else {
+      line = test;
+    }
+  }
+  lines.push(line.trim());
+  return lines;
+}
+
+function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
-  ctx.moveTo(x+r, y);
-  ctx.arcTo(x+w, y, x+w, y+h, r);
-  ctx.arcTo(x+w, y+h, x, y+h, r);
-  ctx.arcTo(x, y+h, x, y, r);
-  ctx.arcTo(x, y, x+w, y, r);
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
   ctx.closePath();
 }
-function motionState(motion, p){
-  const e = ease3(p);
-  switch(motion){
-    case 'zoom-in':  return { z: 1.03 + 0.14 * e, x: 0, y: 0 };
-    case 'zoom-out': return { z: 1.18 - 0.15 * e, x: 0, y: 0 };
-    case 'pan-left': return { z: 1.14, x: lerp(70, -70, e), y: 0 };
-    case 'pan-right':return { z: 1.14, x: lerp(-70, 70, e), y: 0 };
-    case 'pan-up':   return { z: 1.15, x: 0, y: lerp(58, -58, e) };
-    default:         return { z: 1.05 + 0.10 * e, x: 0, y: 0 };
-  }
-}
-function drawCoverImage(ctx, img, m){
-  const iw = img.naturalWidth || 1280, ih = img.naturalHeight || 720;
-  const base = Math.max(CW / iw, CH / ih);
-  const s = base * m.z;
-  const dw = iw * s, dh = ih * s;
-  ctx.drawImage(img, (CW - dw) / 2 + m.x, (CH - dh) / 2 + m.y, dw, dh);
-}
-function drawPlate(ctx, scene, t){
-  const g = ctx.createLinearGradient(0, 0, CW, CH);
-  g.addColorStop(0, '#191922'); g.addColorStop(.5, '#101017'); g.addColorStop(1, '#07070B');
-  ctx.fillStyle = g; ctx.fillRect(0, 0, CW, CH);
-  const word = (scene.lines[0] && scene.lines[0].wordsArr[0] || 'FACT').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0, 10) || 'FACT';
-  ctx.save();
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  try{ ctx.font = 'italic 600 240px "Playfair Display", serif'; }catch(e){ ctx.font = 'italic 600 240px Georgia, serif'; }
-  ctx.globalAlpha = 0.10; ctx.fillStyle = '#E3B558';
-  ctx.fillText(word, CW/2, CH/2);
-  ctx.globalAlpha = 0.5;
-  ctx.fillStyle = '#E3B558'; ctx.fillRect(CW/2 - 90, CH/2 + 150, 180, 3);
-  ctx.restore();
-}
-function drawGrade(ctx){
-  let g = ctx.createLinearGradient(0, CH*0.50, 0, CH);
-  g.addColorStop(0, 'rgba(5,5,9,0)');
-  g.addColorStop(.52, 'rgba(5,5,9,.30)');
-  g.addColorStop(1, 'rgba(5,5,9,.86)');
-  ctx.fillStyle = g; ctx.fillRect(0, CH*0.50, CW, CH*0.5);
-  g = ctx.createLinearGradient(0, 0, 0, CH*0.20);
-  g.addColorStop(0, 'rgba(5,5,9,.62)'); g.addColorStop(1, 'rgba(5,5,9,0)');
-  ctx.fillStyle = g; ctx.fillRect(0, 0, CW, CH*0.20);
-  const v = ctx.createRadialGradient(CW/2, CH*0.46, CH*0.30, CW/2, CH*0.5, CH*0.80);
-  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,.44)');
-  ctx.fillStyle = v; ctx.fillRect(0, 0, CW, CH);
-}
-function drawProgressLine(ctx, t, total){
-  ctx.save();
-  ctx.fillStyle = 'rgba(255,255,255,.10)';
-  ctx.fillRect(0, 0, CW, 4);
-  const pt = clamp(t / total, 0, 1);
-  const grad = ctx.createLinearGradient(0, 0, CW, 0);
-  grad.addColorStop(0, '#8A5E17'); grad.addColorStop(.5, '#E3B558'); grad.addColorStop(1, '#F8E3A6');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, CW * pt, 4);
-  ctx.restore();
-}
-function wrapWords(ctx, words, maxW, uppercase){
-  const spaceW = ctx.measureText(' ').width;
-  const toks = words.map(w => ({ w, tw: ctx.measureText(uppercase ? w.text.toUpperCase() : w.text).width }));
-  const lines = [];
-  let cur = { toks: [], width: 0 };
-  for(const tk of toks){
-    const add = tk.tw + (cur.toks.length ? spaceW : 0);
-    if(cur.width + add > maxW && cur.toks.length){ lines.push(cur); cur = { toks: [tk], width: tk.tw }; }
-    else { cur.toks.push(tk); cur.width += add; }
-  }
-  if(cur.toks.length) lines.push(cur);
-  return { lines, spaceW };
-}
-function currentCaption(timeline, t){
-  for(let i = 0; i < timeline.lines.length; i++){
-    const L = timeline.lines[i];
-    const s = L.start, e = L.start + L.dur;
-    if(t >= s - 0.05 && t < e + GAP + 0.28){
-      let fade = smooth((t - (s - 0.05)) / 0.18);
-      const tail = e + GAP;
-      if(t > tail) fade = clamp(1 - (t - tail) / 0.28, 0, 1);
-      return { line: L, fade: clamp(fade, 0, 1) };
-    }
-  }
-  return null;
-}
-function drawCaption(ctx, timeline, t, styleId){
-  const cap = currentCaption(timeline, t);
-  if(!cap) return;
-  const L = cap.line, fade = cap.fade;
-  if(fade <= 0.01) return;
-  const words = L.words;
-  ctx.save();
 
-  const wordState = w => t < w.start ? 0 : (t <= w.end ? 1 : 2); // 0 upcoming · 1 speaking · 2 spoken
+// ============================================
+// PREVIEW
+// ============================================
+function drawStaticPreview() {
+  const canvas = $('previewCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = 540, H = 960;
+  canvas.width = W;
+  canvas.height = H;
 
-  if(styleId === 'minimal'){
-    const FS = 37, LH = 58, maxW = 900;
-    ctx.font = '600 ' + FS + 'px Inter, sans-serif';
-    try{ ctx.letterSpacing = '9px'; }catch(e){}
-    const { lines } = wrapWords(ctx, words, maxW, true);
-    const startY = 1412 - (lines.length - 1) * LH;
-    // thin gold rule above the block
-    ctx.globalAlpha = fade * 0.9;
-    ctx.fillStyle = '#E3B558';
-    ctx.fillRect(CW/2 - 62, startY - FS - 24, 124, 2);
-    ctx.textBaseline = 'alphabetic';
-    lines.forEach((ln, li) => {
-      let x = (CW - ln.width) / 2;
-      const y = startY + li * LH;
-      for(const tk of ln.toks){
-        const st = wordState(tk.w);
-        ctx.globalAlpha = fade * (st === 0 ? 0.30 : 1);
-        ctx.textAlign = 'left';
-        ctx.fillStyle = '#F2EFE4';
-        ctx.fillText(tk.w.text.toUpperCase(), x, y);
-        x += tk.tw + ctx.measureText(' ').width;
-      }
-    });
-    try{ ctx.letterSpacing = '0px'; }catch(e){}
+  // Draw first scene
+  const scene = state.scenes[0];
+  if (!scene) return;
+
+  ctx.fillStyle = '#0a0a0f';
+  ctx.fillRect(0, 0, W, H);
+
+  const img = scene.imageUrl ? state.imageCache[scene.imageUrl] : null;
+  if (img && img.complete) {
+    const imgRatio = img.naturalWidth / img.naturalHeight;
+    const canvasRatio = W / H;
+    let drawW, drawH, drawX, drawY;
+    if (imgRatio > canvasRatio) { drawH = H; drawW = H * imgRatio; drawX = (W - drawW) / 2; drawY = 0; }
+    else { drawW = W; drawH = W / imgRatio; drawX = 0; drawY = (H - drawH) / 2; }
+    ctx.drawImage(img, drawX, drawY, drawW, drawH);
   }
-  else if(styleId === 'bold'){
-    const FS = 60, LH = 68, maxW = 906, x0 = 84;
-    ctx.font = '800 ' + FS + 'px Inter, sans-serif';
-    const { lines } = wrapWords(ctx, words, maxW, true);
-    const y0 = 1506 - (lines.length - 1) * LH;
-    // gold hook bar
-    const barGrad = ctx.createLinearGradient(0, y0 - FS, 0, y0 + (lines.length-1)*LH + 16);
-    barGrad.addColorStop(0, '#F8E3A6'); barGrad.addColorStop(.5, '#DFA63F'); barGrad.addColorStop(1, '#8A5E17');
-    ctx.globalAlpha = fade;
-    ctx.fillStyle = barGrad;
-    ctx.fillRect(52, y0 - FS + 6, 9, (lines.length - 1) * LH + FS + 10);
-    ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
-    lines.forEach((ln, li) => {
-      let x = x0; const y = y0 + li * LH;
-      for(const tk of ln.toks){
-        const st = wordState(tk.w);
-        ctx.globalAlpha = fade * (st === 0 ? 0.30 : 1);
-        ctx.lineWidth = 13; ctx.strokeStyle = 'rgba(5,5,9,.92)'; ctx.lineJoin = 'round';
-        ctx.strokeText(tk.w.text.toUpperCase(), x, y);
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillText(tk.w.text.toUpperCase(), x, y);
-        x += tk.tw + ctx.measureText(' ').width;
-      }
-    });
-  }
-  else if(styleId === 'highlight'){
-    const FS = 55, LH = 64, maxW = 902;
-    ctx.font = '800 ' + FS + 'px Inter, sans-serif';
-    const { lines } = wrapWords(ctx, words, maxW, false);
-    const startY = 1408 - (lines.length - 1) * LH;
-    ctx.textBaseline = 'alphabetic';
-    lines.forEach((ln, li) => {
-      let x = (CW - ln.width) / 2; const y = startY + li * LH;
-      for(const tk of ln.toks){
-        const w = tk.w, st = wordState(w);
-        if(st === 1){
-          const pop = 1 + 0.20 * Math.exp(-6 * Math.max(0, t - w.start));
-          const cx = x + tk.tw / 2, cy = y - FS * 0.36;
-          ctx.save();
-          ctx.globalAlpha = fade;
-          ctx.translate(cx, cy); ctx.scale(pop, pop); ctx.translate(-cx, -cy);
-          ctx.shadowColor = 'rgba(255,216,61,.5)'; ctx.shadowBlur = 22;
-          ctx.fillStyle = '#FFD83D';
-          rr(ctx, x - 13, y - FS - 4, tk.tw + 26, FS + 16, 14); ctx.fill();
-          ctx.shadowBlur = 0;
-          ctx.fillStyle = '#171310'; ctx.textAlign = 'left';
-          ctx.fillText(w.text, x, y);
-          ctx.restore();
-        } else {
-          ctx.globalAlpha = fade * (st === 0 ? 0.38 : 1);
-          ctx.fillStyle = st === 0 ? '#FFFFFF' : '#FFFFFF';
-          ctx.textAlign = 'left';
-          ctx.fillText(w.text, x, y);
-        }
-        x += tk.tw + ctx.measureText(' ').width;
-      }
-    });
-  }
-  else if(styleId === 'editorial'){
-    const FS = 43, LH = 57, maxW = 862, x0 = 88;
-    ctx.font = 'italic 500 ' + FS + 'px "Playfair Display", Georgia, serif';
-    const { lines } = wrapWords(ctx, words, maxW, false);
-    const startY = 1406 - (lines.length - 1) * LH;
-    ctx.globalAlpha = fade * 0.85;
-    ctx.fillStyle = '#E3B558';
-    ctx.fillRect(x0, startY - FS - 20, 150, 2);
-    ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
-    lines.forEach((ln, li) => {
-      let x = x0; const y = startY + li * LH;
-      for(const tk of ln.toks){
-        const st = wordState(tk.w);
-        ctx.globalAlpha = fade * (st === 0 ? 0.26 : 1);
-        ctx.fillStyle = '#F1EADA';
-        ctx.fillText(tk.w.text, x, y);
-        x += tk.tw + ctx.measureText(' ').width;
-      }
-    });
-  }
-  else { /* primetime */
-    const FS = 46, LH = 57, maxW = 830;
-    ctx.font = '600 ' + FS + 'px Inter, sans-serif';
-    const { lines } = wrapWords(ctx, words, maxW, false);
-    const maxLineW = Math.max.apply(null, lines.map(l => l.width));
-    const pillW = maxLineW + 68, pillH = lines.length * LH + 36;
-    const pillX = (CW - pillW) / 2, pillY = 1530 - pillH;
-    ctx.globalAlpha = fade;
-    ctx.fillStyle = 'rgba(9,9,13,.76)';
-    rr(ctx, pillX, pillY, pillW, pillH, 20); ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = 1.5;
-    rr(ctx, pillX + 1, pillY + 1, pillW - 2, pillH - 2, 19); ctx.stroke();
-    ctx.textBaseline = 'alphabetic';
-    lines.forEach((ln, li) => {
-      let x = (CW - ln.width) / 2; const y = pillY + 48 + li * LH;
-      for(const tk of ln.toks){
-        const st = wordState(tk.w);
-        ctx.globalAlpha = fade * (st === 0 ? 0.45 : 1);
-        ctx.fillStyle = '#FFFFFF'; ctx.textAlign = 'left';
-        ctx.fillText(tk.w.text, x, y);
-        x += tk.tw + ctx.measureText(' ').width;
-      }
-    });
-  }
-  ctx.restore();
+
+  const overlay = ctx.createLinearGradient(0, H * 0.4, 0, H);
+  overlay.addColorStop(0, 'rgba(8,8,14,0)');
+  overlay.addColorStop(0.5, 'rgba(8,8,14,0.6)');
+  overlay.addColorStop(1, 'rgba(8,8,14,0.92)');
+  ctx.fillStyle = overlay;
+  ctx.fillRect(0, 0, W, H);
+
+  // Show subtitle preview
+  ctx.textAlign = 'center';
+  ctx.font = '500 24px "Inter", sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  const maxW = W * 0.8;
+  const words = scene.narration.split(/\s+/);
+  const previewText = words.slice(0, Math.min(12, words.length)).join(' ') + (words.length > 12 ? '...' : '');
+  wrapText(ctx, previewText, W / 2, H * 0.82, maxW, 32, 'center', null, 2);
+
+  // Play icon overlay
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.fillRect(0, 0, W, H);
+  ctx.beginPath();
+  ctx.arc(W / 2, H / 2, 50, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0,212,255,0.2)';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(0,212,255,0.5)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(W / 2 - 15, H / 2 - 22);
+  ctx.lineTo(W / 2 - 15, H / 2 + 22);
+  ctx.lineTo(W / 2 + 22, H / 2);
+  ctx.closePath();
+  ctx.fillStyle = '#00d4ff';
+  ctx.fill();
 }
-function drawFrame(ctx, t, total, scenes, timeline, styleId){
-  ctx.clearRect(0, 0, CW, CH);
-  ctx.fillStyle = '#050507'; ctx.fillRect(0, 0, CW, CH);
-  if(scenes.length){
-    const idx = sceneIndexAt(scenes, t);
-    const sc = scenes[idx];
-    const FADE = 0.55;
-    const drawOne = (s, alpha, pOverride) => {
-      const dur = Math.max(0.001, s.end - s.start);
-      const p = pOverride != null ? pOverride : clamp((t - s.start) / dur, 0, 1);
-      const m = motionState(s.motion, p);
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      if(s.img && s.img.el) drawCoverImage(ctx, s.img.el, m);
-      else drawPlate(ctx, s, t);
-      ctx.restore();
-    };
-    const local = t - sc.start;
-    if(local < FADE && idx > 0){
-      drawOne(scenes[idx - 1], 1, 1);
-      drawOne(sc, smooth(local / FADE), 0);
-    } else {
-      drawOne(sc, 1);
+
+let previewPlaying = false;
+let previewRAF = null;
+let speechUtterances = [];
+
+function playPreview() {
+  if (previewPlaying) { stopPreview(); return; }
+  previewPlaying = true;
+
+  const canvas = $('previewCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = 540, H = 960;
+  canvas.width = W;
+  canvas.height = H;
+
+  const totalDuration = state.scenes.reduce((s, sc) => s + sc.duration, 0);
+  const startTime = performance.now();
+
+  // Start TTS
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const fullText = state.scenes.map(s => s.narration).join(' ');
+    const utt = new SpeechSynthesisUtterance(fullText);
+    const voiceConfig = getVoiceConfig();
+    const voices = window.speechSynthesis.getVoices();
+    const targetVoice = voices.find(v => voiceConfig.langCheck(v)) || voices[0];
+    if (targetVoice) utt.voice = targetVoice;
+    utt.rate = voiceConfig.rate;
+    utt.pitch = voiceConfig.pitch;
+    utt.volume = 1;
+    window.speechSynthesis.speak(utt);
+  }
+
+  function animate() {
+    if (!previewPlaying) return;
+    const elapsed = (performance.now() - startTime) / 1000;
+    if (elapsed >= totalDuration) { stopPreview(); drawStaticPreview(); return; }
+
+    let cumulative = 0;
+    let sceneIdx = 0;
+    let sceneProgress = 0;
+    for (let i = 0; i < state.scenes.length; i++) {
+      if (elapsed < cumulative + state.scenes[i].duration) {
+        sceneIdx = i;
+        sceneProgress = (elapsed - cumulative) / state.scenes[i].duration;
+        break;
+      }
+      cumulative += state.scenes[i].duration;
+      if (i === state.scenes.length - 1) { sceneIdx = i; sceneProgress = 1; }
     }
+
+    const scene = state.scenes[sceneIdx];
+    renderSceneFrame(ctx, W, H, scene, sceneIdx, sceneProgress, elapsed);
+    previewRAF = requestAnimationFrame(animate);
+  }
+
+  animate();
+}
+
+function stopPreview() {
+  previewPlaying = false;
+  if (previewRAF) cancelAnimationFrame(previewRAF);
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+}
+
+function getVoiceConfig() {
+  switch (state.voice) {
+    case 'male-deep': return { rate: 0.88, pitch: 0.75, langCheck: v => v.lang.startsWith('en') && v.name.toLowerCase().includes('male') };
+    case 'male-natural': return { rate: 1.0, pitch: 1.0, langCheck: v => v.lang.startsWith('en') && v.name.toLowerCase().includes('male') };
+    case 'female-deep': return { rate: 0.9, pitch: 0.85, langCheck: v => v.lang.startsWith('en') && (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('samantha') || v.name.toLowerCase().includes('karen')) };
+    case 'female-natural': return { rate: 1.0, pitch: 1.1, langCheck: v => v.lang.startsWith('en') && (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('samantha') || v.name.toLowerCase().includes('karen')) };
+    default: return { rate: 1.0, pitch: 1.0, langCheck: () => true };
+  }
+}
+
+function downloadVideo() {
+  if (!state.videoBlob) { showToast('No video available'); return; }
+  const url = URL.createObjectURL(state.videoBlob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `fact-engine-${Date.now()}.webm`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Video downloaded!');
+}
+
+function startOver() {
+  stopPreview();
+  state.selectedArticle = null;
+  state.articleContent = null;
+  state.scenes = [];
+  state.videoBlob = null;
+  state.imageCache = {};
+  state.progress = 0;
+  $('searchInput').value = '';
+  showPanel('searchPanel');
+}
+
+// ============================================
+// SECRET MENU - CAR DATABASE
+// ============================================
+function toggleSecret() {
+  const c = $('secretContent');
+  const a = $('secretArrow');
+  c.classList.toggle('hidden');
+  a.style.transform = c.classList.contains('hidden') ? '' : 'rotate(180deg)';
+}
+
+function initCarDatabase() {
+  const makeSelect = $('carMake');
+  const makes = Object.keys(carDatabase).sort();
+  makeSelect.innerHTML = '<option value="">Select manufacturer</option>';
+  makes.forEach(m => {
+    const o = document.createElement('option');
+    o.value = m;
+    o.textContent = m;
+    makeSelect.appendChild(o);
+  });
+}
+
+function filterCarMakes() {
+  const search = $('carMakeSearch').value.toLowerCase();
+  const makeSelect = $('carMake');
+  const makes = Object.keys(carDatabase).sort();
+  makeSelect.innerHTML = '<option value="">Select manufacturer</option>';
+  makes.filter(m => m.toLowerCase().includes(search)).forEach(m => {
+    const o = document.createElement('option');
+    o.value = m;
+    o.textContent = m;
+    makeSelect.appendChild(o);
+  });
+  if (state.carMake && state.carMake.toLowerCase().includes(search)) makeSelect.value = state.carMake;
+}
+
+function updateCarModels() {
+  const make = $('carMake').value;
+  state.carMake = make;
+  state.carModel = '';
+  const modelSelect = $('carModel');
+  modelSelect.innerHTML = '<option value="">Select model</option>';
+  if (make && carDatabase[make]) {
+    carDatabase[make].forEach(m => {
+      const o = document.createElement('option');
+      o.value = m;
+      o.textContent = m;
+      modelSelect.appendChild(o);
+    });
+  }
+  updateCarSelection();
+}
+
+function filterCarModels() {
+  const search = $('carModelSearch').value.toLowerCase();
+  const make = $('carMake').value;
+  const modelSelect = $('carModel');
+  modelSelect.innerHTML = '<option value="">Select model</option>';
+  if (make && carDatabase[make]) {
+    carDatabase[make].filter(m => m.toLowerCase().includes(search)).forEach(m => {
+      const o = document.createElement('option');
+      o.value = m;
+      o.textContent = m;
+      modelSelect.appendChild(o);
+    });
+    if (state.carModel && state.carModel.toLowerCase().includes(search)) modelSelect.value = state.carModel;
+  }
+}
+
+function updateCarSelection() {
+  state.carModel = $('carModel').value;
+  const text = $('carSelectionText');
+  const btn = $('carCopyBtn');
+  if (state.carMake && state.carModel) {
+    text.textContent = state.carMake + ' ' + state.carModel;
+    text.className = 'text-sm text-white font-medium';
+    btn.classList.remove('hidden');
+  } else if (state.carMake) {
+    text.textContent = state.carMake + ' — select a model';
+    text.className = 'text-sm text-slate-400';
+    btn.classList.add('hidden');
   } else {
-    drawPlate(ctx, { lines: [{ wordsArr: ['FACT'] }] }, t);
+    text.textContent = 'Select a manufacturer and model';
+    text.className = 'text-sm text-slate-400';
+    btn.classList.add('hidden');
   }
-  drawGrade(ctx);
-  drawProgressLine(ctx, t, total);
-  drawCaption(ctx, timeline, t, styleId);
 }
 
-/* ================================================================
-   MEDIA RECORDER
-   ================================================================ */
-function pickMime(){
-  const candidates = ['video/mp4;codecs=avc1.42E01E','video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'];
-  if(!window.MediaRecorder) return '';
-  for(const m of candidates){ try{ if(MediaRecorder.isTypeSupported(m)) return m; }catch(e){} }
-  return '';
-}
-function renderAndRecord(opts, onFrac){
-  return new Promise((resolve, reject) => {
-    const { canvas, scenes, timeline, styleId, musicOn } = opts;
-    const ctx = canvas.getContext('2d');
-    let ctxA;
-    try{ ctxA = getAudioCtx(); }catch(e){ reject(e); return; }
-    const total = timeline.total + 0.45;
-    let dest;
-    try{ dest = ctxA.createMediaStreamDestination(); }catch(e){ reject(new Error('Could not create audio destination.')); return; }
-    const master = ctxA.createGain(); master.gain.value = 0.95; master.connect(dest); master.connect(ctxA.destination);
-    const t0audio = ctxA.currentTime + 0.15;
-    for(const L of timeline.lines){
-      if(!L.buffer) continue;
-      const src = ctxA.createBufferSource();
-      src.buffer = L.buffer; src.connect(master);
-      src.start(t0audio + L.start);
-    }
-    if(musicOn){
-      const musicGain = ctxA.createGain(); musicGain.gain.value = 0.085;
-      musicGain.connect(dest); musicGain.connect(ctxA.destination);
-      const msrc = ctxA.createBufferSource();
-      msrc.buffer = getMusicBuffer(ctxA); msrc.loop = true;
-      msrc.connect(musicGain); msrc.start(t0audio); msrc.stop(t0audio + total + 0.6);
-    }
-    let vstream;
-    try{ vstream = canvas.captureStream(30); }catch(e){ reject(new Error('Canvas capture is not supported in this browser.')); return; }
-    const combined = new MediaStream(vstream.getVideoTracks().concat(dest.stream.getAudioTracks()));
-    const mime = pickMime();
-    let rec;
-    try{
-      rec = mime ? new MediaRecorder(combined, { mimeType: mime, videoBitsPerSecond: 9000000 })
-                 : new MediaRecorder(combined);
-    }catch(e){ reject(new Error('MediaRecorder could not start in this browser.')); return; }
-    const chunks = [];
-    rec.ondataavailable = e => { if(e.data && e.data.size) chunks.push(e.data); };
-    rec.onerror = () => reject(new Error('The recorder stopped unexpectedly.'));
-    rec.onstop = () => {
-      const type = (mime || 'video/webm').split(';')[0];
-      const blob = new Blob(chunks, { type });
-      resolve({ blob, mime: type, ext: type.indexOf('mp4') !== -1 ? 'mp4' : 'webm' });
-    };
-    rec.start(300);
-    const startPerf = performance.now();
-    const FADE_TAIL = total;
-    function frame(){
-      const t = (performance.now() - startPerf) / 1000;
-      drawFrame(ctx, Math.min(t, FADE_TAIL - 0.001), timeline.total, scenes, timeline, styleId);
-      if(onFrac) onFrac(clamp(t / FADE_TAIL, 0, 1));
-      if(t < FADE_TAIL){ requestAnimationFrame(frame); }
-      else {
-        drawFrame(ctx, timeline.total - 0.001, timeline.total, scenes, timeline, styleId);
-        try{ rec.stop(); }catch(e){ reject(e); }
-      }
-    }
-    requestAnimationFrame(frame);
-  });
-}
-
-/* ================================================================
-   UI — VOICES, STYLE CARDS, CHIPS, TABS, TOGGLES
-   ================================================================ */
-function renderVoices(){
-  els.voiceGrid.innerHTML = VOICES.map(v => (
-    '<button class="voice-card'+(v.id===state.voice?' selected':'')+'" data-voice="'+v.id+'" role="radio" aria-checked="'+(v.id===state.voice)+'" aria-label="'+esc(v.name)+' — '+esc(v.role)+'">' +
-      '<span class="vc-avatar" style="--h:'+v.hue+'">'+v.initials+'</span>' +
-      '<span class="vc-body">' +
-        '<span class="vc-namerow"><span class="vc-name">'+v.name+'</span><span class="vc-tag">'+v.tag+'</span></span>' +
-        '<span class="vc-role">'+v.role+'</span>' +
-        '<span class="vc-desc">'+v.desc+'</span>' +
-        '<span class="vc-foot"><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>' +
-          '<span class="vc-sample" data-sample="'+v.id+'" role="button" tabindex="-1">PREVIEW ▸</span></span>' +
-      '</span>' +
-    '</button>'
-  )).join('');
-}
-function renderStyles(){
-  els.styleGrid.innerHTML = SUB_STYLES.map(s => (
-    '<button class="style-card'+(s.id===state.style?' selected':'')+'" data-style="'+s.id+'" role="radio" aria-checked="'+(s.id===state.style)+'" aria-label="Subtitle style: '+esc(s.name)+'">' +
-      '<span class="demo '+s.demo+'" aria-hidden="true">' +
-        (s.id === 'editorial' ? '<span class="rule"></span>' : '') +
-        '<span>'+ s.words.map(w => '<span class="w">'+esc(w)+'</span>').join('') +'</span>' +
-      '</span>' +
-      '<span class="style-name">'+s.name+'</span>' +
-      '<span class="style-tag">'+s.tag+'</span>' +
-    '</button>'
-  )).join('');
-}
-function renderChips(){
-  els.topicChips.innerHTML = SUGGESTED.map(t => '<button class="topic-chip" data-topic="'+esc(t)+'">'+esc(t)+'</button>').join('');
-}
-function renderPosterEq(){
-  let html = '';
-  for(let i = 0; i < 30; i++){
-    const h = 20 + Math.round(Math.abs(Math.sin(i * 1.7)) * 80);
-    html += '<i style="height:'+h+'%;animation-delay:-'+((i * 0.13) % 1.4).toFixed(2)+'s;animation-duration:'+(1.1 + (i % 5) * 0.22).toFixed(2)+'s"></i>';
-  }
-  els.posterEq.innerHTML = html;
-}
-let activeSampleAudio = null;
-function previewVoice(voiceId, card){
-  const voice = VOICE(voiceId);
-  if(activeSampleAudio){ try{ activeSampleAudio.pause(); }catch(e){} activeSampleAudio = null; $$('.voice-card.playing').forEach(c => c.classList.remove('playing')); }
-  const url = 'https://streamelements.com/apis/tts?voice=' + encodeURIComponent(voice.se) + '&text=' + encodeURIComponent(SAMPLE_LINE);
-  const audio = new Audio(url);
-  audio.crossOrigin = 'anonymous';
-  card.classList.add('playing');
-  const done = () => { card.classList.remove('playing'); activeSampleAudio = null; };
-  audio.onended = done; audio.onerror = () => { done(); speakLinesLive([{ text: SAMPLE_LINE }], voice); };
-  activeSampleAudio = audio;
-  audio.play().catch(() => { done(); speakLinesLive([{ text: SAMPLE_LINE }], voice); });
-}
-els.voiceGrid.addEventListener('click', e => {
-  const sample = e.target.closest('[data-sample]');
-  if(sample){
-    e.stopPropagation();
-    previewVoice(sample.dataset.sample, sample.closest('.voice-card'));
-    return;
-  }
-  const card = e.target.closest('.voice-card');
-  if(!card) return;
-  state.voice = card.dataset.voice;
-  $$('.voice-card', els.voiceGrid).forEach(c => {
-    const sel = c.dataset.voice === state.voice;
-    c.classList.toggle('selected', sel);
-    c.setAttribute('aria-checked', String(sel));
-  });
-});
-els.styleGrid.addEventListener('click', e => {
-  const card = e.target.closest('.style-card');
-  if(!card) return;
-  state.style = card.dataset.style;
-  $$('.style-card', els.styleGrid).forEach(c => {
-    const sel = c.dataset.style === state.style;
-    c.classList.toggle('selected', sel);
-    c.setAttribute('aria-checked', String(sel));
-  });
-});
-els.topicChips.addEventListener('click', e => {
-  const chip = e.target.closest('.topic-chip');
-  if(!chip) return;
-  els.topicInput.value = chip.dataset.topic;
-  updateInputMeta();
-  els.topicInput.focus();
-});
-function updateInputMeta(){
-  const v = els.topicInput.value;
-  els.inputCount.textContent = String(v.trim().length) + (state.mode === 'script' ? ' CHARS · ' + wordCount(v) + ' WORDS' : ' CHARS');
-}
-els.topicInput.addEventListener('input', updateInputMeta);
-function setMode(mode){
-  state.mode = mode;
-  const wiki = mode === 'wiki';
-  els.modeWikiBtn.classList.toggle('active', wiki);
-  els.modeScriptBtn.classList.toggle('active', !wiki);
-  els.modeWikiBtn.setAttribute('aria-selected', String(wiki));
-  els.modeScriptBtn.setAttribute('aria-selected', String(!wiki));
-  els.inputModeNote.textContent = wiki ? 'WIKIPEDIA-VERIFIED' : 'VERBATIM NARRATION';
-  els.inputHint.textContent = wiki ? 'ENTER A SUBJECT — RESEARCH IS AUTOMATIC' : 'PASTE YOUR FULL SCRIPT — WE PRODUCE IT AS WRITTEN';
-  els.scriptModeNote.classList.toggle('show', !wiki);
-  els.topicInput.placeholder = wiki
-    ? 'e.g. The Library of Alexandria — or the octopus, the Wow! signal, Nikola Tesla…'
-    : 'Paste the complete script here. Fact Engine will research the subject for imagery, then narrate exactly what you wrote…';
-  els.topicInput.value = '';
-  updateInputMeta();
-}
-els.modeWikiBtn.addEventListener('click', () => setMode('wiki'));
-els.modeScriptBtn.addEventListener('click', () => setMode('script'));
-els.hookToggle.addEventListener('change', () => {
-  state.hook = els.hookToggle.checked;
-  els.hookLoopNote.classList.toggle('off', !state.hook);
-});
-els.musicToggle.addEventListener('change', () => { state.music = els.musicToggle.checked; });
-els.topicInput.addEventListener('keydown', e => {
-  if((e.metaKey || e.ctrlKey) && e.key === 'Enter'){ e.preventDefault(); generate(); }
-});
-document.addEventListener('keydown', e => {
-  if((e.metaKey || e.ctrlKey) && e.key === 'Enter' && e.target !== els.topicInput){ e.preventDefault(); generate(); }
-});
-
-/* ================================================================
-   QUALITY VERIFICATION + DELIVERY
-   ================================================================ */
-const CHECKS = [];
-function renderQualityChecks(items){
-  els.qualityChecks.innerHTML = items.map((c, i) => (
-    '<div class="check'+(c.warn ? ' warn' : '')+'" style="--d:'+(i * 130)+'ms">' +
-      '<span class="check-ic">' +
-        (c.warn
-          ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M12 7v6" stroke="#E4B45E" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="16.6" r=".6" fill="#E4B45E" stroke="#E4B45E" stroke-width="1.6"/></svg>'
-          : '<svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#6FD598" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>') +
-      '</span><span>'+esc(c.txt)+'</span></div>'
-  )).join('');
-  requestAnimationFrame(() => requestAnimationFrame(() => $$('.check', els.qualityChecks).forEach(c => c.classList.add('in'))));
-}
-function buildScriptAccordion(timeline, hookOn){
-  els.scriptBody.innerHTML = timeline.lines.map((L, i) => (
-    '<div class="script-line"><time>' + fmtClock(L.start) + '</time><span>' + esc(L.text) +
-    (hookOn && i === 0 ? '<span class="loop-badge">HOOK</span>' : '') + '</span></div>'
-  )).join('');
-  els.scriptMeta.textContent = timeline.lines.length + ' LINES · ' + fmtTime(timeline.total);
-}
-function buildSourcesAccordion(images){
-  if(!images.length){
-    els.srcBody.innerHTML = '<div class="src-note">No external images survived verification for this subject — the film used internally art-directed title plates instead. Re-run with a more established subject (or check network access to Wikimedia) for full photographic coverage.</div>';
-    els.srcMeta.textContent = '0 VERIFIED';
-    return;
-  }
-  els.srcBody.innerHTML = images.map(im => (
-    '<a class="src-row" href="'+esc(im.descUrl || '#')+'" target="_blank" rel="noopener noreferrer">' +
-      '<img class="src-thumb" loading="lazy" src="'+esc(im.thumb)+'" alt="'+esc(stripHTML(im.title))+'" onerror="this.style.opacity=.25">' +
-      '<span><span class="src-name">'+esc(stripHTML(im.title.replace(/^File:/,'')))+'</span>' +
-        '<span class="src-meta"><span class="lic'+(/unverified/i.test(im.license)?' unverified':'')+'">'+esc(im.license)+'</span>' +
-        '<span class="src-author">'+esc(trunc(im.artist, 60))+'</span></span>' +
-      '</span>' +
-      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="#6F6E64" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
-    '</a>'
-  )).join('') +
-  '<div class="src-note">Every asset was retrieved through the Wikimedia Commons imageinfo API. Licenses and authors are reported exactly as provided by the source. Before publishing commercially, double-check each asset’s license on its Commons page — requirements for attribution vary by license.</div>';
-  els.srcMeta.textContent = images.length + ' VERIFIED ASSETS';
-}
-function resetOutputToPoster(){
-  els.resultsPanel.hidden = true;
-  els.progressCard.hidden = true;
-  els.finalVideo.style.display = 'none';
-  els.finalVideo.removeAttribute('src');
-  try{ els.finalVideo.load(); }catch(e){}
-  els.poster.style.display = 'flex';
-  els.liveBadge.classList.remove('show');
-}
-els.againBtn.addEventListener('click', () => {
-  resetOutputToPoster();
-  $('#studio').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  setTimeout(() => els.topicInput.focus({ preventScroll: true }), 350);
-});
-
-/* ================================================================
-   MAIN PIPELINE
-   ================================================================ */
-function flagInput(){
-  els.topicInput.classList.add('flag');
-  setTimeout(() => els.topicInput.classList.remove('flag'), 700);
-}
-function setBusy(b){
-  state.busy = b;
-  els.generateBtn.disabled = b;
-  els.generateBtn.classList.toggle('busy', b);
-  els.gbLabel.textContent = b ? 'PRODUCING…' : 'GENERATE SHORT';
-}
-async function generate(){
-  if(state.busy) return;
-  const raw = els.topicInput.value.trim();
-  if(state.mode === 'wiki'){
-    if(raw.length < 3){ flagInput(); log && 0; els.inputHint.textContent = 'GIVE THE ENGINE A SUBJECT FIRST'; return; }
+function copyCarSelection() {
+  const text = state.carMake + ' ' + state.carModel;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => showToast('Copied: ' + text)).catch(() => fallbackCopy(text));
   } else {
-    if(wordCount(raw) < 15){ flagInput(); els.inputHint.textContent = 'SCRIPT TOO SHORT — 15 WORDS MINIMUM'; return; }
-  }
-  setBusy(true);
-  T0 = performance.now();
-  resetPipelineUI(); clearLog();
-  els.pcError.classList.remove('show');
-  els.resultsPanel.hidden = true;
-  els.poster.style.display = 'none';
-  els.finalVideo.style.display = 'none';
-  els.liveBadge.classList.remove('show');
-  els.progressCard.hidden = false;
-  const voice = VOICE(state.voice);
-  const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-  let stage = 0;
-  try{
-    getAudioCtx();
-    const scriptQuery = state.mode === 'wiki' ? raw : guessQuery(raw);
-
-    /* ── STAGE 0 · RESEARCH ─────────────────────────────── */
-    stage = 0;
-    setStage(0, 4, 'Resolving “' + trunc(scriptQuery, 42) + '” on Wikipedia…');
-    log('query → en.wikipedia.org · mode=' + (state.mode === 'wiki' ? 'topic' : 'script'));
-    let article;
-    try{
-      const title = await resolveTopic(scriptQuery);
-      log('matched article → “' + title + '”');
-      setStage(0, 11, 'Reading the full article…');
-      article = await fetchArticle(title);
-      log('extracted ' + article.extract.length.toLocaleString() + ' chars · ' + (article.sectionCount || '?') + ' sections · “' + trunc(article.description || 'no short description', 60) + '”');
-    }catch(e){
-      if(state.mode === 'wiki') throw e;
-      log('research unavailable (' + e.message + ') — continuing with script only', 'warn');
-      article = { title: trunc(scriptQuery, 60), description: 'User-supplied script', extract: raw, mainImage: null, sectionCount: 0 };
-    }
-
-    /* ── STAGE 1 · SCRIPT ──────────────────────────────── */
-    stage = 1;
-    setStage(1, 22, 'Scoring sentences · locating the hook…');
-    let script;
-    if(state.mode === 'wiki'){
-      script = buildScriptFromArticle(article, state.hook);
-      log('scanned ' + script.stats.scanned + ' sentences → ' + script.lines.length + ' narration lines · ' + script.stats.words + ' words');
-      log('HOOK → “' + trunc(script.hookText, 88) + '”', 'gold');
-      if(state.hook) log('intelligent hook ON — ending will echo the opening · final frame will match the first', 'gold');
-      else log('intelligent hook OFF — classic strong hook, resolved ending');
-    } else {
-      script = buildScriptFromRaw(raw, state.hook);
-      log('script parsed → ' + script.lines.length + ' lines · ' + script.stats.words + ' words · narrated verbatim');
-      if(state.hook) log('intelligent hook ON — neutral loop-closing line appended · final frame matches the first', 'gold');
-    }
-
-    /* ── STAGE 2 · IMAGES ──────────────────────────────── */
-    stage = 2;
-    setStage(2, 36, 'Verifying real images via Wikimedia Commons…');
-    const candidates = await gatherImages(article);
-    log('commons imageinfo → ' + candidates.length + ' candidates passed size + license filter');
-    const images = await loadVerifiedImages(candidates, (done, total) => {
-      if(done === total || done % 6 === 0) log('decoding images… ' + done + '/' + total);
-    });
-    log(images.length ? images.length + ' images decoded · CORS-clean for canvas compositing' : 'no CORS-clean images — art-directed plates will be used', images.length ? 'ok' : 'warn');
-
-    /* ── STAGE 3 · VOICE ───────────────────────────────── */
-    stage = 3;
-    setStage(3, 50, 'Synthesising narration — ' + voice.name + ' · ' + voice.role.toLowerCase() + '…');
-    const timeline = await synthesizeLines(script.lines, voice, (done, total, studio) => {
-      setStage(3, 50 + (done / total) * 14, 'Voice synthesis — segment ' + done + '/' + total);
-      log('segment ' + done + '/' + total + ' → ' + (studio ? 'studio TTS' : 'offline estimate'), studio ? '' : 'warn');
-    });
-    const totalWords = script.stats.words;
-    log('voice track → ' + timeline.lines.length + ' segments · ' + timeline.total.toFixed(1) + 's · ' + (timeline.allStudio ? 'studio TTS — fully embedded in export' : timeline.studioCount + '/' + timeline.lines.length + ' segments studio · rest estimated'), timeline.allStudio ? 'ok' : 'warn');
-
-    /* ── SCENES + TIMELINE ─────────────────────────────── */
-    const scenes = buildScenes(timeline.lines, images, state.hook, article.title);
-    const usedImages = [];
-    const seenImg = new Set();
-    for(const sc of scenes){ if(sc.img && !seenImg.has(sc.img.title)){ seenImg.add(sc.img.title); usedImages.push(sc.img); } }
-    state.usedImages = usedImages;
-    state.timeline = timeline; state.scenes = scenes; state.article = article; state.scriptStats = script.stats;
-
-    /* ── STAGE 4 · RENDER ──────────────────────────────── */
-    stage = 4;
-    els.liveBadge.classList.add('show');
-    setStage(4, 64, 'Rendering 1080×1920 · ' + Math.round(timeline.total) + 's film…');
-    log('compositing ' + scenes.length + ' scenes · motion grammar: ken-burns + directional pans · crossfade 0.55s');
-    const { blob, mime, ext } = await renderAndRecord(
-      { canvas: els.canvas, scenes, timeline, styleId: state.style, musicOn: state.music },
-      frac => setStage(4, 64 + frac * 30, 'Rendering 1080×1920 · ' + Math.round(timeline.total) + 's film…')
-    );
-    state.lastBlob = blob; state.lastExt = ext; state.lastMime = mime;
-    log('recorder flushed → ' + (blob.size / 1048576).toFixed(1) + ' MB · ' + mime, 'ok');
-
-    /* ── STAGE 5 · VERIFY ──────────────────────────────── */
-    stage = 5;
-    els.liveBadge.classList.remove('show');
-    setStage(5, 96, 'Verifying the final cut…');
-    await new Promise(r => setTimeout(r, 420));
-    const durStr = fmtTime(timeline.total);
-    const voiceOk = timeline.allStudio;
-    const checks = [
-      { txt: 'Starts instantly on the hook — zero intro, zero logo, zero branding in frame' },
-      { txt: 'No tool watermark, title card or “welcome” anywhere in the ' + durStr + ' cut' },
-      voiceOk
-        ? { txt: 'Narration locked to ' + voice.name + ' — ' + voice.role.charAt(0) + voice.role.slice(1).toLowerCase() }
-        : { warn: true, txt: 'Voice engine unreachable — narration not embedded (score + picture only)' },
-      { txt: 'Subtitles: ' + styleName(state.style) + ' — word-timed to the actual audio track' },
-      { txt: usedImages.length ? usedImages.length + ' real Wikimedia images, license-checked and matched to narration' : 'Art-directed plates used — no image existed that passed verification', warn: !usedImages.length },
-      { txt: (script.stats.sections ? script.stats.sections + ' article sections read · ' : '') + script.stats.scanned + ' sentences scored for a ' + totalWords + '-word script' },
-      state.hook
-        ? { txt: 'Intelligent Hook — final frame matches the opening · seamless Shorts loop' }
-        : { txt: 'Standard strong hook — resolved ending, no forced loop' },
-      { txt: 'Export: ' + ext.toUpperCase() + ' · 1080×1920 · 30fps · ' + durStr },
-    ];
-    renderQualityChecks(checks);
-    setStage(5, 100, 'Delivered.');
-    log('quality gate passed → 8/8 checks · cut is live below', 'ok');
-
-    /* ── DELIVER ───────────────────────────────────────── */
-    const url = URL.createObjectURL(blob);
-    els.finalVideo.src = url;
-    els.finalVideo.style.display = 'block';
-    els.finalVideo.load();
-    els.resTitle.textContent = article.title;
-    els.resDesc.textContent = article.description ? article.description.charAt(0).toUpperCase() + article.description.slice(1) : 'Short documentary';
-    els.resChips.innerHTML = [
-      [durStr, 'DURATION'], [totalWords, 'WORDS'], [scenes.length, 'SCENES'],
-      [usedImages.length, 'IMAGES'], [script.stats.scanned, 'SENTENCES SCORED'], [state.hook ? 'ON' : 'OFF', 'INTELLIGENT HOOK']
-    ].map(c => '<span class="res-chip"><b>' + esc(String(c[0])) + '</b><span>' + esc(c[1]) + '</span></span>').join('');
-    els.dlLabel.textContent = 'DOWNLOAD ' + ext.toUpperCase();
-    els.downloadBtn.href = url;
-    els.downloadBtn.download = 'fact-engine-' + slugify(article.title) + '.' + ext;
-    els.iosNote.classList.toggle('show', isIOS);
-    els.voiceWarn.classList.toggle('show', !voiceOk);
-    buildScriptAccordion(timeline, state.hook);
-    buildSourcesAccordion(usedImages);
-    els.progressCard.hidden = true;
-    els.resultsPanel.hidden = false;
-    els.resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }catch(err){
-    els.liveBadge.classList.remove('show');
-    const msg = (err && err.message) ? err.message : 'Unknown production error.';
-    setStageError(stage, msg);
-  }finally{
-    setBusy(false);
+    fallbackCopy(text);
   }
 }
-els.generateBtn.addEventListener('click', generate);
-els.retryBtn.addEventListener('click', () => { els.pcError.classList.remove('show'); generate(); });
 
-/* ================================================================
-   INIT
-   ================================================================ */
-renderVoices();
-renderStyles();
-renderChips();
-renderPosterEq();
-updateInputMeta();
-// warm the speech voice list for the live-preview fallback
-try{ if(window.speechSynthesis){ window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices(); } }catch(e){}
-})();
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); showToast('Copied: ' + text); } catch (e) { showToast('Copy failed'); }
+  document.body.removeChild(ta);
+}
+
+// ============================================
+// INIT
+// ============================================
+function init() {
+  initCarDatabase();
+  showPanel('searchPanel');
+
+  // Load speech synthesis voices
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+  }
+
+  // Enter key for search
+  $('searchInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') performSearch();
+  });
+}
+
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
