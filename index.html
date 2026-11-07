@@ -21,18 +21,18 @@ button.ghost,.btn.ghost{background:transparent;color:var(--tx);border:1px solid 
 .fr a{color:var(--ac)}.fr p{margin:4px 0}.fr button,.fr .btn{padding:6px 10px;font-size:12px;margin:0 4px 4px 0}
 video{width:min(100%,360px);aspect-ratio:9/16;background:#000;border-radius:14px;display:block;margin:0 auto 12px}audio{width:100%}
 a{color:var(--ac)}ul,ol{padding-left:20px;margin:4px 0}[hidden]{display:none!important}@media(max-width:480px){.grid2{grid-template-columns:1fr}}
-</style><script src="https://js.puter.com/v2/"></script></head><body><main>
-<header><h1>FACT ENGINE</h1><p class="sub">Runs in your browser. No account, no API keys, no server. Voiceover: free AI voice via a no-key API.</p></header>
+</style></head><body><main>
+<header><h1>FACT ENGINE</h1><p class="sub">Runs in your browser. No account, no API keys, no server. Voiceover: free unlimited Microsoft Edge neural voices.</p></header>
 <section class="card note"><h2>Read this first</h2>
 <p>Script: built from the intro of a Wikipedia article (CC BY-SA, credited below), or from a script you paste. There is no AI writer without a key, so it is extractive, not original. Edit any line.</p>
-<p>Voice: free AI voiceover via the Puter.js API (Amazon Polly neural + OpenAI voices). No API key, no account, no 90 MB download, fast on every phone including iPhone. Needs internet; an offline basic voice is the automatic fallback.</p>
+<p>Voice: free unlimited neural voices from Microsoft Edge's Read Aloud service (10 English voices, US/UK/AU). No API key, no account, no download, fast on every phone including iPhone. Needs internet; an offline basic voice is the automatic fallback.</p>
 <p>Images: Wikimedia Commons only (free licenses, credited). No stock video without keys. You can add your own image per line.</p>
 <p>Video: recorded live in your browser, so it takes as long as the video and the tab must stay open and visible. Output is MP4 where your browser supports it, otherwise WebM.</p></section>
 <section class="card">
   <label style="margin:0">Topic<div class="row"><input id="topic" placeholder="e.g. Octopus" maxlength="120"><button id="sug" class="ghost" type="button">Suggest topics</button></div></label>
   <div id="chips" class="chips"></div>
   <label>Or paste your own script (optional, you are responsible for its accuracy)<textarea id="own" rows="3"></textarea></label>
-  <div class="grid2"><label>Voice<select id="voice"><option value="Joanna">Joanna (US, female, natural)</option><option value="Matthew">Matthew (US, male, natural)</option><option value="Amy">Amy (UK, female, natural)</option><option value="Emma">Emma (UK, female, natural)</option><option value="Brian">Brian (UK, male, natural)</option><option value="oa:alloy">Alloy (OpenAI, neutral)</option><option value="oa:nova">Nova (OpenAI, female)</option><option value="oa:echo">Echo (OpenAI, male)</option><option value="oa:onyx">Onyx (OpenAI, deep male)</option><option value="basic">Basic robotic voice (offline fallback)</option><option value="none">No voice (captions only)</option></select></label>
+  <div class="grid2"><label>Voice<select id="voice"><option value="en-US-AriaNeural">Aria (US, female, neural)</option><option value="en-US-JennyNeural">Jenny (US, female, neural)</option><option value="en-US-MichelleNeural">Michelle (US, female, neural)</option><option value="en-US-GuyNeural">Guy (US, male, neural)</option><option value="en-US-ChristopherNeural">Christopher (US, male, neural)</option><option value="en-GB-SoniaNeural">Sonia (UK, female, neural)</option><option value="en-GB-LibbyNeural">Libby (UK, female, neural)</option><option value="en-GB-RyanNeural">Ryan (UK, male, neural)</option><option value="en-AU-NatashaNeural">Natasha (AU, female, neural)</option><option value="en-AU-WilliamNeural">William (AU, male, neural)</option><option value="basic">Basic robotic voice (offline fallback)</option><option value="none">No voice (captions only)</option></select></label>
   <label>Background music<select id="music"><option value="none">None</option><option value="commons">Free tracks from Wikimedia Commons</option><option value="file">My own file (e.g. from Pixabay Music)</option></select></label>
   <label>Length<select id="len"><option value="20">About 20 seconds</option><option value="30">About 30 seconds</option><option value="45" selected>About 45 seconds</option><option value="60">About 60 seconds</option></select></label>
   <label>Smoothness<select id="fps"><option value="60" selected>60 fps (smoothest)</option><option value="30">30 fps (safer on old phones)</option></select></label>
@@ -92,28 +92,72 @@ const NOTES=[];function note(m){if(!m)NOTES.length=0;else NOTES.push(m);$('#info
 function showLen(){const w=+$('#len').value;$('#dur').textContent=`Video length: ${Math.round(S.total)} s (target ${w} s).`+(!S.own&&S.total<w*.75?" Wikipedia's intro for this topic is short. For a longer video, try a broader topic or paste your own script.":'')}
 const withTimeout=(p,ms,m)=>Promise.race([p,new Promise((_,no)=>setTimeout(()=>no(new Error(m)),ms))]);
 function unlock(){if(!uctx||uctx.state==='closed')uctx=new(window.AudioContext||window.webkitAudioContext)();uctx.resume()}
+const TRUSTED='6A5AA1D4EAFF4E9FB37E23D68491D6F4';
+const K256=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+function sha256(bytes){
+  const l=bytes.length,plen=(l+9+63&-64),b=new Uint8Array(plen);b.set(bytes);b[l]=128;
+  const dv=new DataView(b.buffer);dv.setUint32(plen-8,Math.floor(l/536870912));dv.setUint32(plen-4,l<<3);
+  const H=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19],w=new Int32Array(64);
+  for(let o=0;o<plen;o+=64){
+    for(let i=0;i<16;i++)w[i]=dv.getUint32(o+i*4);
+    for(let i=16;i<64;i++){const x=w[i-15],y=w[i-2],s0=((x>>>7)^(x<<25)^(x>>>18)^(x<<14)^(x>>>3))|0,s1=((y>>>17)^(y<<15)^(y>>>19)^(y<<13)^(y>>>10))|0;w[i]=(w[i-16]+s0+w[i-7]+s1)|0}
+    let a=H[0],b2=H[1],c=H[2],d=H[3],e=H[4],f=H[5],g=H[6],h=H[7];
+    for(let i=0;i<64;i++){const S1=((e>>>6)^(e<<26)^(e>>>11)^(e<<21)^(e>>>25)^(e<<7))|0,ch=(e&f)^(~e&g),t1=(h+S1+ch+K256[i]+w[i])|0,S0=((a>>>2)^(a<<30)^(a>>>13)^(a<<19)^(a>>>22)^(a<<10))|0,mj=(a&b2)^(a&c)^(b2&c),t2=(S0+mj)|0;h=g;g=f;f=e;e=(d+t1)|0;d=c;c=b2;b2=a;a=(t1+t2)|0}
+    H[0]=H[0]+a|0;H[1]=H[1]+b2|0;H[2]=H[2]+c|0;H[3]=H[3]+d|0;H[4]=H[4]+e|0;H[5]=H[5]+f|0;H[6]=H[6]+g|0;H[7]=H[7]+h|0}
+  const out=new Uint8Array(32);for(let i=0;i<8;i++){out[i*4]=H[i]>>>24&255;out[i*4+1]=H[i]>>>16&255;out[i*4+2]=H[i]>>>8&255;out[i*4+3]=H[i]&255}
+  return out}
+const SW1={w:0xEF0569FB,s:0x76F50F34,p:0xC3EFEA97},SW2={w:0xC31713DB,s:0x1881CE3C,p:0x35BD1EC9},MX1=[0xCF98B111,0x87085B9F,0x12CEB96D,0x257E1D83],MX2=[0xA27416F5,0xD38396FF,0x7C932B89,0xBFA49F69];
+const rol16=v=>(((v<<16)|(v>>>16))>>>0);
+function swapTerm(w,k,m){const sum=(Math.imul(w,k)+Math.imul(rol16(w),m.w))>>>0,q=Math.imul(rol16(sum),m.s)>>>0;return(Math.imul(rol16(q),m.p)+q)>>>0}
+function chain(v,m){for(const x of m)v=Math.imul(rol16(v),x)>>>0;return v}
+const toHex=b=>Array.from(b,x=>x.toString(16).padStart(2,'0')).join('').toUpperCase();
+function secMsGec(){
+  const t=Math.floor(Date.now()/1000)+11644473600,r=t-t%300,wt=r*10000000;
+  const msg=new TextEncoder().encode('Copyright (C) Microsoft Corporation. All rights reserved.'+wt+TRUSTED);
+  const dg=sha256(msg),dav=new DataView(dg.buffer),ka=dav.getUint32(0,true)|1,kb=dav.getUint32(4,true)|1;
+  const pad=new Uint8Array(Math.ceil(msg.length/8)*8);pad.set(msg);
+  const pv=new DataView(pad.buffer);let ss=0,ls=0,mix=0,ms=0;
+  for(let o=0;o<pad.length;o+=8){const fw=pv.getUint32(o,true),sw=pv.getUint32(o+4,true);
+    ls=swapTerm(sw,kb,SW2);ss=(ss+swapTerm(fw,ka,SW1)+ls)>>>0;
+    mix=chain(Math.imul(mix+fw,ka),MX1);ms=(ms+mix)>>>0;
+    mix=chain(Math.imul(mix+sw,kb),MX2);ms=(ms+mix)>>>0}
+  const cs=new Uint8Array(8),cv=new DataView(cs.buffer);cv.setUint32(0,ls^mix,true);cv.setUint32(4,ss^ms,true);
+  return toHex(cs)+'-'+toHex(dg)}
+function edgeDate(){const D=new Date(),d=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],p=n=>String(n).padStart(2,'0');return`${d[D.getUTCDay()]} ${m[D.getUTCMonth()]} ${p(D.getUTCDate())} ${D.getUTCFullYear()} ${p(D.getUTCHours())}:${p(D.getUTCMinutes())}:${p(D.getUTCSeconds())} GMT+0000 (Coordinated Universal Time)`}
+const rid=()=>{try{if(crypto.randomUUID)return crypto.randomUUID().replace(/-/g,'')}catch(e){}return Array.from({length:32},()=>'0123456789abcdef'[Math.floor(Math.random()*16)]).join('')};
+function edgeSpeak(text,voice){
+  return new Promise((ok,no)=>{
+    const cid=rid(),parts=[];let done=false,ws;
+    const fail=m=>{if(done)return;done=true;try{ws.close()}catch(e){};no(new Error(m))};
+    try{ws=new WebSocket(`wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=${TRUSTED}&Sec-MS-GEC=${secMsGec()}&Sec-MS-GEC-Version=2-143.0.3650.96&ConnectionId=${cid}`)}
+    catch(e){return no(new Error('cannot open the voice connection: '+e.message))}
+    ws.binaryType='arraybuffer';
+    ws.onopen=()=>{
+      const dt=edgeDate();
+      ws.send(`X-Timestamp:${dt}\r\nContent-Type:application/json; charset=utf-8\r\nPath:speech.config\r\n\r\n{"context":{"synthesis":{"audio":{"metadataoptions":{"sentenceBoundaryEnabled":"false","wordBoundaryEnabled":"false"},"outputFormat":"audio-24khz-48kbitrate-mono-mp3"}}}}`);
+      const x=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+      ws.send(`X-RequestId:${cid}\r\nContent-Type:application/ssml+xml\r\nX-Timestamp:${dt}Z\r\nPath:ssml\r\n\r\n<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='${voice.slice(0,5)}'><voice name='${voice}'><prosody pitch='+0Hz' rate='+0%' volume='+0%'>${x(text)}</prosody></voice></speak>`)};
+    ws.onmessage=e=>{
+      if(typeof e.data==='string'){
+        if(e.data.includes('Path:turn.end')){if(done)return;done=true;try{ws.close()}catch(x){}
+          if(!parts.length)no(new Error('the voice service returned no audio'));else ok(new Blob(parts,{type:'audio/mpeg'}))}}
+      else{const u=new Uint8Array(e.data);if(u.length<2)return;const hl=(u[0]<<8)|u[1];if(u.length>hl+2)parts.push(u.slice(hl+2))}};
+    ws.onerror=()=>fail('voice connection failed');
+    ws.onclose=()=>fail('voice connection closed early')});
+}
 async function genAPI(text,v){
-  const pol=()=>v.startsWith('oa:')?{provider:'openai',voice:v.slice(3),model:'gpt-4o-mini-tts'}:{provider:'aws-polly',voice:v,engine:'neural',language:'en-US'};
   let err;
   for(let a=0;a<3;a++){
-    try{
-      const el=await puter.ai.txt2speech(String(text).slice(0,2900),pol());
-      const src=el&&el.src||'';
-      if(!src)throw new Error('no audio returned');
-      const r=await fetch(src);if(!r.ok)throw new Error('audio download failed ('+r.status+')');
-      unlock();const d=await uctx.decodeAudioData(await r.arrayBuffer());
-      return{pcm:d.getChannelData(0).slice(),sr:d.sampleRate}
-    }catch(e){err=e;if(a<2)await new Promise(res=>setTimeout(res,700*(a+1)))}
-  }
+    try{const bl=await edgeSpeak(String(text).slice(0,2800),v);
+      unlock();const d=await uctx.decodeAudioData(await bl.arrayBuffer());
+      return{pcm:d.getChannelData(0).slice(),sr:d.sampleRate}}
+    catch(e){err=e;if(a<2)await new Promise(res=>setTimeout(res,700*(a+1)))}}
   throw err}
 async function pickEngine(v){
   if(v==='none')return'none';
-  if(typeof puter!=='undefined'){
-    try{bar(8,'Checking the free voice API');
-      const pol=v.startsWith('oa:')?{provider:'openai',voice:v.slice(3),model:'gpt-4o-mini-tts'}:{provider:'aws-polly',voice:v,engine:'neural',language:'en-US'};
-      await withTimeout(puter.ai.txt2speech('Hi.',pol),25000,'API check timed out');return v}
-    catch(e){note('Free voice API failed ('+(e&&(e.message||e.error&&e.error.message)||e)+'). Trying the basic offline voice.')}}
-  else note('Voice API not loaded (offline or blocked). Trying the basic offline voice.');
+  if(v!=='basic'){
+    try{bar(8,'Connecting to the free voice service');await withTimeout(edgeSpeak('Hi.',v),25000,'voice service check timed out');return v}
+    catch(e){note('Free voice service failed ('+e.message+'). Trying the basic offline voice.')}}
   try{bar(12,'Loading basic voice');await loadMeSpeak();return'basic'}
   catch(e){note('Basic voice not available ('+e.message+'). Continuing with captions only.');return'none'}}
 async function loadMeSpeak(){
@@ -133,7 +177,7 @@ async function genBasic(text){const m=await loadMeSpeak();let r=m.speak(text,{ra
   unlock();const d=await uctx.decodeAudioData(toAB(r));return{pcm:d.getChannelData(0).slice(),sr:d.sampleRate}}
 async function narrate(eng){
   let at=0,sr=24000,cur=0;const t0=Date.now(),n=S.sents.length;
-  const tick=setInterval(()=>eng!=='none'&&bar(30+15*cur/n,`Recording narration ${cur+1}/${n} · ${Math.round((Date.now()-t0)/1000)} s`+(eng!=='basic'?' (free AI voice, fast)':'')),1000);
+  const tick=setInterval(()=>eng!=='none'&&bar(30+15*cur/n,`Recording narration ${cur+1}/${n} · ${Math.round((Date.now()-t0)/1000)} s`+(eng!=='basic'?' (free Edge neural voice, fast)':'')),1000);
   try{
     for(const[i,x]of S.sents.entries()){cur=i;
       if(eng==='none'){x.speech=Math.max(1.8,x.text.split(' ').length/2.6);x.pcm=null}
@@ -240,6 +284,6 @@ async function go(fresh){
   busy=false;lock(false)}
 $('#go').onclick=()=>{unlock();go(true)};$('#reb').onclick=()=>{unlock();go(false)};
 
-$('#dlp').onclick=()=>{const s=S,t=`FACT ENGINE package: ${s.topic}\n\nTITLE IDEAS\n${s.titles.map((x,i)=>`${i+1}. ${x}`).join('\n')}\n\nDESCRIPTION\n${s.description}\n\n${s.hashtags.join(' ')}\n\nTHUMBNAIL CONCEPT\n${s.thumbnail}\n\nSCRIPT\n${s.sents.map(x=>x.text).join(' ')}\n\nSOURCES\n${s.sources.map(x=>`${x.title} - ${x.url} (${x.license})`).join('\n')||'Own script'}\n\nIMAGE CREDITS (add to your description)\n${s.sents.map((x,i)=>{const a=x.cands[x.sel];return a?`Line ${i+1}: ${a.provider} / ${a.credit} - ${a.page||'local file'} (${a.license})`:`Line ${i+1}: gradient`}).join('\n')}\n\nMusic: ${MU.buf&&$('#music').value!=='none'?MU.credit:'none'}\nNarration: ${s.engine==='none'?'none (captions only)':s.engine==='basic'?'basic eSpeak-based voice (meSpeak, GPL-3.0), generated in your browser':'AI voice via the free Puter.js TTS API (no key, no account), '+(s.engine.startsWith('oa:')?'OpenAI engine':'Amazon Polly neural engine')}\n`;
+$('#dlp').onclick=()=>{const s=S,t=`FACT ENGINE package: ${s.topic}\n\nTITLE IDEAS\n${s.titles.map((x,i)=>`${i+1}. ${x}`).join('\n')}\n\nDESCRIPTION\n${s.description}\n\n${s.hashtags.join(' ')}\n\nTHUMBNAIL CONCEPT\n${s.thumbnail}\n\nSCRIPT\n${s.sents.map(x=>x.text).join(' ')}\n\nSOURCES\n${s.sources.map(x=>`${x.title} - ${x.url} (${x.license})`).join('\n')||'Own script'}\n\nIMAGE CREDITS (add to your description)\n${s.sents.map((x,i)=>{const a=x.cands[x.sel];return a?`Line ${i+1}: ${a.provider} / ${a.credit} - ${a.page||'local file'} (${a.license})`:`Line ${i+1}: gradient`}).join('\n')}\n\nMusic: ${MU.buf&&$('#music').value!=='none'?MU.credit:'none'}\nNarration: ${s.engine==='none'?'none (captions only)':s.engine==='basic'?'basic eSpeak-based voice (meSpeak, GPL-3.0), generated in your browser':'Microsoft Edge neural voice ('+s.engine+'), free and unlimited via the public Edge Read Aloud service, no API key'}\n`;
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'}));a.download='fact-engine-package.txt';a.click()};
 </script></body></html>
