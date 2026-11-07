@@ -129,20 +129,39 @@ function readEdits(){document.querySelectorAll('[data-text]').forEach(el=>{const
 async function loadMeSpeak(){
  if(voiceEngine)return voiceEngine;
  message('Loading the free voice engine…');
+ const root='https://cdn.jsdelivr.net/gh/btopro/mespeak@master/';
  if(!window.meSpeak){
-  await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/mespeak@2.0.2/src/mespeak.js';s.onload=resolve;s.onerror=()=>reject(Error('Could not load the voice library from jsDelivr. Check your internet connection.'));document.head.appendChild(s)});
+  await new Promise((resolve,reject)=>{
+   const s=document.createElement('script');
+   s.src=root+'mespeak.full.js';
+   s.async=true;
+   s.onload=()=>window.meSpeak?resolve():reject(Error('The voice script loaded, but did not expose the meSpeak engine.'));
+   s.onerror=()=>reject(Error('Could not load the voice engine. Check your connection, then reload the page.'));
+   document.head.appendChild(s);
+  });
  }
- const root='https://cdn.jsdelivr.net/npm/mespeak@2.0.2/';
- const get=async path=>{const r=await fetch(root+path);if(!r.ok)throw Error('Could not download voice data ('+r.status+').');return r.json()};
- const [cfg,voice]=await Promise.all([get('src/mespeak_config.json'),get('voices/en/en-us.json')]);
- const ok=(fn)=>new Promise((resolve,reject)=>{let settled=false;const done=v=>{if(settled)return;settled=true;v===false?reject(Error('Voice setup failed.')):resolve()};try{const result=fn(done);if(result===true)done(true)}catch(e){reject(e)}});
+ const get=async path=>{
+  const r=await fetch(root+path,{cache:'force-cache'});
+  if(!r.ok)throw Error('Could not download voice data ('+r.status+'): '+path);
+  return r.json();
+ };
+ const [cfg,voice]=await Promise.all([
+  get('mespeak_config.json'),
+  get('voices/en/en-us.json')
+ ]);
+ const ok=(fn)=>new Promise((resolve,reject)=>{
+  let settled=false;
+  const done=v=>{if(settled)return;settled=true;v===false?reject(Error('meSpeak rejected its configuration or voice data.')):resolve()};
+  try{const result=fn(done);if(result===true)done(true)}catch(e){reject(e)}
+ });
  await ok(cb=>window.meSpeak.loadConfig(cfg,cb));
  await ok(cb=>window.meSpeak.loadVoice(voice,cb));
- voiceEngine=window.meSpeak;return voiceEngine;
+ voiceEngine=window.meSpeak;
+ return voiceEngine;
 }
 async function synth(text){
  const engine=await loadMeSpeak();
- const raw=engine.speak(text,{rawdata:true,voice:$('#voice').value==='en'?'en':'en/en-us'});
+ const raw=engine.speak(text,{rawdata:true,voice:'en/en-us'});
  if(!raw)throw Error('The voice engine returned no audio.');
  const ab=raw instanceof ArrayBuffer?raw:raw.buffer.slice(raw.byteOffset,raw.byteOffset+raw.byteLength);
  const decoded=await context().decodeAudioData(ab.slice(0));
