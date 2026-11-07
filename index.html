@@ -1,60 +1,173 @@
-<html>
-<!DOCTYPE html>
-<html lang="cs">
-<head>
-  <meta charset="UTF-8">
-  <title>Hlavní Stránka</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      color: #333;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background-color: #333;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-    main {
-      padding: 20px;
-      max-width: 800px;
-      margin: auto;
-      background: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h1, h2 {
-      color: #444;
-    }
-    ul {
-      padding-left: 20px;
-    }
-    footer {
-      text-align: center;
-      padding: 10px;
-      background: #eee;
-      margin-top: 30px;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>HLAVNÍ STRÁNKA</h1>
-  </header>
-  <main>
-    <h2>O mně</h2>
-    <p>Jsem 3D grafik a vášnivý modelář v oblasti RC letadel.</p>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FACT ENGINE</title>
+<style>
+:root{--bg:#121220;--panel:#1b1b30;--line:#2e2e4c;--tx:#eceaf8;--mut:#9b99ba;--ac:#7c8cff;--sig:#ffcf5c;--bad:#ff7a8a;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 "Avenir Next","Segoe UI",system-ui,sans-serif}
+main{max-width:760px;margin:0 auto;padding:max(20px,env(safe-area-inset-top)) 16px 64px;display:grid;gap:16px}
+h1{font-size:30px;letter-spacing:.06em;margin:8px 0 0;font-weight:800}h2{font-size:18px;margin:0 0 10px}h3{font-size:15px;margin:14px 0 4px}
+.sub,.mut,small{color:var(--mut)}.sub{margin:0}.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+input,select,textarea{width:100%;color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit;background:#161628}
+input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+textarea{resize:vertical}label{display:block;font-size:14px;color:var(--mut);margin-top:10px}label>*{margin-top:4px}
+button,.btn{background:var(--ac);color:#0d0d1c;border:0;border-radius:10px;padding:12px 16px;font:inherit;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;text-align:center}
+button.ghost,.btn.ghost{background:transparent;color:var(--tx);border:1px solid var(--line);font-weight:600}button:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>input{flex:1 1 200px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#go{width:100%;margin-top:14px;font-size:17px;padding:14px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.chips button{background:#161628;color:var(--tx);border:1px solid var(--line);font-weight:500;font-size:14px;padding:8px 12px}
+.note{border-color:var(--sig)}.note p{margin:4px 0;font-size:14px}#err{color:var(--bad);font-weight:600}
+#bar{height:8px;background:#161628;border-radius:8px;overflow:hidden;margin:8px 0}#bar i{display:block;height:100%;width:0;background:var(--sig);transition:width .4s}
+.ln{border-top:1px solid var(--line);padding:10px 0}.ln:first-child{border:0}.ln input{padding:8px 10px;font-size:14px}
+.strip{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px}.fr{flex:0 0 156px;scroll-snap-align:start;font-size:12px}
+.im{aspect-ratio:9/16;background:linear-gradient(160deg,#2a2a52,#121220) center/cover;border-radius:12px;border:1px solid var(--line);display:grid;place-items:center;color:var(--mut);text-align:center;padding:8px}
+.fr a{color:var(--ac)}.fr p{margin:4px 0}.fr button,.fr .btn{padding:6px 10px;font-size:12px;margin:0 4px 4px 0}
+video{width:min(100%,360px);aspect-ratio:9/16;background:#000;border-radius:14px;display:block;margin:0 auto 12px}audio{width:100%}
+a{color:var(--ac)}ul,ol{padding-left:20px;margin:4px 0}[hidden]{display:none!important}@media(max-width:480px){.grid2{grid-template-columns:1fr}}
+</style></head><body><main>
+<header><h1>FACT ENGINE</h1><p class="sub">Runs entirely in your browser. No account, no API keys, no server.</p></header>
+<section class="card note"><h2>Read this first</h2>
+<p>Script: built from the intro of a Wikipedia article (CC BY-SA, credited below), or from a script you paste. There is no AI writer without a key, so it is extractive, not original. Edit any line.</p>
+<p>Voice: free AI voice (Kokoro) runs on your device. First use downloads about 90 MB, then it is cached. Slow on old phones.</p>
+<p>Images: Wikimedia Commons only (free licenses, credited). No stock video without keys. You can add your own image per line.</p>
+<p>Video: recorded live in your browser, so it takes as long as the video and the tab must stay open and visible. Output is MP4 where your browser supports it, otherwise WebM.</p></section>
+<section class="card">
+  <label style="margin:0">Topic<div class="row"><input id="topic" placeholder="e.g. Octopus" maxlength="120"><button id="sug" class="ghost" type="button">Suggest topics</button></div></label>
+  <div id="chips" class="chips"></div>
+  <label>Or paste your own script (optional, you are responsible for its accuracy)<textarea id="own" rows="3"></textarea></label>
+  <div class="grid2"><label>Voice<select id="voice"><option value="af_heart">Heart (US, female)</option><option value="af_bella">Bella (US, female)</option><option value="am_michael">Michael (US, male)</option><option value="bf_emma">Emma (UK, female)</option><option value="bm_george">George (UK, male)</option><option value="none">No voice (captions only)</option></select></label>
+  <label>Background music<select id="music"><option value="1">Ambient (generated, license-free)</option><option value="0">None</option></select></label>
+  <label>Quality<select id="res"><option value="720">720x1280 (faster)</option><option value="1080">1080x1920 (heavier)</option></select></label></div>
+  <button id="go" type="button">Generate Short</button>
+</section>
+<section id="prog" class="card" hidden><b id="stepname">Starting</b><div id="bar"><i></i></div><div id="err" role="alert" hidden></div></section>
+<section id="out" hidden>
+ <div class="card"><h2>Script</h2><p class="mut">Edit any line or its image search words, then press Rebuild.</p><div id="lines"></div><h3>Sources</h3><ul id="srcs"></ul></div>
+ <div class="card"><h2>Voiceover</h2><audio id="aud" controls></audio><p><a id="dla" class="btn ghost" download="narration.wav">Download audio (WAV)</a></p></div>
+ <div class="card"><h2>Storyboard</h2><div id="story" class="strip"></div><p class="mut">Swap or upload, then press Rebuild.</p></div>
+ <div class="card"><h2>Final video</h2><video id="vid" controls playsinline></video><div class="row" style="justify-content:center"><a id="dlv" class="btn" download>Download video</a><button id="reb" class="ghost" type="button">Rebuild with my edits</button></div><p id="fmt" class="mut" style="text-align:center"></p></div>
+ <div class="card"><h2>YouTube package</h2><div id="pkg"></div><button id="dlp" class="ghost" type="button" style="margin-top:12px">Download package (.txt)</button></div>
+</section></main>
+<canvas id="cv" hidden></canvas>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const TOPICS=['Octopus','Aurora','Placebo','Black hole','Photosynthesis','Great Pyramid of Giza','Bioluminescence','Antikythera mechanism','Dunning–Kruger effect','Tardigrade','Lightning','Rosetta Stone','Mirage','Sleep paralysis','Northern lights','Transistor','Coral reef','Baader–Meinhof phenomenon','Mount Vesuvius','Echolocation','Pareidolia','Plate tectonics','GPS','Honey'];
+const STOP=/^(because|however|between|through|during|another|several|including|usually|against|without|around|called|within|their|which)$/i;
+let S=null,busy=false,tts=null;const vcache=new Map(),qcache=new Map();
+const bar=(p,t)=>{$('#bar i').style.width=p+'%';if(t)$('#stepname').textContent=t};
+const lock=b=>{$('#go').disabled=$('#reb').disabled=b};
+const split=t=>(t.replace(/\s+/g,' ').trim().match(/[^.!?]+[.!?]+(?:\s|$)/g)||[t]).map(s=>s.trim()).filter(Boolean);
+$('#sug').onclick=()=>{$('#chips').innerHTML=[...TOPICS].sort(()=>Math.random()-.5).slice(0,6).map(t=>`<button type="button">${esc(t)}</button>`).join('');$('#chips').querySelectorAll('button').forEach(b=>b.onclick=()=>$('#topic').value=b.textContent)};
 
-    <h2>Projekty</h2>
-    <ul>
-      <li><strong>SPACE SHUTLE Z XPS:</strong> space shutle: 2x servo 9g 180 stupňů, motor s regulátorem, příjmač a baterie (XPS)</li>
-      <li><strong>Web vizitka:</strong> jednoduchý web o RC létání</li>
-    </ul>
-  </main>
-  <footer>
-    &copy; 2025 Parizek3DXD
-  </footer>
-</body>
-</html>
+async function buildScript(topic,own){
+  const j=async p=>{const r=await fetch('https://en.wikipedia.org/w/api.php?format=json&origin=*&action=query&'+p);if(!r.ok)throw new Error('Wikipedia request failed ('+r.status+')');return r.json()};
+  let page=null;
+  if(topic){const s=await j('list=search&srlimit=1&srsearch='+encodeURIComponent(topic)),id=s.query.search[0]?.pageid;
+    if(id){const p=(await j('prop=extracts&exintro=1&explaintext=1&exchars=3000&pageids='+id)).query.pages[id];page={title:p.title,url:'https://en.wikipedia.org/?curid='+id,text:p.extract||''}}}
+  if(!page&&!own)throw new Error('No Wikipedia article found for that topic. Try a more specific topic or paste your own script.');
+  const title=page?page.title:(topic||own.split(' ').slice(0,3).join(' '));let lines;
+  if(own)lines=split(own);else{
+    const body=split(page.text.replace(/\s*\([^)]*\)/g,'')).filter(s=>s.length>=40&&s.length<=230);
+    lines=[`Here's a quick, fascinating look at ${title}.`];let w=lines[0].split(' ').length;
+    for(const s of body){const n=s.split(' ').length;if(lines.length>=8||w+n>100)break;lines.push(s);w+=n}
+    lines.push("That's the short version, and there's plenty more to discover.")}
+  const T=title,tag=T.replace(/[^A-Za-z0-9]/g,'');
+  return{topic:topic||title,title,page,own:!!own,sources:page&&!own?[{title:page.title,url:page.url,license:'Wikipedia text, CC BY-SA 4.0'}]:[],
+    sents:lines.map((t,i)=>{const kw=(t.match(/[A-Za-z]{6,}/g)||[]).filter(w=>!STOP.test(w)).sort((a,b)=>b.length-a.length)[0];return{text:t,q:i&&i<lines.length-1&&kw?`${title} ${kw}`:title}}),
+    titles:[`${T} in 40 seconds`,`${T}: the quick version`,`Quick facts: ${T}`,`${T} explained fast`,`What is ${T}?`],
+    description:`${lines[1]||lines[0]}\n\nText adapted from Wikipedia (CC BY-SA 4.0). Image credits are listed in the video description package.`,
+    hashtags:['#Shorts','#Facts','#DidYouKnow','#LearnOnYouTube',tag&&'#'+tag].filter(Boolean),
+    thumbnail:`Use the strongest image from the storyboard, full-bleed and slightly darkened. Add 2-3 huge words ("${T}") in white with an amber highlight on one word, placed in the middle third so phone UI does not cover it.`};
+}
+function renderScript(){
+  $('#lines').innerHTML=S.sents.map((x,i)=>`<div class="ln"><textarea rows="2" data-t="${i}">${esc(x.text)}</textarea><label>Image search words<input data-q="${i}" value="${esc(x.q)}"></label></div>`).join('');
+  $('#srcs').innerHTML=S.sources.map(x=>`<li><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a> <small>${esc(x.license)}</small></li>`).join('')||'<li class="mut">Your own script (no sources attached)</li>';
+  $('#pkg').innerHTML=`<h3>Title ideas</h3><ol>${S.titles.map(t=>`<li>${esc(t)}</li>`).join('')}</ol><h3>Description</h3><p>${esc(S.description).replace(/\n/g,'<br>')}</p><p class="mut">${esc(S.hashtags.join(' '))}</p><h3>Thumbnail concept</h3><p>${esc(S.thumbnail)}</p>`}
+function readEdits(){document.querySelectorAll('[data-t]').forEach(t=>{const i=+t.dataset.t,q=document.querySelector(`[data-q="${i}"]`).value.trim()||S.title,x=S.sents[i];x.text=t.value.trim()||x.text;if(q!==x.q){x.q=q;x.cands=null}})}
+
+async function loadTTS(){
+  if(tts)return tts;let err;
+  for(const u of['https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/+esm','https://esm.sh/kokoro-js@1.2.1']){
+    try{const{KokoroTTS}=await import(u);tts=await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX',{dtype:'q8',device:'wasm',progress_callback:p=>{if(p.status==='progress')bar(10+25*(p.progress||0)/100,`Downloading voice model ${Math.round(p.progress||0)}% (first time only)`)}});return tts}catch(e){err=e}}
+  throw new Error('Could not load the in-browser voice (needs internet; ~90 MB first time). Choose "No voice" to continue without narration. Details: '+(err&&err.message||err))}
+async function voice(){
+  const v=$('#voice').value;let at=0,sr=24000;
+  for(const[i,x]of S.sents.entries()){
+    if(v==='none'){x.speech=Math.max(1.8,x.text.split(' ').length/2.6);x.pcm=null}
+    else{bar(10+25*i/S.sents.length,`Recording narration ${i+1}/${S.sents.length}`);const k=v+'|'+x.text;
+      if(!vcache.has(k)){const t=await loadTTS(),a=await t.generate(x.text,{voice:v});vcache.set(k,{pcm:a.audio,sr:a.sampling_rate})}
+      const c=vcache.get(k);x.pcm=c.pcm;sr=c.sr;x.speech=c.pcm.length/c.sr}
+    x.dur=x.speech+.3;x.t0=at;at+=x.dur}
+  S.total=at;S.sr=sr;S.hasVoice=v!=='none';
+  if(S.hasVoice){S.pcm=new Float32Array(Math.round(at*sr));S.sents.forEach(x=>S.pcm.set(x.pcm,Math.round(x.t0*sr)));
+    const w=wav(S.pcm,sr);$('#aud').src=$('#dla').href=URL.createObjectURL(w)}else{$('#aud').removeAttribute('src');$('#dla').removeAttribute('href')}
+  S.caps=[];S.sents.forEach(x=>{const ws=x.text.split(/\s+/).filter(Boolean),l=ws.map(w=>w.length+2),tot=l.reduce((a,b)=>a+b,0);let c=x.t0;
+    const words=ws.map((w,k)=>{const d=x.speech*l[k]/tot,o={w,s:c,e:c+d};c+=d;return o});
+    for(let k=0;k<words.length;k+=3)S.caps.push({s:words[k].s,e:k+3>=words.length?x.t0+x.dur:words[k+3].s,w:words.slice(k,k+3)})})}
+function wav(f,sr){const b=new ArrayBuffer(44+f.length*2),v=new DataView(b),w=(o,s)=>[...s].forEach((c,i)=>v.setUint8(o+i,c.charCodeAt(0)));
+  w(0,'RIFF');v.setUint32(4,36+f.length*2,true);w(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,f.length*2,true);
+  for(let i=0;i<f.length;i++)v.setInt16(44+i*2,Math.max(-1,Math.min(1,f[i]))*32767,true);return new Blob([b],{type:'audio/wav'})}
+
+async function commons(q){
+  if(qcache.has(q))return qcache.get(q);
+  const r=await fetch('https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=15&prop=imageinfo&iiprop=url|size|mime|extmetadata&iiurlwidth=1920&gsrsearch='+encodeURIComponent(q+' filetype:bitmap'));
+  if(!r.ok)throw new Error('Wikimedia Commons search failed ('+r.status+')');
+  const out=Object.values((await r.json()).query?.pages||{}).sort((a,b)=>a.index-b.index).map(p=>{const i=p.imageinfo?.[0],m=i?.extmetadata||{},lic=m.LicenseShortName?.value||'';
+    if(!i||!/^image\/(jpeg|png)$/.test(i.mime)||i.width<1000||i.height<700||!/^(cc[ -]?(by|0)|public domain|pd)/i.test(lic)||m.NonFree?.value==='true')return null;
+    return{thumb:i.thumburl||i.url,credit:new DOMParser().parseFromString(m.Artist?.value||'','text/html').body.textContent.trim().slice(0,80)||'Unknown author',license:lic,page:i.descriptionurl,provider:'Wikimedia Commons'}}).filter(Boolean);
+  qcache.set(q,out);return out}
+async function visuals(){const used=new Set(),n=S.sents.length;
+  for(const[i,x]of S.sents.entries()){bar(35+25*i/n,`Finding free images ${i+1}/${n}`);
+    if(!x.cands){let c=await commons(x.q);if(!c.length&&x.q!==S.title)c=await commons(S.title);x.cands=c.slice();x.sel=Math.max(0,c.findIndex(a=>!used.has(a.thumb)))}
+    const a=x.cands[x.sel];if(a)used.add(a.thumb)}}
+function renderStory(){
+  $('#story').innerHTML=S.sents.map((x,i)=>{const a=x.cands[x.sel];return`<div class="fr"><div class="im" ${a?`style="background-image:url('${esc(a.thumb)}')"`:''}>${a?'':'No free image found'}</div><p>${a?`<a href="${esc(a.page||'#')}" target="_blank" rel="noopener">${esc(a.provider)}: ${esc(a.credit)}</a><br><small>${esc(a.license)}</small>`:'<small>Gradient background</small>'}</p>${x.cands.length>1?`<button class="ghost" type="button" data-s="${i}">Swap</button>`:''}<label class="btn ghost" style="margin:0">My image<input type="file" accept="image/*" hidden data-f="${i}"></label></div>`}).join('');
+  $('#story').querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{const x=S.sents[+b.dataset.s];x.sel=(x.sel+1)%x.cands.length;renderStory()});
+  $('#story').querySelectorAll('[data-f]').forEach(f=>f.onchange=()=>{if(!f.files[0])return;const x=S.sents[+f.dataset.f],u=URL.createObjectURL(f.files[0]);x.cands.unshift({thumb:u,credit:'You',license:'Your own file',provider:'Local file',page:'',own:true});x.sel=0;renderStory()})}
+const loadImg=u=>new Promise(r=>{const i=new Image();i.crossOrigin='anonymous';i.onload=()=>r(i);i.onerror=()=>r(null);i.src=u});
+
+async function record(){
+  if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream)throw new Error('This browser cannot record video from a canvas. Try recent Chrome, Edge, Firefox or Safari.');
+  bar(60,'Loading images');
+  for(const x of S.sents){const a=x.cands[x.sel];x.img=a?(a.img||(a.img=await loadImg(a.thumb))):null}
+  const R=+$('#res').value,W=R,H=Math.round(R*16/9),cv=$('#cv'),ctx=cv.getContext('2d');cv.width=W;cv.height=H;
+  const mime=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(m=>MediaRecorder.isTypeSupported(m));
+  if(!mime)throw new Error('No supported video recording format in this browser.');
+  const ac=new(window.AudioContext||window.webkitAudioContext)(),dest=ac.createMediaStreamDestination();
+  if(S.hasVoice){const b=ac.createBuffer(1,S.pcm.length,S.sr);b.copyToChannel(S.pcm,0);S.src=ac.createBufferSource();S.src.buffer=b;S.src.connect(dest)}
+  if($('#music').value==='1'){const g=ac.createGain(),lp=ac.createBiquadFilter(),lfo=ac.createOscillator(),lg=ac.createGain();g.gain.value=.025;lp.type='lowpass';lp.frequency.value=700;lfo.frequency.value=.2;lg.gain.value=.015;lfo.connect(lg);lg.connect(g.gain);lfo.start();
+    [110,164.81,220,277.18].forEach(f=>{const o=ac.createOscillator();o.frequency.value=f;o.connect(lp);o.start()});lp.connect(g);g.connect(dest)}
+  const cover=(img,z,pan)=>{const s=Math.max(W/img.width,H/img.height)*z,dw=img.width*s,dh=img.height*s;ctx.drawImage(img,(W-dw)/2+pan*(dw-W)/2,(H-dh)/2,dw,dh)};
+  const scene=(x,f,a,i)=>{ctx.globalAlpha=a;if(x.img)cover(x.img,1+.1*f,(i%2?1:-1)*(f-.5)*.8);else{const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'#2a2a52');g.addColorStop(1,'#121220');ctx.fillStyle=g;ctx.fillRect(0,0,W,H)}ctx.fillStyle='rgba(0,0,0,.28)';ctx.fillRect(0,0,W,H);ctx.globalAlpha=1};
+  const frame=t=>{let i=S.sents.findIndex(x=>t<x.t0+x.dur);if(i<0)i=S.sents.length-1;const x=S.sents[i],l=Math.max(0,t-x.t0);
+    ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+    if(i>0&&l<.3){scene(S.sents[i-1],1,1,i-1);scene(x,l/x.dur,l/.3,i)}else scene(x,l/x.dur,1,i);
+    const c=S.caps.find(c=>t>=c.s&&t<c.e);if(!c)return;
+    const fs=W*.088;ctx.font=`900 ${fs}px "Arial Black",Impact,system-ui,sans-serif`;ctx.textBaseline='middle';ctx.textAlign='left';ctx.lineJoin='round';ctx.lineWidth=fs*.2;
+    const sp=ctx.measureText(' ').width,ws=c.w.map(o=>({o,t:o.w.toUpperCase()}));ws.forEach(a=>a.m=ctx.measureText(a.t).width);
+    const rows=[[]];let rw=0;ws.forEach(a=>{if(rw+a.m>W*.86&&rows[rows.length-1].length){rows.push([]);rw=0}rows[rows.length-1].push(a);rw+=a.m+sp});
+    const lh=fs*1.25,cy=H*.66,pop=1+.14*Math.max(0,1-(t-c.s)/.18);
+    ctx.save();ctx.translate(W/2,cy);ctx.scale(pop,pop);ctx.translate(-W/2,-cy);
+    rows.forEach((r,k)=>{const tw=r.reduce((s,a)=>s+a.m+sp,0)-sp,y=cy-(rows.length-1)*lh/2+k*lh;let px=(W-tw)/2;r.forEach(a=>{ctx.strokeStyle='#000';ctx.strokeText(a.t,px,y);ctx.fillStyle=t>=a.o.s&&t<a.o.e?'#ffcf5c':'#fff';ctx.fillText(a.t,px,y);px+=a.m+sp})});ctx.restore()};
+  frame(0);
+  const rec=new MediaRecorder(new MediaStream([...cv.captureStream(30).getVideoTracks(),...dest.stream.getAudioTracks()]),{mimeType:mime,videoBitsPerSecond:R>720?8e6:5e6}),chunks=[];
+  rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);
+  const done=new Promise(r=>rec.onstop=r);
+  await ac.resume();const t0=ac.currentTime+.3;if(S.src)S.src.start(t0);rec.start();
+  await new Promise(res=>{const tick=()=>{const t=Math.max(0,ac.currentTime-t0);frame(Math.min(t,S.total-.001));bar(60+40*Math.min(1,t/S.total),`Recording video ${Math.round(Math.min(1,t/S.total)*100)}% (keep this tab open)`);t>S.total+.3?res():requestAnimationFrame(tick)};tick()});
+  rec.stop();await done;ac.close();
+  const ext=mime.startsWith('video/mp4')?'mp4':'webm',url=URL.createObjectURL(new Blob(chunks,{type:mime.split(';')[0]}));
+  $('#vid').src=url;$('#dlv').href=url;$('#dlv').download='fact-engine-short.'+ext;$('#dlv').textContent='Download '+ext.toUpperCase();
+  $('#fmt').textContent=ext==='mp4'?'MP4 recorded by your browser.':'Your browser records WebM, which YouTube accepts. For MP4, use Safari or a recent Chrome, or convert it free in a converter of your choice.';
+  bar(100,'Done')}
+
+async function go(fresh){
+  if(busy)return;busy=true;lock(true);$('#err').hidden=true;$('#prog').hidden=false;
+  try{
+    if(fresh){const topic=$('#topic').value.trim(),own=$('#own').value.trim();if(!topic&&!own){$('#topic').focus();throw new Error('Enter a topic or paste a script.')}
+      bar(3,'Reading Wikipedia');S=await buildScript(topic,own);$('#out').hidden=false;$('#vid').removeAttribute('src');renderScript()}
+    else readEdits();
+    await voice();await visuals();renderStory();await record()
+  }catch(e){const x=$('#err');x.textContent=e.message;x.hidden=false;$('#stepname').textContent='Stopped'}
+  busy=false;lock(false)}
+$('#go').onclick=()=>go(true);$('#reb').onclick=()=>go(false);
+$('#dlp').onclick=()=>{const s=S,t=`FACT ENGINE package: ${s.topic}\n\nTITLE IDEAS\n${s.titles.map((x,i)=>`${i+1}. ${x}`).join('\n')}\n\nDESCRIPTION\n${s.description}\n\n${s.hashtags.join(' ')}\n\nTHUMBNAIL CONCEPT\n${s.thumbnail}\n\nSCRIPT\n${s.sents.map(x=>x.text).join(' ')}\n\nSOURCES\n${s.sources.map(x=>`${x.title} - ${x.url} (${x.license})`).join('\n')||'Own script'}\n\nIMAGE CREDITS (add to your description)\n${s.sents.map((x,i)=>{const a=x.cands[x.sel];return a?`Line ${i+1}: ${a.provider} / ${a.credit} - ${a.page||'local file'} (${a.license})`:`Line ${i+1}: gradient`}).join('\n')}\n\nMusic: ${$('#music').value==='1'?'generated ambient pad (original, no license needed)':'none'}\nNarration: Kokoro-82M AI voice (Apache-2.0), generated in your browser\n`;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'}));a.download='fact-engine-package.txt';a.click()};
+</script></body></html>
