@@ -11,16 +11,15 @@
 :root{--bg:#f2f5fa;--ink:#101828;--mute:#667085;--acc:#2158d6;--red:#e5383b;--ok:#12b76a;--line:#e4e9f2;--ease:cubic-bezier(.2,.8,.2,1);--sh:0 10px 30px rgba(16,24,40,.13)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;margin:0;overflow:hidden;font:500 16px/1.45 Nunito,system-ui,sans-serif;color:var(--ink);background:var(--bg)}
-.screen{position:fixed;inset:0;opacity:0;visibility:hidden;transform:scale(1.02);transition:opacity .5s,transform .7s var(--ease),visibility 0s .5s}
+.screen{position:fixed;top:0;left:0;width:100%;height:100%;height:100dvh;opacity:0;visibility:hidden;transform:scale(1.02);transition:opacity .5s,transform .7s var(--ease),visibility 0s .5s}
 .screen.on{opacity:1;visibility:visible;transform:none;transition-delay:0s}
 .bgd{background:var(--bg)}
 button{font:800 16px/1 Nunito,system-ui,sans-serif;border:0;border-radius:999px;padding:14px 22px;cursor:pointer;color:#fff;background:var(--acc);transition:transform .25s var(--ease),box-shadow .25s,background .25s}
-button:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 20px rgba(33,88,214,.3)}
+@media (hover:hover){button:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 20px rgba(33,88,214,.3)}button.ghost:hover:not(:disabled){box-shadow:0 0 0 1px var(--line),0 8px 20px rgba(16,24,40,.12)}.rounds button:hover:not(:disabled){box-shadow:none;transform:none}}
 button:active:not(:disabled){transform:scale(.97)}
-button:disabled{background:#cfd6e4;cursor:not-allowed}
+button:disabled{background:#e4e9f2;color:var(--mute);cursor:not-allowed}
 button:focus-visible,input:focus-visible{outline:3px solid #9db8f5;outline-offset:2px}
 button.ghost{background:#fff;color:var(--ink);box-shadow:0 0 0 1px var(--line),0 2px 6px rgba(16,24,40,.06)}
-button.ghost:hover:not(:disabled){box-shadow:0 0 0 1px var(--line),0 8px 20px rgba(16,24,40,.12)}
 button.ghost.on{background:var(--acc);color:#fff;box-shadow:none}
 .sm{padding:9px 16px;font-size:15px}
 #home,#end{display:flex;align-items:center;justify-content:center;text-align:center;padding:20px}
@@ -39,7 +38,7 @@ h1{font-size:clamp(46px,13vw,68px);line-height:1;margin:0;font-weight:800;letter
 .mode small{display:block;margin-top:4px;font:500 15px/1.35 Nunito,sans-serif;opacity:.8}
 .rounds{margin-top:22px;display:inline-flex;gap:4px;padding:4px;background:#fff;border-radius:999px;box-shadow:0 0 0 1px var(--line);align-items:center;font-size:14px;color:var(--mute)}
 .rounds span{padding:0 8px 0 14px}
-.rounds button,.rounds button:hover:not(:disabled){background:transparent;color:var(--ink);box-shadow:none;transform:none}
+.rounds button{background:transparent;color:var(--ink);box-shadow:none}
 .rounds button.on{background:var(--acc);color:#fff}
 .credit{position:absolute;left:0;right:0;bottom:max(16px,env(safe-area-inset-bottom));font:700 14px Nunito,sans-serif;color:var(--mute)}
 #pickmap,#map{position:absolute;inset:0}
@@ -66,15 +65,27 @@ h1{font-size:clamp(46px,13vw,68px);line-height:1;margin:0;font-weight:800;letter
 .chip{background:rgba(255,255,255,.93);backdrop-filter:blur(10px);border-radius:999px;padding:9px 16px;font-size:15px;font-weight:700;line-height:1.2;box-shadow:var(--sh)}
 .chip b{color:var(--acc);font-weight:800}
 .chip.by{font-size:13px;color:var(--mute);padding:6px 12px}
-#mini{position:absolute;right:10px;bottom:max(10px,env(safe-area-inset-bottom));width:min(320px,calc(100vw - 20px));z-index:600;transition:width .55s var(--ease)}
+#mini{position:absolute;right:10px;bottom:max(10px,env(safe-area-inset-bottom));width:min(340px,calc(100vw - 20px));z-index:600;display:flex;flex-direction:column;gap:8px;transition:width .55s var(--ease),transform .6s var(--ease),opacity .4s}
 #mini.big{width:min(760px,calc(100vw - 20px))}
-#mapwrap{height:180px;border:4px solid #fff;border-radius:28px;overflow:hidden;box-shadow:var(--sh);transition:height .55s var(--ease)}
-#mini.big #mapwrap{height:min(62vh,540px)}
-#mini.done #mapwrap{height:min(52vh,500px)}
-.row{display:flex;gap:6px;margin-top:8px}
-.row button{padding:12px 14px;font-size:15px}
-#guess{flex:1}
-#mini.done .row{display:none}
+#mini.hidden{transform:translateY(calc(100% + 40px));opacity:0;pointer-events:none}
+#mapwrap{height:clamp(140px,24vh,210px);border:4px solid #fff;border-radius:28px;overflow:hidden;box-shadow:var(--sh);transition:height .55s var(--ease)}
+#mini.big #mapwrap{height:min(56vh,520px)}
+#mini.done #mapwrap{height:min(50vh,480px)}
+.tools{display:flex;justify-content:space-between;gap:8px}
+.tools button{background:rgba(255,255,255,.96);box-shadow:var(--sh)}
+.tools svg,.icon svg,.fab svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px;margin-right:5px}
+#guess{width:100%;padding:17px;font-size:18px;box-shadow:var(--sh)}
+#guess:not(:disabled){animation:pulse 1.4s ease-out 1}
+@keyframes pulse{from{box-shadow:0 0 0 0 rgba(33,88,214,.55)}to{box-shadow:0 0 0 18px rgba(33,88,214,0)}}
+#mini.done .tools,#mini.done #guess{display:none}
+.fab{position:absolute;right:10px;bottom:max(10px,env(safe-area-inset-bottom));z-index:650;padding:15px 20px;box-shadow:var(--sh);opacity:0;pointer-events:none;transform:translateY(24px) scale(.8);transition:opacity .4s,transform .6s var(--ease)}
+.fab.on{opacity:1;pointer-events:auto;transform:none}
+button.icon,button.skip{box-shadow:var(--sh)}
+button.icon{width:42px;height:42px;padding:0;display:grid;place-items:center}
+button.icon svg{margin:0;width:20px;height:20px}
+button.skip{margin-left:auto}
+@media (max-width:600px){#mini,#mini.big{left:10px;right:10px;width:auto}}
+@media (max-width:420px){.chip{padding:8px 12px;font-size:14px}.hud{gap:6px}button.skip{padding:9px 13px;font-size:14px}}
 .res{position:absolute;top:calc(max(10px,env(safe-area-inset-top)) + 54px);left:0;right:0;margin:auto;z-index:700;background:#fff;border-radius:28px;padding:14px 20px 18px;width:min(340px,calc(100vw - 24px));text-align:center;box-shadow:var(--sh);transform:translateY(-230%);transition:transform .8s var(--ease)}
 .res.on{transform:none}
 .res small{font-size:13px;color:var(--mute);font-weight:700}.res p{margin:0 0 12px;font-size:16px;color:var(--mute)}
@@ -135,15 +146,17 @@ path.draw{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.1s var(--ease)
   <iframe id="pano" title="Panorama ulice" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
   <div class="cover on" id="cover"><div class="ld"><i></i><p>Hledám místo na silnici…</p></div></div>
   <div class="hud">
-    <button class="ghost sm" id="exit">Domů</button>
+    <button class="ghost icon" id="exit" aria-label="Domů"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
     <div class="chip">Kolo <b id="rn">1/5</b></div>
     <div class="chip">Skóre <b id="sc">0</b></div>
-    <div class="chip by">by Parizek3DXD</div>
+    <button class="ghost sm skip" id="skip" title="Pokud se nezobrazil žádný snímek">Bez snímku</button>
   </div>
   <div id="mini">
+    <div class="tools"><button class="ghost sm" id="hide"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>Skrýt mapu</button><button class="ghost sm" id="grow">Zvětšit</button></div>
     <div id="mapwrap"><div id="map"></div></div>
-    <div class="row"><button id="guess" disabled>Klikni do mapy</button><button class="ghost" id="skip" title="Pokud se nezobrazil žádný snímek">Bez snímku</button><button class="ghost" id="grow">Zvětšit</button></div>
+    <button id="guess" disabled>Klepni do mapy a vyber místo</button>
   </div>
+  <button class="fab" id="showmap"><svg viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg>Mapa</button>
   <div class="res" id="res"><small id="rt"></small><div class="pts" id="rp">0</div><p id="rd"></p><button id="next">Další kolo</button></div>
 </section>
 
@@ -304,8 +317,8 @@ function startGame(src){
 }
 function nextRound(){
   G.r++; G.lock = false; G.guess = null; G.ans = null;
-  $('rn').textContent = G.r + '/' + G.n;
-  $('guess').disabled = true; $('guess').textContent = 'Klikni do mapy';
+  $('rn').textContent = G.r + '/' + G.n; setHidden(false);
+  $('guess').disabled = true; $('guess').textContent = 'Klepni do mapy a vyber místo';
   G.lay.forEach(l => gm.removeLayer(l)); G.lay = [];
   if (G.gmk){ gm.removeLayer(G.gmk); G.gmk = null; }
   $('res').classList.remove('on'); $('mini').classList.remove('big', 'done'); $('grow').textContent = 'Zvětšit';
@@ -326,7 +339,7 @@ $('pano').onload = () => setTimeout(() => $('cover').classList.remove('on'), 400
 
 function submit(){
   if (!G.guess || !G.ans || G.lock) return;
-  G.lock = true;
+  G.lock = true; setHidden(false);
   const d = km(G.guess, G.ans), pts = Math.round(5000 * Math.exp(-d / G.sc)), a = L.latLng(G.ans.lat, G.ans.lng);
   G.total += pts; G.res.push({d, pts});
   $('guess').disabled = true;
@@ -362,6 +375,9 @@ $('again').onclick = () => startGame(G.src);
 $('guess').onclick = submit;
 $('next').onclick = () => G.r >= G.n ? finish() : nextRound();
 $('skip').onclick = () => { if (G && !G.lock){ G.ans = null; loadPlace(); } };
+function setHidden(h){ $('mini').classList.toggle('hidden', h); $('showmap').classList.toggle('on', h); if (!h && gm) setTimeout(() => gm.invalidateSize(), 620); }
+$('hide').onclick = () => setHidden(true);
+$('showmap').onclick = () => setHidden(false);
 $('grow').onclick = () => { const m = $('mini'); m.classList.toggle('big'); $('grow').textContent = m.classList.contains('big') ? 'Zmenšit' : 'Zvětšit'; setTimeout(() => gm.invalidateSize(), 600); };
 Q('#rounds button').forEach(b => b.onclick = () => { ROUNDS = +b.dataset.r; Q('#rounds button').forEach(x => x.classList.toggle('on', x === b)); });
 </script>
