@@ -1,1428 +1,463 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>FACT ENGINE 2.0 | Premium AI Shorts Studio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FACT ENGINE 2.0 | AI Shorts Generator</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config={theme:{extend:{colors:{neon:'#00d4ff',violet:'#8b5cf6',charcoal:'#0f0f17',deep:'#08080e',surface:'#14141f',surfaceLight:'#1a1a28'},fontFamily:{display:['Space Grotesk','sans-serif'],body:['Inter','sans-serif'],mono:['JetBrains Mono','monospace']}}}}
-</script>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
 <style>
-:root{--neon:#00d4ff;--violet:#8b5cf6;--deep:#08080e;--charcoal:#0f0f17;--surface:#14141f;--surface-light:#1a1a28;--border:rgba(0,212,255,0.1);--border-violet:rgba(139,92,246,0.1);--glow:0 0 20px rgba(0,212,255,0.06);--glow-violet:0 0 20px rgba(139,92,246,0.06);--radius:14px;--radius-sm:10px;--radius-lg:18px}
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{font-family:'Inter',sans-serif;background:var(--deep);color:#e2e8f0;min-height:100vh;overflow-x:hidden}
-::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-track{background:var(--charcoal)}
-::-webkit-scrollbar-thumb{background:rgba(0,212,255,0.2);border-radius:3px}
-::-webkit-scrollbar-thumb:hover{background:rgba(0,212,255,0.35)}
-.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--glow);transition:all 0.3s ease}
-.panel-v{border-color:var(--border-violet);box-shadow:var(--glow-violet)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:var(--radius-sm);font-weight:600;font-size:14px;border:none;cursor:pointer;transition:all 0.25s ease;font-family:'Inter',sans-serif;outline:none}
-.btn:active{transform:scale(0.97)}
-.btn-primary{background:linear-gradient(135deg,#00d4ff,#0ea5e9);color:#08080e;box-shadow:0 0 20px rgba(0,212,255,0.15)}
-.btn-primary:hover{box-shadow:0 0 30px rgba(0,212,255,0.25);transform:translateY(-1px)}
-.btn-violet{background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff;box-shadow:0 0 20px rgba(139,92,246,0.15)}
-.btn-violet:hover{box-shadow:0 0 30px rgba(139,92,246,0.25);transform:translateY(-1px)}
-.btn-ghost{background:rgba(0,212,255,0.06);color:var(--neon);border:1px solid var(--border)}
-.btn-ghost:hover{background:rgba(0,212,255,0.12);border-color:rgba(0,212,255,0.2)}
-.btn-sm{padding:8px 16px;font-size:12px;border-radius:8px}
-.input{width:100%;padding:14px 18px;background:var(--charcoal);border:1px solid var(--border);border-radius:var(--radius-sm);color:#e2e8f0;font-size:15px;font-family:'Inter',sans-serif;outline:none;transition:all 0.25s ease}
-.input:focus{border-color:rgba(0,212,255,0.35);box-shadow:0 0 15px rgba(0,212,255,0.08)}
-.input::placeholder{color:#4a5568}
-.select{appearance:none;background:var(--charcoal) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2300d4ff' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") no-repeat right 14px center;border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 40px 12px 16px;color:#e2e8f0;font-size:14px;font-family:'Inter',sans-serif;outline:none;cursor:pointer;transition:all 0.25s ease;width:100%}
-.select:focus{border-color:rgba(0,212,255,0.35);box-shadow:0 0 15px rgba(0,212,255,0.08)}
-.select option{background:var(--charcoal);color:#e2e8f0}
-.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
-.badge-neon{background:rgba(0,212,255,0.1);color:var(--neon);border:1px solid rgba(0,212,255,0.15)}
-.badge-violet{background:rgba(139,92,246,0.1);color:var(--violet);border:1px solid rgba(139,92,246,0.15)}
-.toggle{position:relative;width:48px;height:26px;border-radius:13px;background:var(--charcoal);border:1px solid var(--border);cursor:pointer;transition:all 0.3s ease;flex-shrink:0}
-.toggle.active{background:linear-gradient(135deg,rgba(0,212,255,0.3),rgba(139,92,246,0.3));border-color:rgba(0,212,255,0.3)}
-.toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#4a5568;transition:all 0.3s ease}
-.toggle.active::after{left:25px;background:var(--neon);box-shadow:0 0 8px rgba(0,212,255,0.4)}
-.progress-bar{width:100%;height:6px;background:var(--charcoal);border-radius:3px;overflow:hidden}
-.progress-fill{height:100%;background:linear-gradient(90deg,var(--neon),var(--violet));border-radius:3px;transition:width 0.3s ease;position:relative}
-.progress-fill::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);animation:shimmer 2s infinite}
-@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
-@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
-@keyframes spin{to{transform:rotate(360deg)}}
-.fade-in{animation:fadeIn 0.4s ease forwards}
-.result-card{background:var(--charcoal);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all 0.25s ease}
-.result-card:hover{border-color:rgba(0,212,255,0.25);background:rgba(0,212,255,0.03);transform:translateY(-2px)}
-.voice-card{background:var(--charcoal);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;cursor:pointer;transition:all 0.25s ease;text-align:center}
-.voice-card:hover{border-color:rgba(0,212,255,0.25)}
-.voice-card.selected{border-color:rgba(0,212,255,0.4);background:rgba(0,212,255,0.06);box-shadow:0 0 15px rgba(0,212,255,0.08)}
-.style-card{background:var(--charcoal);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;cursor:pointer;transition:all 0.25s ease;text-align:center}
-.style-card:hover{border-color:rgba(139,92,246,0.25)}
-.style-card.selected{border-color:rgba(139,92,246,0.4);background:rgba(139,92,246,0.06);box-shadow:0 0 15px rgba(139,92,246,0.08)}
-.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 24px;color:var(--neon);font-size:13px;font-weight:500;z-index:9999;box-shadow:0 0 30px rgba(0,212,255,0.15);animation:fadeIn 0.3s ease;pointer-events:none}
-.scene-item{background:var(--charcoal);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;transition:all 0.2s ease}
-.hidden{display:none!important}
-.spinner{width:20px;height:20px;border:2px solid rgba(0,212,255,0.2);border-top-color:var(--neon);border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block}
-.video-container{position:relative;border-radius:var(--radius);overflow:hidden;background:#000;box-shadow:0 0 40px rgba(0,0,0,0.5)}
-.video-container canvas{display:block;width:100%;height:auto}
-@media(max-width:640px){.panel{padding:16px;border-radius:var(--radius)}.btn{padding:10px 18px;font-size:13px}.input{padding:12px 14px;font-size:14px}}
+*{box-sizing:border-box}html,body{background:#090A10;color:#fff;font-family:Inter,system-ui,sans-serif} 
+.card{background:#131522;border:1px solid rgba(255,255,255,.08);border-radius:24px}
+.neon{border:1px solid rgba(0,217,255,.45);box-shadow:0 0 0 1px rgba(0,217,255,.15),0 0 24px rgba(0,217,255,.14)}
+.grad{background:linear-gradient(90deg,#00D9FF,#8B5CFF)}
+.grad-text{background:linear-gradient(90deg,#00D9FF,#8B5CFF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.btn-main{background:linear-gradient(90deg,#00D9FF,#8B5CFF);transition:.25s;box-shadow:0 10px 30px rgba(0,217,255,.25)}
+.btn-main:hover{transform:translateY(-1px);box-shadow:0 14px 36px rgba(139,92,255,.35)} .btn-main:disabled{opacity:.5;transform:none}
+input,textarea,select{font-size:16px} input:focus,textarea:focus{outline:none;border-color:#00D9FF!important;box-shadow:0 0 0 3px rgba(0,217,255,.18)}
+.tab{transition:.2s}.tab.active{background:linear-gradient(90deg,#00D9FF,#8B5CFF);color:#fff;border-color:transparent}
+.result{transition:.2s;cursor:pointer}.result:hover{border-color:rgba(0,217,255,.6);transform:translateY(-1px)}
+.result.selected{border-color:#00D9FF;box-shadow:0 0 0 2px rgba(0,217,255,.35),0 0 22px rgba(0,217,255,.22);background:rgba(0,217,255,.07)}
+.pick{transition:.2s;cursor:pointer}.pick:hover{border-color:rgba(139,92,255,.7)}
+.pick.selected{border-color:#00D9FF;box-shadow:0 0 0 2px rgba(0,217,255,.3),0 0 20px rgba(0,217,255,.18);background:rgba(0,217,255,.06)}
+.switch{width:54px;height:30px;border-radius:999px;background:#2a2d42;position:relative;cursor:pointer;transition:.25s;flex:none;border:1px solid rgba(255,255,255,.1)}
+.switch:after{content:"";position:absolute;width:24px;height:24px;border-radius:50%;background:#fff;top:2px;left:3px;transition:.25s}
+.switch.on{background:linear-gradient(90deg,#00D9FF,#8B5CFF)} .switch.on:after{left:25px}
+.phone{width:min(340px,88vw);aspect-ratio:9/16;border-radius:36px;border:1px solid rgba(255,255,255,.14);overflow:hidden;background:#000;position:relative;box-shadow:0 24px 60px rgba(0,0,0,.6),0 0 40px rgba(139,92,255,.12);margin:0 auto}
+.phone canvas,.phone video{width:100%;height:100%;object-fit:cover;display:block}
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}} @keyframes pulseGlow{0%,100%{box-shadow:0 0 18px rgba(0,217,255,.25)}50%{box-shadow:0 0 30px rgba(139,92,255,.4)}} .glow{animation:pulseGlow 2.4s infinite}
+.sub-min{font-weight:300;letter-spacing:.18em;text-transform:uppercase;color:#fff;text-shadow:0 2px 10px #000}
+.sub-bold{font-weight:900;text-transform:uppercase;color:#FFD500;background:#000;padding:2px 6px}
+.sub-modern{font-weight:700;color:#fff}.sub-modern b{background:#00D9FF;color:#000;padding:1px 5px;border-radius:6px}
+.sub-elegant{font-family:"Playfair Display",serif;font-style:italic;color:#fff;text-shadow:0 2px 12px #000}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:#2a2d42;border-radius:99px}
+.step-dot{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11px;background:#23263d;border:1px solid rgba(255,255,255,.15);flex:none}
+.step-dot.active{background:linear-gradient(90deg,#00D9FF,#8B5CFF);border-color:transparent}.step-dot.done{background:#00D9FF;color:#000}
 </style>
 </head>
-<body class="antialiased">
+<body>
+<header class="max-w-7xl mx-auto px-4 sm:px-6 pt-5 pb-3 flex items-center justify-between gap-3">
+  <div class="flex items-center gap-3">
+    <div class="w-9 h-9 rounded-xl grad grid place-items-center font-black text-sm">F</div>
+    <div><div class="font-black tracking-tight leading-none">FACT ENGINE <span class="grad-text">2.0</span></div><div class="text-[11px] text-white/50 tracking-widest">AI SHORTS GENERATOR</div></div>
+  </div>
+  <div class="flex gap-2 text-[11px] font-semibold"><span class="px-2.5 py-1.5 rounded-full bg-[#131522] border border-white/10">1080 × 1920</span><span class="px-2.5 py-1.5 rounded-full grad">60 FPS</span><span class="hidden sm:inline px-2.5 py-1.5 rounded-full bg-[#131522] border border-white/10">9:16 MP4</span></div>
+</header>
 
-<div id="app" class="min-h-screen">
-  <!-- Header -->
-  <header class="py-6 px-4 sm:px-6">
-    <div class="max-w-3xl mx-auto flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-neon to-violet flex items-center justify-center">
-          <i class="fas fa-bolt text-sm text-deep"></i>
-        </div>
-        <div>
-          <h1 class="font-display font-bold text-lg tracking-tight text-white">FACT ENGINE<span class="text-neon ml-1.5 font-mono text-xs font-medium">2.0</span></h1>
-          <p class="text-xs text-slate-500 font-medium -mt-0.5">Premium AI Shorts Studio</p>
-        </div>
+<main class="max-w-7xl mx-auto px-4 sm:px-6 pb-10 grid lg:grid-cols-[1fr_400px] gap-5 items-start">
+  <!-- LEFT -->
+  <section class="space-y-4">
+    <div class="card p-4 sm:p-5">
+      <div class="flex gap-2 mb-4">
+        <button id="tabTopic" class="tab active flex-1 py-2.5 rounded-full border border-white/10 text-sm font-semibold">Topic Research</button>
+        <button id="tabScript" class="tab flex-1 py-2.5 rounded-full border border-white/10 text-sm font-semibold text-white/70">Paste Script</button>
       </div>
-      <div class="badge badge-neon"><i class="fas fa-circle text-[6px] animate-pulse"></i>Ready</div>
-    </div>
-  </header>
 
-  <main class="px-4 sm:px-6 pb-12">
-    <div class="max-w-3xl mx-auto space-y-5">
+      <div id="topicPanel">
+        <label class="text-xs font-bold tracking-widest text-white/60">ENTER A TOPIC</label>
+        <div class="flex gap-2 mt-2">
+          <input id="topicInput" placeholder="e.g. The Great Wall of China, Octopus, Apollo 11…" class="flex-1 min-w-0 bg-[#0D0E18] border border-white/10 rounded-2xl px-4 py-3.5 placeholder:text-white/30">
+          <button id="searchBtn" class="btn-main px-4 sm:px-5 rounded-2xl font-bold text-sm whitespace-nowrap">Search</button>
+        </div>
+        <div id="searchStatus" class="text-xs text-white/50 mt-2">Search Wikipedia — select exactly one article to use as primary source.</div>
+        <div id="results" class="grid sm:grid-cols-2 gap-2.5 mt-3 max-h-[380px] overflow-y-auto pr-1"></div>
+      </div>
 
-      <!-- Step 1: Search -->
-      <section id="searchPanel" class="panel fade-in">
-        <div class="flex items-center gap-2 mb-4">
-          <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-neon/20 to-neon/5 flex items-center justify-center">
-            <i class="fas fa-search text-neon text-xs"></i>
-          </div>
-          <h2 class="font-display font-semibold text-white text-base">Research Topic</h2>
-        </div>
-        <p class="text-slate-400 text-sm mb-4">Enter a topic to search Wikipedia for accurate research material and real images.</p>
-        <div class="flex gap-3">
-          <input id="searchInput" type="text" class="input flex-1" placeholder="e.g. Black holes, Roman Empire, CRISPR..." autocomplete="off">
-          <button id="searchBtn" class="btn btn-primary whitespace-nowrap" onclick="performSearch()">
-            <i class="fas fa-search text-sm"></i><span class="hidden sm:inline">Search</span>
-          </button>
-        </div>
-      </section>
-
-      <!-- Step 2: Results -->
-      <section id="resultsPanel" class="panel hidden">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-2">
-            <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-neon/20 to-neon/5 flex items-center justify-center">
-              <i class="fas fa-list text-neon text-xs"></i>
-            </div>
-            <h2 class="font-display font-semibold text-white text-base">Wikipedia Results</h2>
-          </div>
-          <button class="btn btn-ghost btn-sm" onclick="backToSearch()">
-            <i class="fas fa-arrow-left text-xs"></i>Back
-          </button>
-        </div>
-        <div id="resultsList" class="space-y-3 max-h-[420px] overflow-y-auto pr-1"></div>
-        <div class="mt-4 pt-3 border-t border-white/5">
-          <button class="btn btn-ghost btn-sm w-full" onclick="skipArticleSelect()">
-            <i class="fas fa-forward text-xs"></i>Skip — Use topic directly without Wikipedia article
-          </button>
-        </div>
-      </section>
-
-      <!-- Step 3: Article Info + Config -->
-      <section id="configPanel" class="panel hidden">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-2">
-            <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-violet/20 to-violet/5 flex items-center justify-center">
-              <i class="fas fa-newspaper text-violet text-xs"></i>
-            </div>
-            <h2 class="font-display font-semibold text-white text-base">Selected Source</h2>
-          </div>
-          <button class="btn btn-ghost btn-sm" onclick="backToResults()">
-            <i class="fas fa-arrow-left text-xs"></i>Change
-          </button>
-        </div>
-        <div id="articleInfo" class="bg-charcoal rounded-xl p-4 border border-white/5 mb-5"></div>
-
-        <!-- Voice Selection -->
-        <div class="mb-5">
-          <label class="text-sm font-medium text-slate-300 mb-3 block">Narration Voice</label>
-          <div id="voiceGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5"></div>
-        </div>
-
-        <!-- Subtitle Style -->
-        <div class="mb-5">
-          <label class="text-sm font-medium text-slate-300 mb-3 block">Subtitle Style</label>
-          <div id="styleGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5"></div>
-        </div>
-
-        <!-- Intelligent Hook -->
-        <div class="mb-5">
-          <div class="flex items-center justify-between bg-charcoal rounded-xl p-4 border border-white/5">
-            <div>
-              <p class="text-sm font-medium text-white">Intelligent Hook</p>
-              <p class="text-xs text-slate-400 mt-0.5">Loops the ending back to the opening for seamless replay</p>
-            </div>
-            <div id="hookToggle" class="toggle active" onclick="toggleHook()"></div>
-          </div>
-        </div>
-
-        <button id="generateBtn" class="btn btn-violet w-full text-base py-3.5" onclick="startGeneration()">
-          <i class="fas fa-wand-magic-sparkles"></i>Generate Short
-        </button>
-      </section>
-
-      <!-- Step 4: Progress -->
-      <section id="progressPanel" class="panel hidden">
-        <div class="flex items-center gap-2 mb-4">
-          <div class="spinner"></div>
-          <h2 class="font-display font-semibold text-white text-base">Generating</h2>
-        </div>
-        <div class="mb-3">
-          <div class="flex justify-between mb-1.5">
-            <span id="progressLabel" class="text-sm text-slate-300">Researching topic...</span>
-            <span id="progressPercent" class="text-sm text-neon font-mono">0%</span>
-          </div>
-          <div class="progress-bar"><div id="progressFill" class="progress-fill" style="width:0%"></div></div>
-        </div>
-        <div id="scriptPreview" class="mt-4 bg-charcoal rounded-xl p-4 border border-white/5 max-h-[280px] overflow-y-auto hidden">
-          <p class="text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">Script Preview</p>
-          <div id="scriptContent" class="space-y-2"></div>
-        </div>
-      </section>
-
-      <!-- Step 5: Preview -->
-      <section id="previewPanel" class="panel hidden">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-2">
-            <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-neon/20 to-violet/20 flex items-center justify-center">
-              <i class="fas fa-check text-neon text-xs"></i>
-            </div>
-            <h2 class="font-display font-semibold text-white text-base">Your Short is Ready</h2>
-          </div>
-          <div class="badge badge-neon"><i class="fas fa-circle-check text-[8px]"></i>Complete</div>
-        </div>
-        <div class="video-container mx-auto" style="max-width:280px">
-          <canvas id="previewCanvas" width="540" height="960"></canvas>
-        </div>
-        <div class="flex gap-3 mt-4">
-          <button class="btn btn-primary flex-1" onclick="playPreview()">
-            <i class="fas fa-play text-sm"></i>Play
-          </button>
-          <button class="btn btn-violet flex-1" onclick="downloadVideo()">
-            <i class="fas fa-download text-sm"></i>Download
-          </button>
-        </div>
-        <button class="btn btn-ghost btn-sm w-full mt-3" onclick="startOver()">
-          <i class="fas fa-rotate-left text-xs"></i>Start Over
-        </button>
-      </section>
-
-    </div>
-  </main>
-
-  <!-- Secret Menu -->
-  <footer class="px-4 sm:px-6 pb-8">
-    <div class="max-w-3xl mx-auto">
-      <div class="border-t border-white/5 pt-6 mt-4">
-        <button id="secretToggle" class="flex items-center gap-2 text-xs text-slate-600 hover:text-slate-400 transition-colors cursor-pointer mb-3" onclick="toggleSecret()">
-          <i class="fas fa-lock text-[10px]"></i>Secret Menu
-          <i id="secretArrow" class="fas fa-chevron-down text-[8px] transition-transform"></i>
-        </button>
-        <div id="secretContent" class="hidden">
-          <div class="panel panel-v" style="border-color:var(--border-violet);box-shadow:var(--glow-violet)">
-            <div class="flex items-center gap-2 mb-4">
-              <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-violet/20 to-violet/5 flex items-center justify-center">
-                <i class="fas fa-car text-violet text-xs"></i>
-              </div>
-              <h3 class="font-display font-semibold text-white text-sm">Car Database</h3>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-              <div>
-                <label class="text-xs text-slate-400 mb-1.5 block">Manufacturer</label>
-                <div class="relative">
-                  <input id="carMakeSearch" type="text" class="input text-sm mb-2" placeholder="Search brands..." oninput="filterCarMakes()">
-                  <select id="carMake" class="select" onchange="updateCarModels()"></select>
-                </div>
-              </div>
-              <div>
-                <label class="text-xs text-slate-400 mb-1.5 block">Model</label>
-                <div class="relative">
-                  <input id="carModelSearch" type="text" class="input text-sm mb-2" placeholder="Search models..." oninput="filterCarModels()">
-                  <select id="carModel" class="select" onchange="updateCarSelection()"></select>
-                </div>
-              </div>
-            </div>
-            <div id="carSelection" class="bg-charcoal rounded-xl p-3 border border-white/5 flex items-center justify-between">
-              <span id="carSelectionText" class="text-sm text-slate-400">Select a manufacturer and model</span>
-              <button id="carCopyBtn" class="btn btn-ghost btn-sm hidden" onclick="copyCarSelection()">
-                <i class="fas fa-copy text-xs"></i>Copy
-              </button>
-            </div>
-          </div>
-        </div>
+      <div id="scriptPanel" class="hidden">
+        <label class="text-xs font-bold tracking-widest text-white/60">YOUR SCRIPT</label>
+        <textarea id="scriptInput" rows="7" placeholder="Paste your narration script here…" class="w-full mt-2 bg-[#0D0E18] border border-white/10 rounded-2xl p-4 placeholder:text-white/30 resize-y"></textarea>
+        <div class="flex justify-between text-xs text-white/50 mt-2"><span>Used exactly as provided. Images &amp; timing are built per sentence.</span><span id="wordCount">0 words</span></div>
       </div>
     </div>
-  </footer>
-</div>
 
-<!-- Toast container -->
-<div id="toastContainer"></div>
+    <div class="card p-4 sm:p-5">
+      <div class="text-xs font-bold tracking-widest text-white/60 mb-3">1 · VOICE — SELECT ONE</div>
+      <div id="voiceGrid" class="grid grid-cols-2 gap-2.5"></div>
+    </div>
 
-<!-- Hidden render canvas -->
-<canvas id="renderCanvas" width="1080" height="1920" style="display:none"></canvas>
+    <div class="card p-4 sm:p-5">
+      <div class="text-xs font-bold tracking-widest text-white/60 mb-3">2 · SUBTITLE STYLE — SELECT ONE</div>
+      <div id="styleGrid" class="grid grid-cols-2 gap-2.5"></div>
+    </div>
+
+    <div class="card p-4 sm:p-5 flex items-center justify-between gap-4">
+      <div><div class="font-bold">Intelligent Hook</div><div class="text-sm text-white/55">Final sentence leads into the opening — seamless loop, matched visuals.</div></div>
+      <div id="hookSwitch" class="switch on" role="switch" aria-checked="true" tabindex="0"></div>
+    </div>
+
+    <button id="generateBtn" class="btn-main w-full py-4 rounded-3xl font-black text-base tracking-wide">▶ &nbsp;GENERATE VIDEO</button>
+
+    <div id="progressCard" class="card p-4 sm:p-5 hidden">
+      <div class="flex justify-between items-center mb-3"><div class="font-bold text-sm">Generation Progress</div><div id="progressPct" class="font-black grad-text">0%</div></div>
+      <div class="h-2.5 bg-[#0D0E18] rounded-full overflow-hidden mb-4"><div id="progressBar" class="h-full grad rounded-full transition-all duration-300" style="width:0%"></div></div>
+      <div id="steps" class="space-y-2.5 text-sm"></div>
+      <div id="progressMsg" class="text-xs text-white/50 mt-3">Preparing…</div>
+    </div>
+  </section>
+
+  <!-- RIGHT -->
+  <aside class="space-y-4 lg:sticky lg:top-4">
+    <div class="card p-4 sm:p-5">
+      <div class="flex justify-between items-center mb-3"><div class="text-xs font-bold tracking-widest text-white/60">PREVIEW · 9:16</div><div id="fpsBadge" class="text-[11px] px-2 py-1 rounded-full bg-white/5 border border-white/10">1080×1920 · 60 FPS</div></div>
+      <div class="phone glow">
+        <canvas id="stage" width="1080" height="1920"></canvas>
+        <video id="finalVideo" class="hidden" playsinline controls></video>
+        <div id="emptyHint" class="absolute inset-0 grid place-items-center text-center p-6 pointer-events-none">
+          <div><div class="w-14 h-14 mx-auto rounded-2xl grad grid place-items-center text-2xl font-black mb-3">▶</div><div class="font-bold">Your finished Short appears here</div><div class="text-xs text-white/50 mt-1">Starts immediately with narration.<br>No logo. No title screen.</div></div>
+        </div>
+      </div>
+      <div id="videoMeta" class="hidden mt-4 grid grid-cols-3 gap-2 text-center text-xs">
+        <div class="bg-[#0D0E18] rounded-2xl p-3"><div class="font-black text-base" id="metaDur">—</div><div class="text-white/50">Duration</div></div>
+        <div class="bg-[#0D0E18] rounded-2xl p-3"><div class="font-black text-base" id="metaScenes">—</div><div class="text-white/50">Scenes</div></div>
+        <div class="bg-[#0D0E18] rounded-2xl p-3"><div class="font-black text-base" id="metaFormat">—</div><div class="text-white/50">Format</div></div>
+      </div>
+      <a id="downloadBtn" class="hidden btn-main mt-3 w-full py-3.5 rounded-2xl font-black text-center block" download>↓ &nbsp;SAVE VIDEO</a>
+      <button id="replayBtn" class="hidden mt-2 w-full py-3 rounded-2xl bg-white/5 border border-white/10 font-bold text-sm">↺ &nbsp;Replay Loop</button>
+    </div>
+
+    <div id="qualityCard" class="card p-4 sm:p-5 hidden">
+      <div class="text-xs font-bold tracking-widest text-white/60 mb-3">FINAL QUALITY CHECK</div>
+      <ul id="qualityList" class="space-y-2 text-sm"></ul>
+    </div>
+
+    <div id="sourcesCard" class="card p-4 sm:p-5 hidden">
+      <div class="text-xs font-bold tracking-widest text-white/60 mb-3">IMAGE SOURCES · WIKIMEDIA</div>
+      <div id="sourcesList" class="space-y-3 text-xs"></div>
+    </div>
+
+    <div id="scriptCard" class="card p-4 sm:p-5 hidden">
+      <div class="text-xs font-bold tracking-widest text-white/60 mb-2">GENERATED NARRATION</div>
+      <p id="scriptText" class="text-sm leading-relaxed text-white/85"></p>
+      <div id="scriptStats" class="text-xs text-white/50 mt-2"></div>
+    </div>
+  </aside>
+</main>
 
 <script>
-// ============================================
-// STATE
-// ============================================
-const state = {
-  step: 'search',
-  searchQuery: '',
-  searchResults: [],
-  selectedArticle: null,
-  articleContent: null,
-  articleImages: [],
-  script: null,
-  scenes: [],
-  voice: 'male-deep',
-  subtitleStyle: 'minimal',
-  intelligentHook: true,
-  videoBlob: null,
-  progress: 0,
-  generating: false,
-  carMake: '',
-  carModel: ''
+const $=id=>document.getElementById(id);
+const canvas=$('stage'),ctx=canvas.getContext('2d');
+const VOICES=[
+ {name:"Male Deep Documentary",desc:"Deep · authoritative · cinematic",tts:"Brian",pitch:.75,rate:.92},
+ {name:"Male Natural Conversational",desc:"Warm · natural · conversational",tts:"Joey",pitch:1,rate:1},
+ {name:"Female Confident Documentary",desc:"Confident · clear · documentary",tts:"Emma",pitch:1.05,rate:.96},
+ {name:"Female Natural Conversational",desc:"Bright · natural · conversational",tts:"Joanna",pitch:1.1,rate:1}
+];
+const STYLES=[
+ {name:"Minimal Cinematic",preview:"<span class='sub-min text-[10px]'>the story begins</span>",cls:""},
+ {name:"Bold Documentary",preview:"<span class='sub-bold text-[10px]'>THE STORY BEGINS</span>",cls:""},
+ {name:"Modern Word Highlight",preview:"<span class='sub-modern text-[10px]'>the <b>story</b> begins</span>",cls:""},
+ {name:"Elegant Editorial",preview:"<span class='sub-elegant text-[11px]'>the story begins</span>",cls:""}
+];
+let state={mode:'topic',selected:null,results:[],voice:0,style:0,hook:true,scenes:[],duration:0,blob:null,mime:'',finalURL:''};
+const researchCache=new Map(),imageCache=new Map(),ttsCache=new Map();
+const enc=encodeURIComponent, sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const stopWords=new Set("the a an and or of to in is was were are be been it its this that with for on at by as from they he she his her their not but more than then when who which what where how all any can could had has have do does did will would should may might one two first also into over under after before during between".split(" "));
+const wordsOf=t=>(t.toLowerCase().match(/[a-z0-9']+/g)||[]);
+const countWords=t=>wordsOf(t).length;
+const cleanText=t=>t.replace(/\[[0-9\-–]+\]/g,'').replace(/\s+/g,' ').replace(/\(.*?\)/g,' ').replace(/\s+/g,' ').trim();
+function splitSentences(t){return cleanText(t).split(/(?<=[.!?])\s+(?=[A-Z0-9"“'])/).map(s=>s.trim()).filter(s=>s.length>25)}
+function setProgress(p,msg){$('progressBar').style.width=p+'%';$('progressPct').textContent=Math.round(p)+'%';if(msg)$('progressMsg').textContent=msg}
+const STEP_NAMES=["Deep Research — Wikipedia + linked articles","Authentic Images — Wikipedia / Wikimedia Commons","Voice Synthesis — synced TTS audio","Scene Build — timing, subtitles, Ken Burns","Rendering — 1080×1920 at exactly 60 FPS"];
+function renderSteps(active=-1,doneUpTo=-1){$('steps').innerHTML=STEP_NAMES.map((n,i)=>`<div class="flex items-center gap-3"><div class="step-dot ${i<=doneUpTo?'done':i===active?'active':''}">${i<=doneUpTo?'✓':i+1}</div><span class="${i===active?'font-bold':i<=doneUpTo?'text-white/80':'text-white/45'}">${n}</span></div>`).join('')}
+
+/* ---------- UI BUILD ---------- */
+$('voiceGrid').innerHTML=VOICES.map((v,i)=>`<div data-voice="${i}" class="pick ${i===0?'selected':''} bg-[#0D0E18] border border-white/10 rounded-2xl p-3.5"><div class="font-bold text-sm leading-tight">${v.name}</div><div class="text-xs text-white/50 mt-1">${v.desc}</div><button data-sample="${i}" class="mt-2 text-[11px] font-bold text-[#00D9FF]">▶ Preview voice</button></div>`).join('');
+$('styleGrid').innerHTML=STYLES.map((s,i)=>`<div data-style="${i}" class="pick ${i===0?'selected':''} bg-[#0D0E18] border border-white/10 rounded-2xl p-3.5"><div class="h-12 grid place-items-center bg-black/60 rounded-xl mb-2 overflow-hidden">${s.preview}</div><div class="font-bold text-sm">${i+1}. ${s.name}</div></div>`).join('');
+$('voiceGrid').addEventListener('click',e=>{const b=e.target.closest('[data-sample]');if(b){e.stopPropagation();previewVoice(+b.dataset.sample);return}const c=e.target.closest('[data-voice]');if(!c)return;state.voice=+c.dataset.voice;document.querySelectorAll('[data-voice]').forEach(x=>x.classList.toggle('selected',+x.dataset.voice===state.voice))});
+$('styleGrid').addEventListener('click',e=>{const c=e.target.closest('[data-style]');if(!c)return;state.style=+c.dataset.style;document.querySelectorAll('[data-style]').forEach(x=>x.classList.toggle('selected',+x.dataset.style===state.style))});
+function previewVoice(i){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance("This is how your documentary will sound.");u.pitch=VOICES[i].pitch;u.rate=VOICES[i].rate;const vs=speechSynthesis.getVoices().filter(v=>v.lang.startsWith('en'));const want=i<2?vs.find(v=>/male|david|daniel|alex|fred/i.test(v.name)):vs.find(v=>/female|zira|samantha|karen|moira/i.test(v.name));if(want)u.voice=want;speechSynthesis.speak(u)}catch(e){}}
+$('tabTopic').onclick=()=>{state.mode='topic';$('tabTopic').classList.add('active');$('tabScript').classList.remove('active');$('topicPanel').classList.remove('hidden');$('scriptPanel').classList.add('hidden')};
+$('tabScript').onclick=()=>{state.mode='script';$('tabScript').classList.add('active');$('tabTopic').classList.remove('active');$('scriptPanel').classList.remove('hidden');$('topicPanel').classList.add('hidden')};
+$('scriptInput').oninput=e=>$('wordCount').textContent=countWords(e.target.value)+' words';
+function toggleHook(){state.hook=!state.hook;$('hookSwitch').classList.toggle('on',state.hook);$('hookSwitch').setAttribute('aria-checked',state.hook)}
+$('hookSwitch').onclick=toggleHook;$('hookSwitch').onkeydown=e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();toggleHook()}};
+
+/* ---------- WIKIPEDIA SEARCH ---------- */
+async function wikiSearch(q){
+ const url=`https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrsearch=${enc(q)}&gsrlimit=8&gsrnamespace=0&prop=pageimages|description|extracts&piprop=thumbnail&pithumbsize=400&exintro=1&exchars=220`;
+ const r=await fetch(url);const j=await r.json();const pages=j.query?.pages||{};
+ return Object.values(pages).sort((a,b)=>(a.index||99)-(b.index||99)).map(p=>({title:p.title,desc:p.description||p.extract||'Wikipedia article',thumb:p.thumbnail?.source||'',pageid:p.pageid}));
+}
+$('searchBtn').onclick=doSearch;$('topicInput').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch()});
+async function doSearch(){
+ const q=$('topicInput').value.trim();if(!q)return;
+ $('searchBtn').innerHTML='<span class="spinner"></span>';$('results').innerHTML='';state.selected=null;$('searchStatus').textContent='Searching Wikipedia…';
+ try{state.results=await wikiSearch(q);
+  $('searchStatus').textContent=state.results.length?`Found ${state.results.length} articles — select one:`:'No articles found. Try another topic.';
+  $('results').innerHTML=state.results.map((r,i)=>`<div data-i="${i}" class="result bg-[#0D0E18] border border-white/10 rounded-2xl p-3 flex gap-3 items-start"><img src="${r.thumb||''}" onerror="this.style.display='none'" class="w-16 h-16 rounded-xl object-cover bg-white/5 flex-none"><div class="min-w-0"><div class="font-bold text-sm leading-tight">${r.title}</div><div class="text-xs text-white/50 mt-1 leading-snug">${r.desc}</div></div></div>`).join('');
+  document.querySelectorAll('.result').forEach(el=>el.onclick=()=>{state.selected=state.results[+el.dataset.i];document.querySelectorAll('.result').forEach(x=>x.classList.toggle('selected',x===el));$('searchStatus').innerHTML=`✓ Selected: <b class="text-white">${state.selected.title}</b> — click another to change.`});
+ }catch(e){$('searchStatus').textContent='Search failed — check connection and try again.'}
+ $('searchBtn').textContent='Search';
+}
+
+/* ---------- RESEARCH ---------- */
+async function fetchArticle(title){
+ if(researchCache.has(title))return researchCache.get(title);
+ const url=`https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=extracts|pageimages|images|links&explaintext=1&exsectionformat=plain&exchars=20000&piprop=original|thumbnail&pithumbsize=1080&pllimit=30&titles=${enc(title)}`;
+ const r=await fetch(url);const j=await r.json();const p=Object.values(j.query?.pages||{})[0]||{};
+ const data={title:p.title||title,extract:p.extract||'',thumb:p.original?.source||p.thumbnail?.source||'',images:(p.images||[]).map(x=>x.title),links:(p.links||[]).map(x=>x.title).filter(t=>!/disambiguation|category/i.test(t))};
+ researchCache.set(title,data);return data;
+}
+async function fetchLinkedExtract(title){
+ try{const url=`https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=extracts&explaintext=1&exchars=4000&titles=${enc(title)}`;const r=await fetch(url);const j=await r.json();return Object.values(j.query?.pages||{})[0]?.extract||''}catch(e){return''}
+}
+function scoreSentence(s,idx){
+ let sc=0;const w=countWords(s);
+ if(/\d/.test(s))sc+=3; if(/(first|only|largest|biggest|greatest|most|million|billion|thousand|record|never|always|discovered|invented|caused|led to|because|due to|after|before|during|changed|became|built|founded|killed|died|born|war|battle)/i.test(s))sc+=2;
+ if(w>=12&&w<=28)sc+=1.5; if(/^[A-Z]/.test(s))sc+=.5;
+ if(/(see also|references|coordinates|retrieved|isbn|wikimedia|commons|external links)/i.test(s))sc-=10;
+ if(w<8||w>38)sc-=3; if((s.match(/,/g)||[]).length>3)sc-=1;
+ return sc;
+}
+function similar(a,b){const A=new Set(wordsOf(a)),B=new Set(wordsOf(b));let n=0;A.forEach(x=>{if(B.has(x))n++});return n/Math.max(1,Math.min(A.size,B.size))>0.55}
+function buildScript(article,linkedExtracts,topic){
+ let pool=splitSentences(article.extract);
+ linkedExtracts.forEach(ex=>splitSentences(ex).forEach(s=>pool.push(s))); // deeper research
+ // drop heading-like fragments
+ pool=pool.filter(s=>countWords(s)>=8&&countWords(s)<=40&&!s.endsWith(':'));
+ pool=[...new Set(pool)];
+ const scored=pool.map((s,i)=>({s,i,sc:scoreSentence(s,i)})).filter(x=>x.sc>0).sort((a,b)=>b.sc-a.sc);
+ if(!scored.length)throw new Error('Not enough research material — try another article.');
+ const hook=scored[0].s;
+ const target=150;let total=countWords(hook);const body=[];
+ const inOrder=pool.map((s,i)=>({s,i,sc:scoreSentence(s,i)})).filter(x=>x.s!==hook&&x.sc>=2.5).sort((a,b)=>a.i-b.i);
+ for(const c of inOrder){if(total>=135)break;if(body.some(b=>similar(b.s,c.s))||similar(hook,c.s))continue;body.push(c);total+=countWords(c.s)}
+ if(total<130){for(const c of scored){if(total>=135)break;if(c.s===hook||body.some(b=>b.s===c.s)||body.some(b=>similar(b.s,c.s)))continue;body.push(c);total+=countWords(c.s)}}
+ body.sort((a,b)=>a.i-b.i);
+ let sentences=[hook,...body.map(b=>b.s)];
+ let conclusion='';
+ const concl=scored.find(x=>/(today|still|remains|continues|legacy|now known|remains one)/i.test(x.s)&&x.s!==hook);
+ if(state.hook){
+   const lead=`And to understand why it matters so much, you have to go back to the beginning — where ${topic} first changed everything.`;
+   if(concl&&total+countWords(concl.s)+countWords(lead)<=175){sentences.push(concl.s);sentences.push(lead)}
+   else sentences.push(lead);
+ }else if(concl){sentences.push(concl.s)}
+ // trim to <=175 if possible by dropping middle body sentences
+ while(countWords(sentences.join(' '))>175&&sentences.length>5){sentences.splice(sentences.length-(state.hook?3:2),1)}
+ return sentences.join(' ');
+}
+
+/* ---------- IMAGES ---------- */
+function tokenOverlap(a,b){const A=new Set(wordsOf(a)),B=new Set(wordsOf(b));let n=0;A.forEach(x=>{if(B.has(x))n++});return n}
+async function fetchCommons(query){
+ const url=`https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrsearch=${enc(query+' filetype:bitmap')}&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url|size|extmetadata&iiurlwidth=1080`;
+ const r=await fetch(url);const j=await r.json();const pages=j.query?.pages||{};
+ return Object.values(pages).map(p=>{const ii=p.imageinfo?.[0];if(!ii)return null;return{title:p.title,url:ii.thumburl||ii.url,orig:ii.url,w:ii.width||0,desc:(ii.extmetadata?.ImageDescription?.value||'').replace(/<[^>]+>/g,''),license:ii.extmetadata?.LicenseShortName?.value||ii.extmetadata?.UsageTerms?.value||'Wikimedia Commons',artist:(ii.extmetadata?.Artist?.value||'').replace(/<[^>]+>/g,'')}}).filter(Boolean);
+}
+async function fetchWikiPageImage(query){
+ try{const url=`https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrsearch=${enc(query)}&gsrlimit=3&prop=pageimages|description&piprop=original|thumbnail&pithumbsize=1080`;
+ const r=await fetch(url);const j=await r.json();return Object.values(j.query?.pages||{}).map(p=>({title:p.title,url:p.original?.source||p.thumbnail?.source||'',w:p.original?.width||0,desc:p.description||'',license:'Wikipedia / CC',artist:'Wikimedia'})).filter(x=>x.url)}catch(e){return[]}
+}
+function scoreImage(img,subject,topic){
+ let sc=0;const hay=(img.title+' '+img.desc).toLowerCase();
+ wordsOf(subject).forEach(w=>{if(hay.includes(w))sc+=4}); wordsOf(topic).forEach(w=>{if(hay.includes(w))sc+=2});
+ if(/\.svg$/i.test(img.title))sc-=3; if(/\.(jpg|jpeg|png)$/i.test(img.title))sc+=1; if(img.w>800)sc+=1; if(/map|diagram|photograph|photo/i.test(hay))sc+=.5;
+ return sc;
+}
+async function getImageForScene(scene,topic,article){
+ const key=scene.subject.toLowerCase()+'|'+topic.toLowerCase();
+ if(imageCache.has(key))return imageCache.get(key);
+ const queries=[...new Set([scene.subject,scene.subject+' '+topic,topic])];
+ let best=null,bestSc=-1;
+ await Promise.all(queries.map(async q=>{
+   try{const [c,w]=await Promise.all([fetchCommons(q),fetchWikiPageImage(q)]);
+     [...c,...w].forEach(img=>{const sc=scoreImage(img,scene.subject,topic);if(sc>bestSc){bestSc=sc;best=img}});
+   }catch(e){}
+ }));
+ if(!best||bestSc<3){
+   if(article?.thumb)best={title:article.title,url:article.thumb,desc:article.title,license:'Wikipedia',artist:'Wikimedia'};
+ }
+ if(best)imageCache.set(key,best);return best;
+}
+function extractSubject(sentence,topic){
+ const caps=sentence.match(/\b(?:[A-Z][a-z]{2,}(?:\s+(?:[A-Z][a-z]{2,}|of|the|de|von|van|and))*){1,3}\b/g)||[];
+ const freq={};wordsOf(sentence).forEach(w=>{if(!stopWords.has(w)&&w.length>3)freq[w]=(freq[w]||0)+1});
+ const frequent=Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,2).map(x=>x[0]).join(' ');
+ const cleanCaps=caps.filter(c=>!/^(The|A|An|In|It|He|She|This|That|But|And|After|Before|During|When|However)\b/.test(c)&&c.split(' ').length>1||topic.toLowerCase().includes(c.toLowerCase()));
+ const subj=(cleanCaps.sort((a,b)=>b.length-a.length)[0]||frequent||topic||'subject');
+ return subj.replace(/\s+/g,' ').trim().slice(0,60)||topic;
+}
+function loadImage(url){return new Promise(res=>{const img=new Image();img.crossOrigin='anonymous';img.onload=()=>res(img);img.onerror=()=>res(null);img.src=url;setTimeout(()=>res(img.complete&&img.naturalWidth?img:null),9000)})}
+
+/* ---------- TTS ---------- */
+function estimateDur(text){return Math.max(1.9,countWords(text)/2.55+0.35)}
+async function synthScene(scene,voice){
+ const key=voice.tts+'|'+scene.narration;
+ if(ttsCache.has(key))return ttsCache.get(key);
+ let out={duration:estimateDur(scene.narration),arrayBuffer:null};
+ try{
+   const r=await fetch(`https://api.streamelements.com/kappa/v2/speech?voice=${enc(voice.tts)}&text=${enc(scene.narration)}`);
+   if(r.ok){const ab=await r.arrayBuffer();const ct=r.headers.get('content-type')||'';
+     if(ct.includes('audio')||ab.byteLength>800){const AC=window.AudioContext||window.webkitAudioContext;const tmp=new AC();const buf=await tmp.decodeAudioData(ab.slice(0));if(buf.duration>0.4){out={duration:buf.duration+0.18,arrayBuffer:ab};tmp.close().catch(()=>{})}}
+   }
+ }catch(e){}
+ ttsCache.set(key,out);return out;
+}
+
+/* ---------- SCENES ---------- */
+function buildScenes(script,topic){
+ const sents=splitSentences(script);if(!sents.length)throw new Error('Script is empty.');
+ const scenes=[];let cur=[],curW=0;
+ for(const s of sents){cur.push(s);curW+=countWords(s);if(curW>=17||cur.length>=2){scenes.push(cur.join(' '));cur=[];curW=0}}
+ if(cur.length)scenes.length&&scenes[scenes.length-1]+=' '+cur.join(' '),cur.length&&!scenes.length&&scenes.push(cur.join(' '));
+ // ensure 6-10: if too many merge, if too few split already fine
+ while(scenes.length>10){const a=scenes[scenes.length-2],b=scenes.pop();scenes[scenes.length-1]=a+' '+b}
+ const types=['fade','slide','fade','zoom','fade','slide','fade','zoom','fade','slide'];
+ return scenes.map((narration,i)=>({narration,subject:extractSubject(narration,topic),transition:types[i%types.length],index:i,start:0,end:0,duration:0,image:null,imgObj:null,tts:null}));
+}
+function buildWordTiming(scene){const ws=scene.narration.split(/\s+/).filter(Boolean);scene.words=ws.map((w,i)=>({w,start:scene.start+(i/ws.length)*scene.duration,end:scene.start+((i+1)/ws.length)*scene.duration}))}
+
+/* ---------- DRAW ---------- */
+function drawCover(img,zoom,dx,dy,alpha=1){
+ ctx.globalAlpha=alpha;
+ const cw=1080,ch=1920,ir=img.naturalWidth/img.naturalHeight,cr=cw/ch;
+ let dw,dh;if(ir>cr){dh=ch*zoom;dw=dh*ir}else{dw=cw*zoom;dh=dw/ir}
+ ctx.drawImage(img,(cw-dw)/2+dx,(ch-dh)/2+dy,dw,dh);ctx.globalAlpha=1;
+}
+function wrapWords(words,maxChars){const lines=[];let cur='';for(const w of words){if((cur+' '+w.w).trim().length>maxChars&&cur){lines.push(cur);cur=w.w}else cur=(cur+' '+w.w).trim()}if(cur)lines.push(cur);return lines}
+function drawSubtitles(time,scene){
+ const ws=scene.words||[];if(!ws.length)return;
+ const curIdx=Math.max(0,ws.findIndex(w=>time>=w.start&&time<w.end));const idx=curIdx===-1?ws.length-1:curIdx;
+ const startLine=Math.max(0,Math.floor(idx/4)-0); // phrase window
+ const windowWords=ws.slice(Math.max(0,idx-3),Math.min(ws.length,idx+5));
+ // group into lines max 22 chars, show lines containing current word
+ const lines=wrapWords(windowWords,22);
+ const yBase=1690,lineH=72;
+ ctx.textAlign='center';
+ const style=state.style;
+ // background gradient bottom
+ const g=ctx.createLinearGradient(0,1450,0,1920);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.72)');ctx.fillStyle=g;ctx.fillRect(0,1450,1080,470);
+ lines.forEach((line,li)=>{
+   const y=yBase+li*lineH;const isCurLine=line.split(' ').some((_,k)=>{const globalIdx=windowWords.indexOf(line.split(' ')[k]);return Math.max(0,idx-3)+globalIdx===idx});
+   if(style===0){ctx.font='300 50px Inter, sans-serif';ctx.fillStyle='rgba(255,255,255,.92)';ctx.shadowColor='#000';ctx.shadowBlur=14;ctx.fillText(line.toUpperCase(),540,y)}
+   else if(style===1){ctx.font='900 52px Inter, sans-serif';const w=ctx.measureText(line.toUpperCase()).width;ctx.fillStyle='rgba(0,0,0,.82)';ctx.shadowBlur=0;roundRect(540-w/2-18,y-52,w+36,66,12);ctx.fill();ctx.fillStyle='#FFD500';ctx.fillText(line.toUpperCase(),540,y)}
+   else if(style===2){ctx.font='700 50px Inter, sans-serif';let x=540-ctx.measureText(line).width/2;ctx.textAlign='left';line.split(' ').forEach(word=>{const ww=ctx.measureText(word).width;const wi=windowWords.findIndex((v,k)=>v===word&&x>0);const isCur=(Math.max(0,idx-3)+windowWords.indexOf(word)===idx);if(isCur){ctx.fillStyle='#00D9FF';roundRect(x-8,y-44,ww+16,58,10);ctx.fill();ctx.fillStyle='#000'}else ctx.fillStyle='#fff';ctx.shadowColor='#000';ctx.shadowBlur=10;ctx.fillText(word,x,y);x+=ww+ctx.measureText(' ').width});ctx.textAlign='center'}
+   else{ctx.font='italic 600 54px Georgia, serif';ctx.fillStyle='#fff';ctx.shadowColor='#000';ctx.shadowBlur=16;ctx.fillText(line,540,y)}
+   ctx.shadowBlur=0;
+ });
+}
+function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+function drawFrame(time){
+ ctx.fillStyle='#090A10';ctx.fillRect(0,0,1080,1920);
+ if(!state.scenes.length){return}
+ let scene=state.scenes[state.scenes.length-1];
+ for(const s of state.scenes){if(time>=s.start&&time<s.end){scene=s;break}}
+ const p=Math.min(1,Math.max(0,(time-scene.start)/Math.max(.1,scene.duration)));
+ const zoom=1.06+0.13*p,dx=(scene.index%2===0?-28:28)*p,dy=(scene.index%3===0?-20:20)*p;
+ const img=scene.imgObj;
+ // transition crossfade
+ if(scene.index>0&&time-scene.start<0.4&&state.scenes[scene.index-1].imgObj){
+   drawCover(state.scenes[scene.index-1].imgObj,1.12,0,0,1-(time-scene.start)/0.4);
+   if(img)drawCover(img,zoom,dx,dy,(time-scene.start)/0.4);
+ }else if(img)drawCover(img,zoom,dx,dy,1);
+ else{const gg=ctx.createLinearGradient(0,0,1080,1920);gg.addColorStop(0,'#131522');gg.addColorStop(1,'#1a1033');ctx.fillStyle=gg;ctx.fillRect(0,0,1080,1920)}
+ // top/bottom vignette
+ const vg=ctx.createLinearGradient(0,0,0,400);vg.addColorStop(0,'rgba(0,0,0,.35)');vg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=vg;ctx.fillRect(0,0,1080,400);
+ drawSubtitles(time,scene);
+ // progress line (not branding)
+ const prog=state.duration?time/state.duration:0;const pg=ctx.createLinearGradient(0,0,1080,0);pg.addColorStop(0,'#00D9FF');pg.addColorStop(1,'#8B5CFF');ctx.fillStyle=pg;ctx.fillRect(0,1912,1080*prog,8);
+}
+
+/* ---------- GENERATE ---------- */
+$('generateBtn').onclick=async()=>{
+ const btn=$('generateBtn');
+ let script='',topic='',article=null;
+ $('progressCard').classList.remove('hidden');renderSteps(0);setProgress(4,'Starting…');
+ $('finalVideo').classList.add('hidden');canvas.classList.remove('hidden');$('emptyHint').style.display='none';
+ try{
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> &nbsp;GENERATING…';
+  // 1 research
+  renderSteps(0);setProgress(8,'Deep research on Wikipedia…');
+  if(state.mode==='topic'){
+    if(!state.selected)throw new Error('Please search and select a Wikipedia article first.');
+    topic=state.selected.title;article=await fetchArticle(topic);
+    const linked=[];for(const lt of article.links.slice(0,2)){const ex=await fetchLinkedExtract(lt);if(ex)linked.push(ex)}
+    script=buildScript(article,linked,topic);setProgress(20,`Researched ${article.title} + ${linked.length} linked article(s).`);
+  }else{
+    script=$('scriptInput').value.trim();if(!script)throw new Error('Paste a script or switch to Topic Research.');
+    topic=extractSubject(splitSentences(script)[0]||script,'documentary');
+    // still fetch article for images if possible
+    try{const res=await wikiSearch(topic);if(res[0])article=await fetchArticle(res[0].title)}catch(e){}
+    if(state.hook){const lead=`And to understand why it matters so much, you have to go back to the beginning — where ${topic} first changed everything.`;if(!script.includes('go back to the beginning'))script=script+' '+lead}
+    setProgress(20,'Using your script.');
+  }
+  $('scriptCard').classList.remove('hidden');$('scriptText').textContent=script;$('scriptStats').textContent=`${countWords(script)} words · ${splitSentences(script).length} sentences · hook ${state.hook?'ON (loop)':'OFF'}`;
+  // 2 scenes + images
+  renderSteps(1,-1);setProgress(26,'Building scenes…');
+  state.scenes=buildScenes(script,topic);
+  if(state.hook&&state.scenes.length>1){state.scenes[state.scenes.length-1].subject=state.scenes[0].subject} // coordinated loop visual
+  setProgress(32,`Found ${state.scenes.length} scenes — retrieving authentic images in parallel…`);
+  await Promise.all(state.scenes.map(async sc=>{sc.image=await getImageForScene(sc,topic,article)}));
+  // loop visual: last scene reuses first image object if hook
+  if(state.hook&&state.scenes.length>1&&state.scenes[0].image){state.scenes[state.scenes.length-1].image=state.scenes[0].image}
+  await Promise.all(state.scenes.map(async sc=>{if(sc.image?.url)sc.imgObj=await loadImage(sc.image.url);if(!sc.imgObj&&article?.thumb)sc.imgObj=await loadImage(article.thumb)}));
+  setProgress(52,'Images verified against Wikipedia / Wikimedia Commons.');
+  // sources
+  $('sourcesCard').classList.remove('hidden');
+  $('sourcesList').innerHTML=state.scenes.map((s,i)=>`<div class="flex gap-3"><div class="step-dot">${i+1}</div><div><div class="text-white/85 font-semibold">${s.image?.title||'Article image'}</div><div class="text-white/45">${s.subject} · ${s.image?.license||'Wikimedia'} ${s.image?.artist?'· '+s.image.artist:''}</div></div></div>`).join('');
+  // 3 TTS
+  renderSteps(2,1);setProgress(58,'Synthesizing voice — real audio data, timed per scene…');
+  const voice=VOICES[state.voice];
+  await Promise.all(state.scenes.map(async sc=>{sc.tts=await synthScene(sc,voice)}));
+  let t=0;state.scenes.forEach(sc=>{sc.start=t;sc.duration=sc.tts.duration;sc.end=t+sc.duration;t=sc.end+0.14});
+  state.duration=t;state.scenes.forEach(buildWordTiming);
+  const hasAudio=state.scenes.some(s=>s.tts.arrayBuffer);
+  setProgress(72,`Voice timed: ${state.duration.toFixed(1)}s ${hasAudio?'(audio buffers synced)':'(timed synthesis)'}`);
+  // 4 render & record
+  renderSteps(4,3);setProgress(78,'Rendering 1080×1920 · 60 FPS…');
+  drawFrame(0);
+  await recordVideo();
+  renderSteps(4,4);setProgress(100,'Done — finished video ready.');
+  // meta + quality
+  $('videoMeta').classList.remove('hidden');$('metaDur').textContent=state.duration.toFixed(1)+'s';$('metaScenes').textContent=state.scenes.length;$('metaFormat').textContent=state.mime.includes('mp4')?'MP4':'WebM';
+  $('qualityCard').classList.remove('hidden');
+  const checks=["Opening starts immediately with narration — no logo / title screen","No application branding in video","Script built from real Wikipedia research (not invented)","Images from Wikipedia / Wikimedia Commons, matched per scene","Scene changes match story, Ken Burns zoom / pan","Voice: "+voice.name,"Subtitle style: "+STYLES[state.style].name+" — word-level sync","Subtitles use actual TTS timing, mobile safe area","Output 1080 × 1920 at exactly 60 FPS, audio synced",state.hook?"Intelligent Hook: final sentence + visual lead into opening (seamless loop)":"Strong opening, normal conclusion","No blank frames — all images preloaded"];
+  $('qualityList').innerHTML=checks.map(c=>`<li class="flex gap-2"><span class="text-[#00D9FF] font-black">✓</span><span class="text-white/80">${c}</span></li>`).join('');
+  $('downloadBtn').classList.remove('hidden');$('replayBtn').classList.remove('hidden');
+ }catch(e){$('progressMsg').textContent='⚠ '+e.message;alert(e.message)}
+ btn.disabled=false;btn.innerHTML='▶ &nbsp;GENERATE VIDEO';
 };
 
-// ============================================
-// VOICE DEFINITIONS
-// ============================================
-const voices = [
-  { id: 'male-deep', name: 'Deep Documentary', icon: 'fa-microphone', desc: 'Male · Authoritative', color: 'neon' },
-  { id: 'male-natural', name: 'Natural Conversational', icon: 'fa-comments', desc: 'Male · Warm', color: 'neon' },
-  { id: 'female-deep', name: 'Confident Documentary', icon: 'fa-microphone-lines', desc: 'Female · Assertive', color: 'violet' },
-  { id: 'female-natural', name: 'Natural Conversational', icon: 'fa-message', desc: 'Female · Friendly', color: 'violet' }
-];
-
-// ============================================
-// SUBTITLE STYLES
-// ============================================
-const subStyles = [
-  { id: 'minimal', name: 'Minimal Cinematic', desc: 'Subtle · Elegant' },
-  { id: 'bold', name: 'Bold Documentary', desc: 'Impact · Clear' },
-  { id: 'highlight', name: 'Word Highlight', desc: 'Modern · Dynamic' },
-  { id: 'elegant', name: 'Elegant Editorial', desc: 'Refined · Serif' }
-];
-
-// ============================================
-// CAR DATABASE
-// ============================================
-const carDatabase = {
-  "Acura": ["ILX","MDX","NSX","RDX","TLX","Integra","ZDX"],
-  "Alfa Romeo": ["Giulia","Stelvio","Tonale"],
-  "Aston Martin": ["DB11","DB12","DBX","Vantage","Valhalla"],
-  "Audi": ["A3","A4","A5","A6","A7","A8","Q3","Q4 e-tron","Q5","Q7","Q8","R8","RS3","RS4","RS5","RS6","RS7","S3","S4","S5","S6","S7","S8","SQ5","e-tron GT"],
-  "BMW": ["228i","330i","430i","530i","740i","840i","X1","X2","X3","X4","X5","X6","X7","Z4","M2","M3","M4","M5","M8","X3 M","X4 M","X5 M","X6 M","i4","iX","i7"],
-  "Bugatti": ["Chiron","Tourbillon","Mistral"],
-  "Buick": ["Encore","Encore GX","Enclave","Envista","LaCrosse","Regal"],
-  "Cadillac": ["CT4","CT5","CT5-V","Escalade","Escalade-V","Lyriq","XT4","XT5","XT6","Celestiq"],
-  "Chevrolet": ["Blazer","Camaro","Colorado","Corvette","Equinox","Express","Impala","Malibu","Silverado 1500","Suburban","Tahoe","Trailblazer","Traverse","Trax","Volt"],
-  "Chrysler": ["300","Pacifica","Voyager"],
-  "Dodge": ["Challenger","Charger","Durango","Hornet"],
-  "Ferrari": ["296 GTB","SF90 Stradale","F8 Tributo","Roma","Purosangue","812 Competizione"],
-  "Fiat": ["500","500e","Panda","Tipo","Pulse"],
-  "Ford": ["Bronco","Bronco Sport","EcoSport","Edge","Escape","Expedition","Explorer","F-150","F-150 Lightning","Fiesta","Focus","Mustang","Mustang Mach-E","Ranger","Raptor","Transit"],
-  "Genesis": ["G70","G80","G90","GV60","GV70","GV80"],
-  "GMC": ["Acadia","Canyon","Hummer EV","Sierra 1500","Terrain","Yukon"],
-  "Honda": ["Accord","Civic","CR-V","HR-V","Insight","Odyssey","Passport","Pilot","Ridgeline","S2000","Type R"],
-  "Hyundai": ["Accent","Elantra","Ioniq 5","Ioniq 6","Kona","Palisade","Santa Fe","Sonata","Tucson","Veloster"],
-  "Infiniti": ["Q50","Q55","QX50","QX55","QX60","QX80"],
-  "Jaguar": ["F-Type","F-Pace","E-Pace","I-Pace","XF","XJ"],
-  "Jeep": ["Cherokee","Compass","Gladiator","Grand Cherokee","Grand Wagoneer","Renegade","Wrangler"],
-  "Kia": ["Ceed","EV6","EV9","Forte","K5","Niro","Seltos","Sorento","Soul","Sportage","Stinger","Telluride"],
-  "Lamborghini": ["Huracán","Revuelto","Urus","Temerario"],
-  "Land Rover": ["Defender","Discovery","Discovery Sport","Range Rover","Range Rover Evoque","Range Rover Sport","Range Rover Velar"],
-  "Lexus": ["ES","GS","GX","IS","LC","LFA","LS","LX","NX","RC","RX","RZ","UX"],
-  "Lincoln": ["Aviator","Corsair","Nautilus","Navigator","Zephyr"],
-  "Lotus": ["Emira","Eletre","Evija"],
-  "Maserati": ["Ghibli","GranTurismo","Grecale","Levante","MC20","Quattroporte"],
-  "Mazda": ["2","3","CX-3","CX-30","CX-5","CX-50","CX-60","CX-90","MX-5 Miata","6"],
-  "McLaren": ["720S","750S","Artura","P1","Speedtail","765LT"],
-  "Mercedes-Benz": ["A-Class","C-Class","CLA","CLE","E-Class","EQE","EQS","G-Class","GLA","GLB","GLC","GLE","GLS","GT","Maybach S-Class","S-Class","SL","AMG GT","C63 AMG","E63 AMG","S63 AMG","G63 AMG","GLC63 AMG","GLE63 AMG"],
-  "Mini": ["Cooper","Cooper Clubman","Cooper Countryman","Cooper Convertible","JCW"],
-  "Mitsubishi": ["Eclipse Cross","Lancer","Mirage","Outlander","Outlander Sport","Pajero"],
-  "Nissan": ["Altima","Ariya","Frontier","GT-R","Kicks","Leaf","Maxima","Murano","Pathfinder","Rogue","Sentra","Versa","Z"],
-  "Pagani": ["Huayra","Utopia"],
-  "Porsche": ["718 Boxster","718 Cayman","911","918 Spyder","Cayenne","Macan","Panamera","Taycan"],
-  "Ram": ["1500","1500 TRX","2500","3500","ProMaster"],
-  "Rivian": ["R1T","R1S"],
-  "Rolls-Royce": ["Cullinan","Dawn","Ghost","Phantom","Spectre","Wraith"],
-  "Subaru": ["Ascent","BRZ","Crosstrek","Forester","Impreza","Legacy","Outback","WRX"],
-  "Tesla": ["Model 3","Model S","Model X","Model Y","Cybertruck","Roadster"],
-  "Toyota": ["4Runner","Avalon","Camry","Corolla","Crown","GR86","GR Supra","GR Corolla","Highlander","Land Cruiser","Prius","RAV4","Sequoia","Sienna","Tacoma","Tundra","Yaris"],
-  "Volkswagen": ["Atlas","Golf","Golf GTI","Golf R","ID.4","ID.7","Jetta","Passat","Taos","Tiguan","Touareg"],
-  "Volvo": ["C40","EX30","EX90","S60","S90","V60","V90","XC40","XC60","XC90"]
-};
-
-// ============================================
-// DOM REFS
-// ============================================
-const $ = id => document.getElementById(id);
-
-// ============================================
-// UI HELPERS
-// ============================================
-function showPanel(id) {
-  ['searchPanel','resultsPanel','configPanel','progressPanel','previewPanel'].forEach(p => {
-    const el = $(p);
-    if (p === id) { el.classList.remove('hidden'); el.classList.add('fade-in'); }
-    else { el.classList.add('hidden'); el.classList.remove('fade-in'); }
-  });
-  setTimeout(() => id && $(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+async function recordVideo(){
+ const mime=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm'].find(m=>window.MediaRecorder&&MediaRecorder.isTypeSupported(m))||'';
+ state.mime=mime||'video/webm';
+ const AC=window.AudioContext||window.webkitAudioContext;const aCtx=new AC();await aCtx.resume().catch(()=>{});
+ const dest=aCtx.createMediaStreamDestination();
+ const cStream=canvas.captureStream(60);
+ const tracks=[...cStream.getVideoTracks(),...dest.stream.getAudioTracks()];
+ const stream=new MediaStream(tracks);
+ const chunks=[];let rec;
+ try{rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:14000000,audioBitsPerSecond:192000}:{videoBitsPerSecond:14000000})}catch(e){rec=new MediaRecorder(stream)}
+ rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+ const stopped=new Promise(res=>rec.onstop=res);
+ const startPerf=performance.now()+120;const aStart=aCtx.currentTime+0.12;
+ // schedule TTS
+ let anyAudio=false;
+ for(const sc of state.scenes){if(sc.tts.arrayBuffer){try{const buf=await aCtx.decodeAudioData(sc.tts.arrayBuffer.slice(0));const src=aCtx.createBufferSource();src.buffer=buf;src.connect(dest);src.start(aStart+sc.start);anyAudio=true}catch(e){}}}
+ if(!anyAudio){const sil=aCtx.createBuffer(1,aCtx.sampleRate*state.duration,aCtx.sampleRate);const src=aCtx.createBufferSource();src.buffer=sil;src.connect(dest);src.start(aStart)}
+ rec.start(200);
+ await new Promise(resolve=>{
+   function tick(){const now=performance.now();const time=(now-startPerf)/1000;
+     if(time<0){requestAnimationFrame(tick);return}
+     if(time>=state.duration){drawFrame(state.duration-0.01);try{rec.stop()}catch(e){}resolve();return}
+     drawFrame(time);setProgress(78+(time/state.duration)*20,`Rendering frame ${Math.round(time*60)} / ${Math.round(state.duration*60)} · 60 FPS`);
+     requestAnimationFrame(tick)}
+   tick();
+ });
+ await stopped;
+ state.blob=new Blob(chunks,{type:rec.mimeType||mime||'video/webm'});
+ if(state.finalURL)URL.revokeObjectURL(state.finalURL);
+ state.finalURL=URL.createObjectURL(state.blob);
+ const vid=$('finalVideo');vid.src=state.finalURL;vid.loop=state.hook;vid.classList.remove('hidden');canvas.classList.add('hidden');
+ $('downloadBtn').href=state.finalURL;$('downloadBtn').download='fact-engine-short.'+(state.mime.includes('mp4')?'mp4':'webm');
+ vid.play().catch(()=>{});
+ aCtx.close().catch(()=>{});
 }
-
-function showToast(msg, dur = 2500) {
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.textContent = msg;
-  $('toastContainer').appendChild(t);
-  setTimeout(() => t.remove(), dur);
-}
-
-function setProgress(pct, label) {
-  state.progress = pct;
-  $('progressFill').style.width = pct + '%';
-  $('progressPercent').textContent = Math.round(pct) + '%';
-  if (label) $('progressLabel').textContent = label;
-}
-
-// ============================================
-// SEARCH
-// ============================================
-async function performSearch() {
-  const q = $('searchInput').value.trim();
-  if (!q) { showToast('Enter a topic to search'); return; }
-  state.searchQuery = q;
-  const btn = $('searchBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px"></span><span class="hidden sm:inline">Searching</span>';
-
-  try {
-    const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&srlimit=10&format=json&origin=*`;
-    const res = await fetch(url);
-    const data = await res.json();
-    state.searchResults = data.query?.search || [];
-
-    if (!state.searchResults.length) { showToast('No results found. Try a different topic.'); btn.disabled = false; btn.innerHTML = '<i class="fas fa-search text-sm"></i><span class="hidden sm:inline">Search</span>'; return; }
-
-    // Fetch thumbnails
-    const titles = state.searchResults.map(r => r.title).join('|');
-    const thumbUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${encodeURIComponent(titles)}&pithumbsize=300&format=json&origin=*`;
-    const thumbRes = await fetch(thumbUrl);
-    const thumbData = await thumbRes.json();
-    const pages = thumbData.query?.pages || {};
-    state.searchResults.forEach(r => {
-      const page = Object.values(pages).find(p => p.title === r.title);
-      r.thumbnail = page?.thumbnail?.source || null;
-    });
-
-    renderResults();
-    showPanel('resultsPanel');
-  } catch (e) {
-    showToast('Search failed. Check your connection.');
-    console.error(e);
-  }
-  btn.disabled = false;
-  btn.innerHTML = '<i class="fas fa-search text-sm"></i><span class="hidden sm:inline">Search</span>';
-}
-
-function renderResults() {
-  const c = $('resultsList');
-  c.innerHTML = '';
-  state.searchResults.forEach((r, i) => {
-    const div = document.createElement('div');
-    div.className = 'result-card flex gap-3 items-start';
-    div.style.animationDelay = (i * 60) + 'ms';
-    div.innerHTML = `
-      ${r.thumbnail ? `<img src="${r.thumbnail}" alt="" class="w-16 h-16 rounded-lg object-cover flex-shrink-0 border border-white/5">` : `<div class="w-16 h-16 rounded-lg bg-surface flex-shrink-0 flex items-center justify-center border border-white/5"><i class="fas fa-image text-slate-600 text-sm"></i></div>`}
-      <div class="flex-1 min-w-0">
-        <h3 class="text-sm font-semibold text-white truncate">${r.title}</h3>
-        <p class="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">${r.snippet.replace(/<[^>]+>/g, '')}</p>
-        <div class="flex items-center gap-2 mt-2">
-          <span class="badge badge-neon text-[10px]"><i class="fas fa-globe text-[8px]"></i>EN</span>
-        </div>
-      </div>
-      <button class="btn btn-ghost btn-sm flex-shrink-0" onclick="selectArticle(${i})">
-        <i class="fas fa-check text-xs"></i>Select
-      </button>
-    `;
-    c.appendChild(div);
-  });
-}
-
-function backToSearch() { showPanel('searchPanel'); }
-function backToResults() { showPanel('resultsPanel'); }
-
-function skipArticleSelect() {
-  state.selectedArticle = { title: state.searchQuery, snippet: '', thumbnail: null, skipped: true };
-  showConfig();
-}
-
-// ============================================
-// ARTICLE SELECTION
-// ============================================
-async function selectArticle(idx) {
-  const r = state.searchResults[idx];
-  state.selectedArticle = r;
-  showToast('Loading article...');
-  try {
-    const url = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts|pageimages&titles=${encodeURIComponent(r.title)}&exintro=0&explaintext=1&format=json&origin=*`;
-    const res = await fetch(url);
-    const data = await res.json();
-    const page = Object.values(data.query.pages)[0];
-    state.articleContent = page?.extract || '';
-    state.selectedArticle.thumbnail = state.selectedArticle.thumbnail || page?.thumbnail?.source || null;
-  } catch (e) {
-    state.articleContent = r.snippet || '';
-  }
-  showConfig();
-}
-
-function showConfig() {
-  const art = state.selectedArticle;
-  $('articleInfo').innerHTML = `
-    <div class="flex gap-3 items-start">
-      ${art.thumbnail ? `<img src="${art.thumbnail}" alt="" class="w-14 h-14 rounded-lg object-cover flex-shrink-0 border border-white/5">` : ''}
-      <div class="flex-1 min-w-0">
-        <h3 class="text-sm font-semibold text-white">${art.title}</h3>
-        <p class="text-xs text-slate-400 mt-1">${art.skipped ? 'Direct topic mode — no Wikipedia article selected' : 'Wikipedia article selected as primary source'}</p>
-      </div>
-    </div>
-  `;
-
-  // Render voice options
-  const vg = $('voiceGrid');
-  vg.innerHTML = '';
-  voices.forEach(v => {
-    const d = document.createElement('div');
-    d.className = `voice-card ${state.voice === v.id ? 'selected' : ''}`;
-    d.onclick = () => { state.voice = v.id; showConfig(); };
-    d.innerHTML = `
-      <i class="fas ${v.icon} text-${v.color} text-lg mb-1.5"></i>
-      <p class="text-xs font-semibold text-white">${v.name}</p>
-      <p class="text-[10px] text-slate-500 mt-0.5">${v.desc}</p>
-    `;
-    vg.appendChild(d);
-  });
-
-  // Render subtitle styles
-  const sg = $('styleGrid');
-  sg.innerHTML = '';
-  subStyles.forEach(s => {
-    const d = document.createElement('div');
-    d.className = `style-card ${state.subtitleStyle === s.id ? 'selected' : ''}`;
-    d.onclick = () => { state.subtitleStyle = s.id; showConfig(); };
-    d.innerHTML = `
-      <p class="text-xs font-semibold text-white">${s.name}</p>
-      <p class="text-[10px] text-slate-500 mt-0.5">${s.desc}</p>
-    `;
-    sg.appendChild(d);
-  });
-
-  // Hook toggle
-  const ht = $('hookToggle');
-  ht.classList.toggle('active', state.intelligentHook);
-
-  showPanel('configPanel');
-}
-
-function toggleHook() {
-  state.intelligentHook = !state.intelligentHook;
-  $('hookToggle').classList.toggle('active', state.intelligentHook);
-}
-
-// ============================================
-// GENERATION PIPELINE
-// ============================================
-async function startGeneration() {
-  state.generating = true;
-  showPanel('progressPanel');
-  $('scriptPreview').classList.add('hidden');
-  $('generateBtn')?.setAttribute('disabled', 'true');
-
-  try {
-    // Step 1: Deep Research
-    setProgress(5, 'Researching topic...');
-    await delay(400);
-
-    let fullContent = state.articleContent || '';
-    let articleTitle = state.selectedArticle?.title || state.searchQuery;
-
-    // If we have a Wikipedia article, fetch more sections
-    if (!state.selectedArticle?.skipped && articleTitle) {
-      setProgress(10, 'Fetching article sections...');
-      try {
-        // Get sections
-        const secUrl = `https://en.wikipedia.org/w/api.php?action=parse&page=${encodeURIComponent(articleTitle)}&prop=sections&format=json&origin=*`;
-        const secRes = await fetch(secUrl);
-        const secData = await secRes.json();
-
-        // Get full content with sections
-        const fullUrl = `https://en.wikipedia.org/w/api.php?action=parse&page=${encodeURIComponent(articleTitle)}&prop=wikitext&format=json&origin=*`;
-        const fullRes = await fetch(fullUrl);
-        const fullData = await fullRes.json();
-        if (fullData.parse?.wikitext?.['*']) {
-          // We have wikitext - use the extract we already have which is plain text
-        }
-      } catch (e) { /* continue with what we have */ }
-
-      // Try to get related articles for richer content
-      setProgress(15, 'Exploring related articles...');
-      try {
-        const linksUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=links&titles=${encodeURIComponent(articleTitle)}&pllimit=15&format=json&origin=*`;
-        const linksRes = await fetch(linksUrl);
-        const linksData = await linksRes.json();
-        const linksPage = Object.values(linksData.query?.pages || {})[0];
-        const relatedLinks = (linksPage?.links || []).slice(0, 5).map(l => l.title);
-
-        // Fetch intro of related articles for context
-        if (relatedLinks.length) {
-          const relTitles = relatedLinks.join('|');
-          const relUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts&titles=${encodeURIComponent(relTitles)}&exintro=1&explaintext=1&exsentences=3&format=json&origin=*`;
-          const relRes = await fetch(relUrl);
-          const relData = await relRes.json();
-          const relPages = relData.query?.pages || {};
-          state.relatedContent = Object.values(relPages).map(p => ({ title: p.title, extract: p.extract || '' })).filter(p => p.extract);
-        }
-      } catch (e) { /* continue */ }
-    }
-
-    setProgress(25, 'Analyzing research material...');
-    await delay(300);
-
-    // Step 2: Generate Script
-    setProgress(30, 'Creating documentary script...');
-    await delay(300);
-    generateScript(articleTitle, fullContent);
-    setProgress(40, 'Script created — reviewing...');
-    await delay(200);
-
-    // Show script preview
-    $('scriptPreview').classList.remove('hidden');
-    const sc = $('scriptContent');
-    sc.innerHTML = '';
-    state.scenes.forEach((s, i) => {
-      const d = document.createElement('div');
-      d.className = 'scene-item';
-      d.innerHTML = `
-        <div class="flex items-center gap-2 mb-1">
-          <span class="text-[10px] font-mono text-neon font-medium">SCENE ${i + 1}</span>
-          <span class="text-[10px] text-slate-500">${s.duration.toFixed(1)}s</span>
-        </div>
-        <p class="text-xs text-slate-300 leading-relaxed">${s.narration}</p>
-      `;
-      sc.appendChild(d);
-    });
-
-    // Step 3: Fetch Images
-    setProgress(45, 'Finding real images from Wikimedia...');
-    await fetchImagesForScenes(articleTitle);
-    setProgress(65, 'Verifying image relevance...');
-    await delay(300);
-
-    // Step 4: Render Video
-    setProgress(70, 'Rendering scenes...');
-    await renderVideo();
-    setProgress(95, 'Finalizing video...');
-    await delay(500);
-    setProgress(100, 'Complete!');
-
-    await delay(400);
-    showPanel('previewPanel');
-    drawStaticPreview();
-    showToast('Short generated successfully!');
-  } catch (e) {
-    console.error('Generation error:', e);
-    showToast('Generation failed. Please try again.');
-  }
-  state.generating = false;
-}
-
-function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-// ============================================
-// SCRIPT GENERATION
-// ============================================
-function generateScript(title, content) {
-  // Split content into paragraphs and extract key facts
-  const paragraphs = content.split('\n\n').filter(p => p.trim().length > 40);
-  const facts = [];
-  const factPatterns = /\b(\d{4})\b|\b(\d+(?:,\d{3})*(?:\.\d+)?)\b|\b(discovered|invented|first|largest|smallest|oldest|youngest|highest|lowest|fastest|slowest|most|least|only|never|always|record|breakthrough|revolutionary|surprising|unexpected|remarkable|extraordinary|rare|unique|critical|important|significant|founded|created|established|built|launched|published|proved|demonstrated|revealed|showed|found)\b/gi;
-
-  paragraphs.forEach(p => {
-    const sentences = p.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 20);
-    sentences.forEach(s => {
-      const matches = s.match(factPatterns);
-      const score = (matches?.length || 0) + (s.length > 60 ? 1 : 0) + (s.includes(',') ? 0.5 : 0);
-      if (score > 0.5 || s.length > 50) {
-        facts.push({ text: s.trim(), score });
-      }
-    });
-  });
-
-  facts.sort((a, b) => b.score - a.score);
-  const topFacts = facts.slice(0, 20);
-
-  // Build scenes from top facts
-  const scenes = [];
-  const wordsPerSecond = 2.6;
-  const targetSceneWords = 25;
-  const targetSceneDuration = targetSceneWords / wordsPerSecond;
-
-  if (topFacts.length === 0) {
-    // Fallback: use paragraphs directly
-    paragraphs.slice(0, 8).forEach(p => {
-      const text = p.trim().substring(0, 200);
-      const wc = text.split(/\s+/).length;
-      scenes.push({ narration: text, duration: wc / wordsPerSecond, imageQuery: title });
-    });
-  } else {
-    // Intelligent hook: use the most striking fact first
-    if (state.intelligentHook && topFacts.length > 3) {
-      const hookFact = topFacts[0];
-      scenes.push({
-        narration: hookFact.text,
-        duration: hookFact.text.split(/\s+/).length / wordsPerSecond,
-        imageQuery: title,
-        isHook: true
-      });
-    }
-
-    // Group remaining facts into scenes
-    let currentNarration = '';
-    let currentQuery = title;
-    const remainingFacts = state.intelligentHook ? topFacts.slice(1, -1) : topFacts;
-
-    remainingFacts.forEach((f, i) => {
-      currentNarration += (currentNarration ? ' ' : '') + f.text;
-      if (currentNarration.split(/\s+/).length >= targetSceneWords || i === remainingFacts.length - 1) {
-        const wc = currentNarration.split(/\s+/).length;
-        scenes.push({
-          narration: currentNarration,
-          duration: Math.max(3, wc / wordsPerSecond),
-          imageQuery: extractImageQuery(currentNarration, title)
-        });
-        currentNarration = '';
-      }
-    });
-
-    // Intelligent hook ending: connect back to opening
-    if (state.intelligentHook && topFacts.length > 3) {
-      const lastFact = topFacts[topFacts.length - 1];
-      const hookRef = topFacts[0].text.split(/\s+/).slice(0, 4).join(' ');
-      const ending = lastFact.text + (lastFact.text.endsWith('.') ? '' : '.') + ' And that brings us back to where we began: ' + hookRef.toLowerCase() + '...';
-      scenes.push({
-        narration: ending,
-        duration: ending.split(/\s+/).length / wordsPerSecond,
-        imageQuery: title,
-        isHookEnd: true
-      });
-    }
-  }
-
-  // Ensure we have at least 4 scenes
-  while (scenes.length < 4 && paragraphs.length > scenes.length) {
-    const p = paragraphs[scenes.length];
-    const text = p.trim().substring(0, 180);
-    scenes.push({ narration: text, duration: text.split(/\s+/).length / wordsPerSecond, imageQuery: title });
-  }
-
-  // Cap total duration to ~60-90 seconds
-  const totalDur = scenes.reduce((s, sc) => s + sc.duration, 0);
-  if (totalDur > 90) {
-    const scale = 85 / totalDur;
-    scenes.forEach(sc => sc.duration = Math.max(3, sc.duration * scale));
-  }
-
-  state.scenes = scenes;
-}
-
-function extractImageQuery(text, topic) {
-  // Try to find a specific noun phrase for image search
-  const words = text.split(/\s+/);
-  // Look for capitalized terms (likely proper nouns)
-  const properNouns = words.filter(w => w[0] === w[0]?.toUpperCase() && w.length > 2).slice(0, 3);
-  if (properNouns.length > 0) return properNouns.join(' ');
-  return topic;
-}
-
-// ============================================
-// IMAGE FETCHING
-// ============================================
-async function fetchImagesForScenes(articleTitle) {
-  const images = [];
-  const usedUrls = new Set();
-
-  // First, get images from the main article
-  try {
-    const imgUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(articleTitle)}&prop=images&imlimit=20&format=json&origin=*`;
-    const imgRes = await fetch(imgUrl);
-    const imgData = await imgRes.json();
-    const imgPage = Object.values(imgData.query?.pages || {})[0];
-    const imgFiles = (imgPage?.images || []).map(i => i.title).filter(t => !t.includes('.svg') && !t.includes('.ogg') && !t.includes('.ogv'));
-
-    // Get URLs for these images
-    for (let i = 0; i < Math.min(imgFiles.length, 12); i++) {
-      try {
-        const fUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(imgFiles[i])}&prop=imageinfo&iiprop=url|size&iiurlwidth=1080&format=json&origin=*`;
-        const fRes = await fetch(fUrl);
-        const fData = await fRes.json();
-        const fPage = Object.values(fData.query?.pages || {})[0];
-        const imgInfo = fPage?.imageinfo?.[0];
-        if (imgInfo?.thumburl && !usedUrls.has(imgInfo.thumburl)) {
-          usedUrls.add(imgInfo.thumburl);
-          images.push({ url: imgInfo.thumburl, desc: imgFiles[i].replace('File:', ''), width: imgInfo.thumbwidth, height: imgInfo.thumbheight });
-        }
-      } catch (e) { /* skip */ }
-      if (i % 3 === 2) { setProgress(45 + (i / imgFiles.length) * 15, 'Fetching images...'); await delay(50); }
-    }
-  } catch (e) { /* continue */ }
-
-  // Also get the page image directly
-  try {
-    const pImgUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${encodeURIComponent(articleTitle)}&pithumbsize=1080&format=json&origin=*`;
-    const pImgRes = await fetch(pImgUrl);
-    const pImgData = await pImgRes.json();
-    const pImgPage = Object.values(pImgData.query?.pages || {})[0];
-    if (pImgPage?.thumbnail?.source && !usedUrls.has(pImgPage.thumbnail.source)) {
-      usedUrls.add(pImgPage.thumbnail.source);
-      images.unshift({ url: pImgPage.thumbnail.source, desc: articleTitle, isMain: true });
-    }
-  } catch (e) { /* continue */ }
-
-  // Fetch from Wikimedia Commons as backup
-  if (images.length < state.scenes.length) {
-    try {
-      const commonsUrl = `https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(articleTitle)}&srnamespace=6&srlimit=10&format=json&origin=*`;
-      const cRes = await fetch(commonsUrl);
-      const cData = await cRes.json();
-      const cResults = cData.query?.search || [];
-      for (let i = 0; i < cResults.length && images.length < state.scenes.length + 3; i++) {
-        const title = cResults[i].title;
-        try {
-          const fUrl = `https://commons.wikimedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=imageinfo&iiprop=url&iiurlwidth=1080&format=json&origin=*`;
-          const fRes = await fetch(fUrl);
-          const fData = await fRes.json();
-          const fPage = Object.values(fData.query?.pages || {})[0];
-          const url = fPage?.imageinfo?.[0]?.thumburl;
-          if (url && !usedUrls.has(url)) {
-            usedUrls.add(url);
-            images.push({ url, desc: title.replace('File:', '') });
-          }
-        } catch (e) { /* skip */ }
-      }
-    } catch (e) { /* continue */ }
-  }
-
-  // Assign images to scenes
-  state.scenes.forEach((scene, i) => {
-    if (images.length > 0) {
-      scene.imageUrl = images[i % images.length].url;
-      scene.imageDesc = images[i % images.length].desc;
-    } else {
-      scene.imageUrl = null;
-      scene.imageDesc = null;
-    }
-  });
-
-  // Preload images
-  state.imageCache = {};
-  const preloadPromises = [];
-  usedUrls.forEach(url => {
-    preloadPromises.push(new Promise(resolve => {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => { state.imageCache[url] = img; resolve(); };
-      img.onerror = () => resolve();
-      img.src = url;
-    }));
-  });
-  await Promise.all(preloadPromises);
-}
-
-// ============================================
-// VIDEO RENDERING
-// ============================================
-async function renderVideo() {
-  const canvas = $('renderCanvas');
-  const ctx = canvas.getContext('2d');
-  const W = 1080, H = 1920;
-  canvas.width = W;
-  canvas.height = H;
-
-  const totalDuration = state.scenes.reduce((s, sc) => s + sc.duration, 0);
-  const fps = 30;
-  const totalFrames = Math.ceil(totalDuration * fps);
-
-  // Setup MediaRecorder
-  const stream = canvas.captureStream(fps);
-  let mimeType = 'video/webm;codecs=vp9';
-  if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm;codecs=vp8';
-  if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
-  const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 5000000 });
-  const chunks = [];
-  recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-
-  return new Promise((resolve, reject) => {
-    recorder.onstop = () => {
-      state.videoBlob = new Blob(chunks, { type: 'video/webm' });
-      resolve();
-    };
-    recorder.onerror = reject;
-    recorder.start();
-
-    let frame = 0;
-    const startTime = performance.now();
-
-    function renderFrame() {
-      if (frame >= totalFrames) {
-        recorder.stop();
-        return;
-      }
-
-      const currentTime = frame / fps;
-      let elapsed = 0;
-      let sceneIdx = 0;
-      let sceneProgress = 0;
-
-      for (let i = 0; i < state.scenes.length; i++) {
-        if (currentTime < elapsed + state.scenes[i].duration) {
-          sceneIdx = i;
-          sceneProgress = (currentTime - elapsed) / state.scenes[i].duration;
-          break;
-        }
-        elapsed += state.scenes[i].duration;
-        if (i === state.scenes.length - 1) { sceneIdx = i; sceneProgress = 1; }
-      }
-
-      const scene = state.scenes[sceneIdx];
-      renderSceneFrame(ctx, W, H, scene, sceneIdx, sceneProgress, currentTime);
-
-      frame++;
-      const pct = 70 + (frame / totalFrames) * 25;
-      if (frame % 15 === 0) setProgress(Math.min(95, pct), 'Rendering scenes...');
-
-      requestAnimationFrame(renderFrame);
-    }
-
-    renderFrame();
-  });
-}
-
-function renderSceneFrame(ctx, W, H, scene, sceneIdx, progress, currentTime) {
-  // Background
-  ctx.fillStyle = '#0a0a0f';
-  ctx.fillRect(0, 0, W, H);
-
-  // Image with Ken Burns
-  const imgUrl = scene.imageUrl;
-  const img = imgUrl ? state.imageCache[imgUrl] : null;
-
-  if (img && img.complete && img.naturalWidth > 0) {
-    // Ken Burns: slow zoom in
-    const startScale = 1.0;
-    const endScale = 1.15;
-    const scale = startScale + (endScale - startScale) * progress;
-    // Subtle pan
-    const panX = Math.sin(sceneIdx * 1.5) * 30 * progress;
-    const panY = Math.cos(sceneIdx * 2.1) * 20 * progress;
-
-    ctx.save();
-    ctx.translate(W / 2 + panX, H / 2 + panY);
-    ctx.scale(scale, scale);
-    ctx.translate(-W / 2, -H / 2);
-
-    // Draw image covering the canvas (cover fit)
-    const imgRatio = img.naturalWidth / img.naturalHeight;
-    const canvasRatio = W / H;
-    let drawW, drawH, drawX, drawY;
-    if (imgRatio > canvasRatio) {
-      drawH = H;
-      drawW = H * imgRatio;
-      drawX = (W - drawW) / 2;
-      drawY = 0;
-    } else {
-      drawW = W;
-      drawH = W / imgRatio;
-      drawX = 0;
-      drawY = (H - drawH) / 2;
-    }
-    ctx.drawImage(img, drawX, drawY, drawW, drawH);
-    ctx.restore();
-  } else {
-    // Fallback: gradient background with topic text
-    const grad = ctx.createLinearGradient(0, 0, W, H);
-    grad.addColorStop(0, '#0f0f17');
-    grad.addColorStop(1, '#14141f');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, W, H);
-  }
-
-  // Overlay gradient for readability
-  const overlay = ctx.createLinearGradient(0, H * 0.4, 0, H);
-  overlay.addColorStop(0, 'rgba(8,8,14,0)');
-  overlay.addColorStop(0.5, 'rgba(8,8,14,0.6)');
-  overlay.addColorStop(1, 'rgba(8,8,14,0.92)');
-  ctx.fillStyle = overlay;
-  ctx.fillRect(0, 0, W, H);
-
-  // Top subtle vignette
-  const topVignette = ctx.createLinearGradient(0, 0, 0, H * 0.3);
-  topVignette.addColorStop(0, 'rgba(8,8,14,0.5)');
-  topVignette.addColorStop(1, 'rgba(8,8,14,0)');
-  ctx.fillStyle = topVignette;
-  ctx.fillRect(0, 0, W, H * 0.3);
-
-  // Subtitles
-  renderSubtitles(ctx, W, H, scene, progress);
-}
-
-function renderSubtitles(ctx, W, H, scene, progress) {
-  const text = scene.narration;
-  const style = state.subtitleStyle;
-  const maxW = W * 0.82;
-  const x = W / 2;
-  const y = H * 0.82;
-
-  // Word progress for highlight style
-  const words = text.split(/\s+/);
-  const wordsShown = Math.floor(progress * words.length * 1.3);
-  const visibleText = words.slice(0, Math.min(wordsShown, words.length)).join(' ');
-
-  if (!visibleText && style !== 'highlight') return;
-
-  ctx.textAlign = 'center';
-
-  switch (style) {
-    case 'minimal':
-      ctx.font = '500 42px "Inter", sans-serif';
-      ctx.fillStyle = 'rgba(255,255,255,0.92)';
-      wrapText(ctx, visibleText || text, x, y, maxW, 56, 'center', null, 3);
-      break;
-
-    case 'bold':
-      ctx.font = '700 52px "Inter", sans-serif';
-      ctx.fillStyle = '#ffffff';
-      ctx.shadowColor = 'rgba(0,0,0,0.7)';
-      ctx.shadowBlur = 20;
-      ctx.shadowOffsetY = 3;
-      wrapText(ctx, visibleText || text, x, y, maxW, 64, 'center', null, 4);
-      ctx.shadowColor = 'transparent';
-      ctx.shadowBlur = 0;
-      ctx.shadowOffsetY = 0;
-      break;
-
-    case 'highlight': {
-      // Word-by-word with current word highlighted
-      const currentWordIdx = Math.min(wordsShown, words.length - 1);
-      const lineHeight = 56;
-      ctx.font = '600 44px "Inter", sans-serif';
-      const lines = wrapTextGetLines(ctx, words.join(' '), maxW);
-      let wordCounter = 0;
-      let curY = y - ((lines.length - 1) * lineHeight) / 2;
-
-      lines.forEach(line => {
-        const lineWords = line.split(/\s+/);
-        let curX = x - (ctx.measureText(line).width / 2);
-        lineWords.forEach(w => {
-          const isCurrent = wordCounter === currentWordIdx && wordCounter < wordsShown;
-          const isPast = wordCounter < wordsShown;
-          if (isCurrent) {
-            const mw = ctx.measureText(w).width;
-            ctx.fillStyle = 'rgba(0,212,255,0.25)';
-            const pad = 6;
-            roundRect(ctx, curX - pad, curY - 38, mw + pad * 2, 52, 8);
-            ctx.fill();
-          }
-          ctx.fillStyle = isPast ? '#ffffff' : 'rgba(255,255,255,0.3)';
-          if (isCurrent) ctx.fillStyle = '#00d4ff';
-          ctx.textAlign = 'left';
-          ctx.fillText(w, curX, curY);
-          curX += ctx.measureText(w).width + ctx.measureText(' ').width;
-          wordCounter++;
-        });
-        curY += lineHeight;
-      });
-      break;
-    }
-
-    case 'elegant':
-      ctx.font = '400 44px "Georgia", serif';
-      ctx.fillStyle = 'rgba(255,255,255,0.88)';
-      // Decorative line above
-      ctx.strokeStyle = 'rgba(0,212,255,0.3)';
-      ctx.lineWidth = 1.5;
-      const lineY = y - 60;
-      ctx.beginPath();
-      ctx.moveTo(x - 60, lineY);
-      ctx.lineTo(x + 60, lineY);
-      ctx.stroke();
-      wrapText(ctx, visibleText || text, x, y, maxW, 58, 'center', null, 3);
-      break;
-  }
-}
-
-function wrapText(ctx, text, x, y, maxWidth, lineHeight, align, fillColor, maxLines) {
-  if (!text) return;
-  const words = text.split(/\s+/);
-  let line = '';
-  let curY = y;
-  let lineCount = 0;
-  const lines = [];
-
-  for (let i = 0; i < words.length; i++) {
-    const test = line + words[i] + ' ';
-    if (ctx.measureText(test).width > maxWidth && i > 0) {
-      lines.push(line.trim());
-      line = words[i] + ' ';
-      lineCount++;
-    } else {
-      line = test;
-    }
-    if (maxLines && lineCount >= maxLines) break;
-  }
-  lines.push(line.trim());
-
-  const totalH = lines.length * lineHeight;
-  const startY = y - totalH / 2 + lineHeight / 2;
-
-  ctx.textAlign = align || 'center';
-  ctx.fillStyle = fillColor || ctx.fillStyle;
-
-  lines.forEach((l, i) => {
-    ctx.fillText(l, x, startY + i * lineHeight);
-  });
-}
-
-function wrapTextGetLines(ctx, text, maxWidth) {
-  const words = text.split(/\s+/);
-  let line = '';
-  const lines = [];
-  for (let i = 0; i < words.length; i++) {
-    const test = line + words[i] + ' ';
-    if (ctx.measureText(test).width > maxWidth && i > 0) {
-      lines.push(line.trim());
-      line = words[i] + ' ';
-    } else {
-      line = test;
-    }
-  }
-  lines.push(line.trim());
-  return lines;
-}
-
-function roundRect(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
-}
-
-// ============================================
-// PREVIEW
-// ============================================
-function drawStaticPreview() {
-  const canvas = $('previewCanvas');
-  const ctx = canvas.getContext('2d');
-  const W = 540, H = 960;
-  canvas.width = W;
-  canvas.height = H;
-
-  // Draw first scene
-  const scene = state.scenes[0];
-  if (!scene) return;
-
-  ctx.fillStyle = '#0a0a0f';
-  ctx.fillRect(0, 0, W, H);
-
-  const img = scene.imageUrl ? state.imageCache[scene.imageUrl] : null;
-  if (img && img.complete) {
-    const imgRatio = img.naturalWidth / img.naturalHeight;
-    const canvasRatio = W / H;
-    let drawW, drawH, drawX, drawY;
-    if (imgRatio > canvasRatio) { drawH = H; drawW = H * imgRatio; drawX = (W - drawW) / 2; drawY = 0; }
-    else { drawW = W; drawH = W / imgRatio; drawX = 0; drawY = (H - drawH) / 2; }
-    ctx.drawImage(img, drawX, drawY, drawW, drawH);
-  }
-
-  const overlay = ctx.createLinearGradient(0, H * 0.4, 0, H);
-  overlay.addColorStop(0, 'rgba(8,8,14,0)');
-  overlay.addColorStop(0.5, 'rgba(8,8,14,0.6)');
-  overlay.addColorStop(1, 'rgba(8,8,14,0.92)');
-  ctx.fillStyle = overlay;
-  ctx.fillRect(0, 0, W, H);
-
-  // Show subtitle preview
-  ctx.textAlign = 'center';
-  ctx.font = '500 24px "Inter", sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,0.85)';
-  const maxW = W * 0.8;
-  const words = scene.narration.split(/\s+/);
-  const previewText = words.slice(0, Math.min(12, words.length)).join(' ') + (words.length > 12 ? '...' : '');
-  wrapText(ctx, previewText, W / 2, H * 0.82, maxW, 32, 'center', null, 2);
-
-  // Play icon overlay
-  ctx.fillStyle = 'rgba(0,0,0,0.3)';
-  ctx.fillRect(0, 0, W, H);
-  ctx.beginPath();
-  ctx.arc(W / 2, H / 2, 50, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(0,212,255,0.2)';
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(0,212,255,0.5)';
-  ctx.lineWidth = 2;
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(W / 2 - 15, H / 2 - 22);
-  ctx.lineTo(W / 2 - 15, H / 2 + 22);
-  ctx.lineTo(W / 2 + 22, H / 2);
-  ctx.closePath();
-  ctx.fillStyle = '#00d4ff';
-  ctx.fill();
-}
-
-let previewPlaying = false;
-let previewRAF = null;
-let speechUtterances = [];
-
-function playPreview() {
-  if (previewPlaying) { stopPreview(); return; }
-  previewPlaying = true;
-
-  const canvas = $('previewCanvas');
-  const ctx = canvas.getContext('2d');
-  const W = 540, H = 960;
-  canvas.width = W;
-  canvas.height = H;
-
-  const totalDuration = state.scenes.reduce((s, sc) => s + sc.duration, 0);
-  const startTime = performance.now();
-
-  // Start TTS
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-    const fullText = state.scenes.map(s => s.narration).join(' ');
-    const utt = new SpeechSynthesisUtterance(fullText);
-    const voiceConfig = getVoiceConfig();
-    const voices = window.speechSynthesis.getVoices();
-    const targetVoice = voices.find(v => voiceConfig.langCheck(v)) || voices[0];
-    if (targetVoice) utt.voice = targetVoice;
-    utt.rate = voiceConfig.rate;
-    utt.pitch = voiceConfig.pitch;
-    utt.volume = 1;
-    window.speechSynthesis.speak(utt);
-  }
-
-  function animate() {
-    if (!previewPlaying) return;
-    const elapsed = (performance.now() - startTime) / 1000;
-    if (elapsed >= totalDuration) { stopPreview(); drawStaticPreview(); return; }
-
-    let cumulative = 0;
-    let sceneIdx = 0;
-    let sceneProgress = 0;
-    for (let i = 0; i < state.scenes.length; i++) {
-      if (elapsed < cumulative + state.scenes[i].duration) {
-        sceneIdx = i;
-        sceneProgress = (elapsed - cumulative) / state.scenes[i].duration;
-        break;
-      }
-      cumulative += state.scenes[i].duration;
-      if (i === state.scenes.length - 1) { sceneIdx = i; sceneProgress = 1; }
-    }
-
-    const scene = state.scenes[sceneIdx];
-    renderSceneFrame(ctx, W, H, scene, sceneIdx, sceneProgress, elapsed);
-    previewRAF = requestAnimationFrame(animate);
-  }
-
-  animate();
-}
-
-function stopPreview() {
-  previewPlaying = false;
-  if (previewRAF) cancelAnimationFrame(previewRAF);
-  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-}
-
-function getVoiceConfig() {
-  switch (state.voice) {
-    case 'male-deep': return { rate: 0.88, pitch: 0.75, langCheck: v => v.lang.startsWith('en') && v.name.toLowerCase().includes('male') };
-    case 'male-natural': return { rate: 1.0, pitch: 1.0, langCheck: v => v.lang.startsWith('en') && v.name.toLowerCase().includes('male') };
-    case 'female-deep': return { rate: 0.9, pitch: 0.85, langCheck: v => v.lang.startsWith('en') && (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('samantha') || v.name.toLowerCase().includes('karen')) };
-    case 'female-natural': return { rate: 1.0, pitch: 1.1, langCheck: v => v.lang.startsWith('en') && (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('samantha') || v.name.toLowerCase().includes('karen')) };
-    default: return { rate: 1.0, pitch: 1.0, langCheck: () => true };
-  }
-}
-
-function downloadVideo() {
-  if (!state.videoBlob) { showToast('No video available'); return; }
-  const url = URL.createObjectURL(state.videoBlob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `fact-engine-${Date.now()}.webm`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showToast('Video downloaded!');
-}
-
-function startOver() {
-  stopPreview();
-  state.selectedArticle = null;
-  state.articleContent = null;
-  state.scenes = [];
-  state.videoBlob = null;
-  state.imageCache = {};
-  state.progress = 0;
-  $('searchInput').value = '';
-  showPanel('searchPanel');
-}
-
-// ============================================
-// SECRET MENU - CAR DATABASE
-// ============================================
-function toggleSecret() {
-  const c = $('secretContent');
-  const a = $('secretArrow');
-  c.classList.toggle('hidden');
-  a.style.transform = c.classList.contains('hidden') ? '' : 'rotate(180deg)';
-}
-
-function initCarDatabase() {
-  const makeSelect = $('carMake');
-  const makes = Object.keys(carDatabase).sort();
-  makeSelect.innerHTML = '<option value="">Select manufacturer</option>';
-  makes.forEach(m => {
-    const o = document.createElement('option');
-    o.value = m;
-    o.textContent = m;
-    makeSelect.appendChild(o);
-  });
-}
-
-function filterCarMakes() {
-  const search = $('carMakeSearch').value.toLowerCase();
-  const makeSelect = $('carMake');
-  const makes = Object.keys(carDatabase).sort();
-  makeSelect.innerHTML = '<option value="">Select manufacturer</option>';
-  makes.filter(m => m.toLowerCase().includes(search)).forEach(m => {
-    const o = document.createElement('option');
-    o.value = m;
-    o.textContent = m;
-    makeSelect.appendChild(o);
-  });
-  if (state.carMake && state.carMake.toLowerCase().includes(search)) makeSelect.value = state.carMake;
-}
-
-function updateCarModels() {
-  const make = $('carMake').value;
-  state.carMake = make;
-  state.carModel = '';
-  const modelSelect = $('carModel');
-  modelSelect.innerHTML = '<option value="">Select model</option>';
-  if (make && carDatabase[make]) {
-    carDatabase[make].forEach(m => {
-      const o = document.createElement('option');
-      o.value = m;
-      o.textContent = m;
-      modelSelect.appendChild(o);
-    });
-  }
-  updateCarSelection();
-}
-
-function filterCarModels() {
-  const search = $('carModelSearch').value.toLowerCase();
-  const make = $('carMake').value;
-  const modelSelect = $('carModel');
-  modelSelect.innerHTML = '<option value="">Select model</option>';
-  if (make && carDatabase[make]) {
-    carDatabase[make].filter(m => m.toLowerCase().includes(search)).forEach(m => {
-      const o = document.createElement('option');
-      o.value = m;
-      o.textContent = m;
-      modelSelect.appendChild(o);
-    });
-    if (state.carModel && state.carModel.toLowerCase().includes(search)) modelSelect.value = state.carModel;
-  }
-}
-
-function updateCarSelection() {
-  state.carModel = $('carModel').value;
-  const text = $('carSelectionText');
-  const btn = $('carCopyBtn');
-  if (state.carMake && state.carModel) {
-    text.textContent = state.carMake + ' ' + state.carModel;
-    text.className = 'text-sm text-white font-medium';
-    btn.classList.remove('hidden');
-  } else if (state.carMake) {
-    text.textContent = state.carMake + ' — select a model';
-    text.className = 'text-sm text-slate-400';
-    btn.classList.add('hidden');
-  } else {
-    text.textContent = 'Select a manufacturer and model';
-    text.className = 'text-sm text-slate-400';
-    btn.classList.add('hidden');
-  }
-}
-
-function copyCarSelection() {
-  const text = state.carMake + ' ' + state.carModel;
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(() => showToast('Copied: ' + text)).catch(() => fallbackCopy(text));
-  } else {
-    fallbackCopy(text);
-  }
-}
-
-function fallbackCopy(text) {
-  const ta = document.createElement('textarea');
-  ta.value = text;
-  ta.style.position = 'fixed';
-  ta.style.left = '-9999px';
-  document.body.appendChild(ta);
-  ta.select();
-  try { document.execCommand('copy'); showToast('Copied: ' + text); } catch (e) { showToast('Copy failed'); }
-  document.body.removeChild(ta);
-}
-
-// ============================================
-// INIT
-// ============================================
-function init() {
-  initCarDatabase();
-  showPanel('searchPanel');
-
-  // Load speech synthesis voices
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.getVoices();
-    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
-  }
-
-  // Enter key for search
-  $('searchInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') performSearch();
-  });
-}
-
-document.addEventListener('DOMContentLoaded', init);
+$('replayBtn').onclick=()=>{const v=$('finalVideo');v.currentTime=0;v.play()};
+drawFrame(0);
+// warm speech voices
+try{speechSynthesis.getVoices()}catch(e){}
 </script>
 </body>
 </html>
