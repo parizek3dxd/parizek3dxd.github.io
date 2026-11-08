@@ -68,9 +68,9 @@ h1{font-size:clamp(46px,13vw,68px);line-height:1;margin:0;font-weight:800;letter
 #mini{position:absolute;right:10px;bottom:max(10px,env(safe-area-inset-bottom));width:min(340px,calc(100vw - 20px));z-index:600;display:flex;flex-direction:column;gap:8px;transition:width .55s var(--ease),transform .6s var(--ease),opacity .4s}
 #mini.big{width:min(760px,calc(100vw - 20px))}
 #mini.hidden{transform:translateY(calc(100% + 40px));opacity:0;pointer-events:none}
-#mapwrap{height:clamp(140px,24vh,210px);border:4px solid #fff;border-radius:28px;overflow:hidden;box-shadow:var(--sh);transition:height .55s var(--ease)}
-#mini.big #mapwrap{height:min(56vh,520px)}
-#mini.done #mapwrap{height:min(50vh,480px)}
+#mapwrap{position:relative;isolation:isolate;height:clamp(140px,24vh,210px);border:4px solid #fff;border-radius:28px;overflow:hidden;box-shadow:var(--sh);transition:height .55s var(--ease)}
+#mini.big #mapwrap{position:relative;isolation:isolate;height:min(56vh,520px)}
+#mini.done #mapwrap{position:relative;isolation:isolate;height:min(50vh,480px)}
 .tools{display:flex;justify-content:space-between;gap:8px}
 .tools button{background:rgba(255,255,255,.96);box-shadow:var(--sh)}
 .tools svg,.icon svg,.fab svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px;margin-right:5px}
@@ -137,7 +137,7 @@ path.draw{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.1s var(--ease)
     <h2>Kde chceš hrát?</h2>
     <div class="chips" id="chips"></div>
     <div class="hint" id="hint">Vyber kraj, nebo klikni do mapy a nastav okruh.</div>
-    <label class="rad">Okruh <input type="range" id="rad" min="2" max="150" value="25"><output id="rv">25 km</output></label>
+    <label class="rad">Okruh <input type="range" id="rad" min="0" max="100" value="68"><output id="rv">24 km</output></label>
     <button class="cta" id="pickGo" disabled>Hrát</button>
   </div>
 </section>
@@ -241,9 +241,9 @@ async function makePlace(src){
     else { const rnd = rng(k * 100003 + idx * 31 + t); p = inCircle(pickC(KC[k], rnd), rnd); }
     if (!inCZ(p.lng, p.lat)) continue;
     const s = await snap(p);
-    if (s && inCZ(s.lng, s.lat) && (k != null || km(s, src.c) <= src.r * 1.15)) return s;
+    if (s && inCZ(s.lng, s.lat) && (k != null || km(s, src.c) <= Math.max(src.r * 1.15, src.r + .3))) return s;
   }
-  if (k == null) return {lat: src.c.lat, lng: src.c.lng};
+  if (k == null) return (await snap(src.c)) || {lat: src.c.lat, lng: src.c.lng};
   const c = pickC(KC[k], Math.random); return {lat: c[0], lng: c[1]};
 }
 
@@ -266,7 +266,7 @@ function tween(el, to, ms, from){
   const t0 = performance.now();
   (function f(t){ const p = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - p, 3); el.textContent = fmt(Math.round(from + (to - from) * e)); if (p < 1) requestAnimationFrame(f); })(t0);
 }
-let pm, gm, ROUNDS = 5, G = null, PK = {k: null, c: null, r: 25}, pLay = [], aLay = [];
+let pm, gm, ROUNDS = 5, G = null, PK = {k: null, c: null, r: 24}, pLay = [], aLay = [];
 function show(id){
   Q('.screen').forEach(s => s.classList.toggle('on', s.id === id));
   if (id === 'pick'){ initPick(); setTimeout(() => pm.invalidateSize(), 80); }
@@ -288,17 +288,19 @@ function renderPick(fit){
   const {k, c} = PK;
   Q('#chips button').forEach((b, i) => b.classList.toggle('on', i === k));
   if (k != null){ KC[k].forEach(x => pLay.push(circ(x[0], x[1], x[2]).addTo(pm))); $('hint').textContent = `${KR[k][0]}: 1 000 lokalit včetně venkova`; }
-  else if (c){ pLay.push(circ(c.lat, c.lng, PK.r).addTo(pm), L.marker(c, {icon: pin(''), interactive: false}).addTo(pm)); $('hint').textContent = `Okruh ${PK.r} km kolem vybraného místa`; }
+  else if (c){ pLay.push(circ(c.lat, c.lng, PK.r).addTo(pm), L.marker(c, {icon: pin(''), interactive: false}).addTo(pm)); $('hint').textContent = `Okruh ${fmt(PK.r)} km kolem vybraného místa`; }
   $('pickGo').disabled = k == null && !c; $('rad').disabled = k != null;
-  if (fit) pm.flyToBounds(areaBounds(k != null ? {t: 'kraj', k} : {t: 'circle', c, r: PK.r}), {paddingTopLeft: [30, 60], paddingBottomRight: [30, 300], duration: .9, maxZoom: 12});
+  if (fit) pm.flyToBounds(areaBounds(k != null ? {t: 'kraj', k} : {t: 'circle', c, r: PK.r}), {paddingTopLeft: [30, 60], paddingBottomRight: [30, 300], duration: .9, maxZoom: 15});
 }
-$('rad').oninput = e => { PK.r = +e.target.value; $('rv').textContent = PK.r + ' km'; if (PK.c) renderPick(false); };
+const radOf = v => { const x = .5 * Math.pow(300, v / 100); return x < 10 ? Math.max(.5, Math.round(x * 2) / 2) : x < 50 ? Math.round(x) : Math.round(x / 5) * 5; };
+$('rad').oninput = e => { PK.r = radOf(+e.target.value); $('rv').textContent = fmt(PK.r) + ' km'; if (PK.c) renderPick(false); };
+$('rad').onchange = () => { if (PK.c) renderPick(true); };
 $('pickGo').onclick = () => startGame(PK.k != null ? {t: 'kraj', k: PK.k} : {t: 'circle', c: PK.c, r: PK.r});
 
 // ---------- hra ----------
 function startGame(src){
   G = {src, n: ROUNDS, r: 0, total: 0, res: [], lock: false, next: null, lay: [], gm: null,
-       sc: src.t === 'cr' ? 60 : src.t === 'kraj' ? 22 : Math.max(2, src.r * .45)};
+       sc: src.t === 'cr' ? 60 : src.t === 'kraj' ? 22 : Math.max(.25, src.r * .45)};
   show('game');
   if (!gm){
     gm = mkMap('map', 5);
