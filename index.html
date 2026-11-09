@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>GeoČesko – poznej Česko podle ulice</title>
+<meta name="theme-color" content="#f2f5fa">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="GeoČesko">
+<link rel="preconnect" href="https://router.project-osrm.org" crossorigin>
+<link rel="preconnect" href="https://maps.google.com"><link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
@@ -47,14 +52,16 @@ h1{font-size:clamp(46px,13vw,68px);line-height:1;margin:0;font-weight:800;letter
 .sheet{position:absolute;left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));max-width:560px;margin:auto;z-index:500;background:#fff;border-radius:28px;padding:18px;box-shadow:var(--sh);transform:translateY(60px);opacity:0;transition:transform .8s var(--ease) .15s,opacity .8s .15s}
 .on .sheet{transform:none;opacity:1}
 .sheet h2{font-size:22px;font-weight:800;margin:0 0 12px}
-.chips{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 10px;scrollbar-width:none}
+.lbl{font-size:12px;font-weight:800;color:var(--mute);letter-spacing:.06em;text-transform:uppercase;margin:0 0 3px 4px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none}
 .chips button{flex:none}
 .hint{margin:0 0 10px;font-size:14px;color:var(--mute);min-height:20px}
 .rad{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--mute);margin-bottom:14px}
 .rad input{flex:1;accent-color:var(--acc)}
 .rad output{font-weight:800;color:var(--ink);min-width:56px;text-align:right}
 .sheet>.cta{width:100%;font-size:18px;padding:16px}
-#pano{position:absolute;inset:0;width:100%;height:100%;border:0;background:#dfe5ef}
+#pano,#pano2{position:absolute;inset:0;width:100%;height:100%;border:0;background:#dfe5ef;opacity:0;pointer-events:none;transition:opacity .45s}
+#pano.vis,#pano2.vis{opacity:1;pointer-events:auto}
 .cover{position:absolute;inset:0;z-index:400;display:grid;place-items:center;background:var(--bg);opacity:0;pointer-events:none;transition:opacity .5s}
 .cover.on{opacity:1;pointer-events:auto}
 .ld{text-align:center;color:var(--mute)}
@@ -112,6 +119,28 @@ path.draw{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.1s var(--ease)
 .acts{display:grid;gap:10px}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}}
 </style>
+<script>
+// Ikona = špendlík z domovské stránky, vykreslený přímo v prohlížeči; manifest je také vložený v tomto souboru.
+(function(){
+  try {
+    const draw = n => {
+      const c = document.createElement('canvas'); c.width = c.height = n;
+      const x = c.getContext('2d'), sc = n * .54 / 64;
+      x.fillStyle = '#fff'; x.fillRect(0, 0, n, n);
+      x.translate(n / 2 - 24 * sc, n / 2 - 32.5 * sc); x.scale(sc, sc);
+      x.fillStyle = '#e5383b'; x.fill(new Path2D('M24 3C12 3 3 12 3 24c0 16 21 38 21 38s21-22 21-38C45 12 36 3 24 3z'));
+      x.fillStyle = '#fff'; x.beginPath(); x.arc(24, 24, 8.5, 0, 6.2832); x.fill();
+      return c.toDataURL('image/png');
+    };
+    const add = (rel, href) => { const l = document.createElement('link'); l.rel = rel; l.href = href; document.head.appendChild(l); };
+    const i180 = draw(180), i192 = draw(192), i512 = draw(512), base = location.href.split('#')[0].split('?')[0];
+    add('icon', i192); add('apple-touch-icon', i180);
+    const man = {name: 'GeoČesko', short_name: 'GeoČesko', description: 'Poznej Česko podle ulice', lang: 'cs', start_url: base, scope: base.replace(/[^/]*$/, ''), display: 'standalone', background_color: '#f2f5fa', theme_color: '#f2f5fa',
+      icons: [{src: i192, sizes: '192x192', type: 'image/png', purpose: 'any maskable'}, {src: i512, sizes: '512x512', type: 'image/png', purpose: 'any maskable'}]};
+    add('manifest', URL.createObjectURL(new Blob([JSON.stringify(man)], {type: 'application/manifest+json'})));
+  } catch (e) {}
+})();
+</script>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute"><symbol id="pinsvg" viewBox="0 0 48 64"><path d="M24 3C12 3 3 12 3 24c0 16 21 38 21 38s21-22 21-38C45 12 36 3 24 3z" fill="#e5383b" stroke="#fff" stroke-width="3.5"/><circle cx="24" cy="24" r="8.5" fill="#fff"/></symbol></svg>
@@ -135,15 +164,17 @@ path.draw{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.1s var(--ease)
   <button class="ghost back" id="pickBack">Zpět</button>
   <div class="sheet">
     <h2>Kde chceš hrát?</h2>
-    <div class="chips" id="chips"></div>
+    <div class="lbl">Kraj</div><div class="chips" id="chips"></div>
+    <div class="lbl">Biom</div><div class="chips" id="biomes"></div>
     <div class="hint" id="hint">Vyber kraj, nebo klikni do mapy a nastav okruh.</div>
-    <label class="rad">Okruh <input type="range" id="rad" min="0" max="100" value="68"><output id="rv">24 km</output></label>
+    <label class="rad" id="radrow" style="display:none">Okruh <input type="range" id="rad" min="0" max="100" value="68"><output id="rv">24 km</output></label>
     <button class="cta" id="pickGo" disabled>Hrát</button>
   </div>
 </section>
 
 <section class="screen" id="game">
   <iframe id="pano" title="Panorama ulice" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
+  <iframe id="pano2" title="Panorama ulice" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
   <div class="cover on" id="cover"><div class="ld"><i></i><p>Hledám místo na silnici…</p></div></div>
   <div class="hud">
     <button class="ghost icon" id="exit" aria-label="Domů"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
@@ -196,6 +227,16 @@ const KR = [
 ];
 const KC = KR.map(k => k[1].split(';').map(s => s.split(',').map(Number)));
 const KW = KC.map(cs => Math.max(1500, cs.reduce((s, c) => s + c[2] ** 2, 0)));
+const BR = [
+['Města','50.08,14.44,10;49.20,16.61,8;49.83,18.28,8;49.75,13.38,6;50.77,15.06,5;49.59,17.25,5;48.97,14.47,5;50.21,15.83,5;50.66,14.03,5;50.04,15.78,5;49.22,17.66,5;49.40,15.59,4.5;50.23,12.87,4;49.94,17.90,4;50.50,13.64,4;50.64,13.82,4;49.68,18.35,5'],
+['Venkov','49.50,15.60,40;49.00,16.90,22;49.45,17.15,20;50.15,15.20,25;49.05,14.55,25;50.30,13.55,18;49.35,18.00,20;50.45,15.45,20;49.15,15.40,25;49.55,13.20,25;49.20,13.80,22;50.15,14.30,15;49.90,16.60,20'],
+['Hory','50.72,15.65,15;49.05,13.55,25;50.08,17.25,16;49.48,18.40,18;50.30,16.40,14;50.45,13.10,18;50.40,12.75,14;50.85,15.30,10;48.72,14.78,10;49.65,13.85,12;49.20,18.05,14'],
+['Lesy','50.85,14.35,10;50.00,13.85,14;50.50,15.20,10;50.45,14.50,10;49.40,16.70,9;49.70,18.00,8;49.05,14.80,14;49.55,15.95,14;50.60,14.65,12;49.85,12.65,12']
+];
+const BC = BR.map(b => b[1].split(';').map(x => x.split(',').map(Number)));
+const near = (a, b) => km({lat: a[0], lng: a[1]}, {lat: b[0], lng: b[1]}) < a[2] + b[2];
+const hasBK = (b, k) => BC[b].some(x => KC[k].some(y => near(x, y)));
+const inAny = (p, cs) => cs.some(c => km(p, {lat: c[0], lng: c[1]}) <= c[2]);
 const CZ = [[12.09,50.25],[12.20,50.32],[12.40,50.42],[12.95,50.42],[13.50,50.60],[14.25,50.87],[14.60,51.05],[15.00,51.05],[15.28,50.99],[15.35,50.80],[16.00,50.60],[16.45,50.60],[16.90,50.43],[17.20,50.38],[17.70,50.25],[18.05,50.05],[18.55,49.90],[18.85,49.52],[18.55,49.45],[18.00,49.30],[17.60,48.95],[17.20,48.85],[16.95,48.62],[16.45,48.77],[16.00,48.78],[15.30,48.98],[14.95,48.75],[14.70,48.58],[14.45,48.65],[14.00,48.62],[13.80,48.77],[13.40,48.95],[12.95,49.35],[12.50,49.68],[12.40,49.95]];
 
 function inCZ(lng, lat){
@@ -234,18 +275,24 @@ async function snap(p){
   return null;
 }
 async function makePlace(src){
-  const k = src.t === 'circle' ? null : (src.t === 'kraj' ? src.k : pickKraj()), idx = Math.random() * 1000 | 0;
-  for (let t = 0; t < 10; t++){
-    let p;
-    if (k == null) p = inCircle([src.c.lat, src.c.lng, src.r], Math.random);
-    else { const rnd = rng(k * 100003 + idx * 31 + t); p = inCircle(pickC(KC[k], rnd), rnd); }
-    if (!inCZ(p.lng, p.lat)) continue;
-    const s = await snap(p);
-    if (s && inCZ(s.lng, s.lat) && (k != null || km(s, src.c) <= Math.max(src.r * 1.15, src.r + .3))) return s;
+  const circle = src.t === 'circle', biome = !circle && src.b != null;
+  const kk = !circle && !biome ? (src.t === 'kraj' ? src.k : pickKraj()) : null, idx = Math.random() * 1000 | 0;
+  const pt = u => {
+    if (circle) return inCircle([src.c.lat, src.c.lng, src.r], Math.random);
+    if (biome){ for (let i = 0; i < 40; i++){ const p = inCircle(pickC(BC[src.b], Math.random), Math.random); if (src.t !== 'kraj' || inAny(p, KC[src.k])) return p; } return null; }
+    const rnd = rng(kk * 100003 + idx * 31 + u); return inCircle(pickC(KC[kk], rnd), rnd);
+  };
+  for (let t = 0; t < 10; t += 2){
+    const ps = [pt(t), pt(t + 1)].filter(p => p && inCZ(p.lng, p.lat));
+    const ss = await Promise.all(ps.map(snap));
+    for (const s of ss) if (s && inCZ(s.lng, s.lat) && (!circle || km(s, src.c) <= Math.max(src.r * 1.15, src.r + .3))) return s;
   }
-  if (k == null) return (await snap(src.c)) || {lat: src.c.lat, lng: src.c.lng};
-  const c = pickC(KC[k], Math.random); return {lat: c[0], lng: c[1]};
+  if (circle) return (await snap(src.c)) || {lat: src.c.lat, lng: src.c.lng};
+  const c = pickC(biome ? BC[src.b] : KC[kk], Math.random); return {lat: c[0], lng: c[1]};
 }
+// fronta míst připravených dopředu
+function fillQ(g){ while (g.q.length < 3) g.q.push(makePlace(g.src)); }
+function take(g){ fillQ(g); const p = g.q.shift(); fillQ(g); return p; }
 
 function areaBounds(src){
   const cs = src.t === 'kraj' ? KC[src.k] : src.t === 'circle' ? [[src.c.lat, src.c.lng, src.r]] : null;
@@ -254,7 +301,7 @@ function areaBounds(src){
   cs.forEach(c => { const dy = c[2] / 111.2, dx = dy / Math.cos(c[0] * Math.PI / 180); b.extend([c[0] - dy, c[1] - dx]); b.extend([c[0] + dy, c[1] + dx]); });
   return b;
 }
-const circ = (lat, lng, r) => L.circle([lat, lng], {radius: r * 1000, color: '#2158d6', weight: 2, dashArray: '6 6', fillColor: '#2158d6', fillOpacity: .12, interactive: false});
+const circ = (lat, lng, r, col = '#2158d6') => L.circle([lat, lng], {radius: r * 1000, color: col, weight: 2, dashArray: '6 6', fillColor: col, fillOpacity: .12, interactive: false});
 const pin = c => L.divIcon({className: '', iconSize: [30, 40], iconAnchor: [15, 40], html: `<div class="mk ${c}"><i></i></div>`});
 function mkMap(id, minZ){
   const m = L.map(id, {zoomControl: false, attributionControl: false, minZoom: minZ, maxBounds: [[47.6, 11.2], [51.9, 19.6]], maxBoundsViscosity: .8, zoomSnap: .25, center: [49.8, 15.5], zoom: 7});
@@ -266,41 +313,55 @@ function tween(el, to, ms, from){
   const t0 = performance.now();
   (function f(t){ const p = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - p, 3); el.textContent = fmt(Math.round(from + (to - from) * e)); if (p < 1) requestAnimationFrame(f); })(t0);
 }
-let pm, gm, ROUNDS = 5, G = null, PK = {k: null, c: null, r: 24}, pLay = [], aLay = [];
+let pm, gm, ROUNDS = 5, G = null, PK = {k: null, c: null, r: 24, b: null}, pLay = [], aLay = [];
 function show(id){
   Q('.screen').forEach(s => s.classList.toggle('on', s.id === id));
   if (id === 'pick'){ initPick(); setTimeout(() => pm.invalidateSize(), 80); }
-  if (id !== 'game') $('pano').src = 'about:blank';
+  if (id !== 'game') resetFrames();
 }
 
 // ---------- výběr lokality ----------
 function initPick(){
   if (pm) return;
-  pm = mkMap('pickmap', 6); pm.fitBounds(areaBounds({t: 'cr'}), {paddingBottomRight: [10, 260]});
-  KR.forEach((k, i) => { const b = document.createElement('button'); b.className = 'ghost sm'; b.textContent = k[0]; b.onclick = () => { PK = {k: i, c: null, r: PK.r}; renderPick(true); }; $('chips').appendChild(b); });
+  pm = mkMap('pickmap', 6); pm.fitBounds(areaBounds({t: 'cr'}), {paddingBottomRight: [10, 320]});
+  const chip = (box, txt, fn) => { const b = document.createElement('button'); b.className = 'ghost sm'; b.textContent = txt; b.onclick = fn; $(box).appendChild(b); };
+  KR.forEach((k, i) => chip('chips', k[0], () => {
+    PK.k = PK.k === i ? null : i; PK.c = null;
+    if (PK.k != null && PK.b != null && !hasBK(PK.b, PK.k)) PK.b = null;
+    renderPick(true);
+  }));
+  BR.forEach((b, i) => chip('biomes', b[0], () => { PK.b = PK.b === i ? null : i; renderPick(true); }));
   pm.on('click', e => {
     if (!inCZ(e.latlng.lng, e.latlng.lat)){ $('hint').textContent = 'Vyber místo uvnitř České republiky.'; return; }
-    PK = {k: null, c: e.latlng, r: PK.r}; renderPick(true);
+    PK = {k: null, c: e.latlng, r: PK.r, b: null}; renderPick(true);
   });
 }
 function renderPick(fit){
   pLay.forEach(l => pm.removeLayer(l)); pLay = [];
-  const {k, c} = PK;
-  Q('#chips button').forEach((b, i) => b.classList.toggle('on', i === k));
-  if (k != null){ KC[k].forEach(x => pLay.push(circ(x[0], x[1], x[2]).addTo(pm))); $('hint').textContent = `${KR[k][0]}: 1 000 lokalit včetně venkova`; }
-  else if (c){ pLay.push(circ(c.lat, c.lng, PK.r).addTo(pm), L.marker(c, {icon: pin(''), interactive: false}).addTo(pm)); $('hint').textContent = `Okruh ${fmt(PK.r)} km kolem vybraného místa`; }
-  $('pickGo').disabled = k == null && !c; $('rad').disabled = k != null;
-  if (fit) pm.flyToBounds(areaBounds(k != null ? {t: 'kraj', k} : {t: 'circle', c, r: PK.r}), {paddingTopLeft: [30, 60], paddingBottomRight: [30, 300], duration: .9, maxZoom: 15});
+  const {k, c, b} = PK;
+  Q('#chips button').forEach((x, i) => x.classList.toggle('on', i === k));
+  Q('#biomes button').forEach((x, i) => { x.classList.toggle('on', i === b); x.disabled = !!c || (k != null && !hasBK(i, k)); });
+  if (k != null) KC[k].forEach(x => pLay.push(circ(x[0], x[1], x[2]).addTo(pm)));
+  if (b != null) BC[b].forEach(x => pLay.push(circ(x[0], x[1], x[2], '#12b76a').addTo(pm)));
+  if (c) pLay.push(circ(c.lat, c.lng, PK.r).addTo(pm), L.marker(c, {icon: pin(''), interactive: false}).addTo(pm));
+  $('hint').textContent = k != null && b != null ? `${KR[k][0]} + ${BR[b][0].toLowerCase()}` : k != null ? `${KR[k][0]}: 1 000 lokalit včetně venkova` : b != null ? `${BR[b][0]} v celé republice` : c ? `Okruh ${fmt(PK.r)} km kolem vybraného místa` : 'Vyber kraj a biom, nebo klikni do mapy a nastav okruh.';
+  $('pickGo').disabled = k == null && !c && b == null;
+  $('radrow').style.display = c ? 'flex' : 'none';
+  if (fit) pm.flyToBounds(areaBounds(k != null ? {t: 'kraj', k} : c ? {t: 'circle', c, r: PK.r} : {t: 'cr'}), {paddingTopLeft: [30, 60], paddingBottomRight: [30, 320], duration: .9, maxZoom: 15});
 }
 const radOf = v => { const x = .5 * Math.pow(300, v / 100); return x < 10 ? Math.max(.5, Math.round(x * 2) / 2) : x < 50 ? Math.round(x) : Math.round(x / 5) * 5; };
 $('rad').oninput = e => { PK.r = radOf(+e.target.value); $('rv').textContent = fmt(PK.r) + ' km'; if (PK.c) renderPick(false); };
 $('rad').onchange = () => { if (PK.c) renderPick(true); };
-$('pickGo').onclick = () => startGame(PK.k != null ? {t: 'kraj', k: PK.k} : {t: 'circle', c: PK.c, r: PK.r});
+$('pickGo').onclick = () => startGame(PK.c ? {t: 'circle', c: PK.c, r: PK.r} : {t: PK.k != null ? 'kraj' : 'cr', k: PK.k, b: PK.b});
 
 // ---------- hra ----------
+const fr = [$('pano'), $('pano2')]; let ci = 0;
+const pUrl = p => `https://maps.google.com/maps?q=&layer=c&cbll=${p.lat},${p.lng}&cbp=12,${Math.floor(Math.random() * 360)},0,0,0&output=svembed`;
+function resetFrames(){ ci = 0; fr.forEach(f => { f.onload = null; f.classList.remove('vis'); f.src = 'about:blank'; }); }
 function startGame(src){
-  G = {src, n: ROUNDS, r: 0, total: 0, res: [], lock: false, next: null, lay: [], gm: null,
-       sc: src.t === 'cr' ? 60 : src.t === 'kraj' ? 22 : Math.max(.25, src.r * .45)};
+  G = {src, n: ROUNDS, r: 0, total: 0, res: [], lock: false, q: [], pre: null, lay: [],
+       sc: src.t === 'circle' ? Math.max(.25, src.r * .45) : src.t === 'kraj' ? 22 : 60};
+  resetFrames(); fillQ(G);
   show('game');
   if (!gm){
     gm = mkMap('map', 5);
@@ -314,6 +375,7 @@ function startGame(src){
   aLay.forEach(l => gm.removeLayer(l)); aLay = [];
   if (src.t === 'kraj') KC[src.k].forEach(x => aLay.push(circ(x[0], x[1], x[2]).addTo(gm)));
   if (src.t === 'circle') aLay.push(circ(src.c.lat, src.c.lng, src.r).addTo(gm));
+  if (src.t !== 'circle' && src.b != null) BC[src.b].forEach(x => aLay.push(circ(x[0], x[1], x[2], '#12b76a').addTo(gm)));
   $('sc').textContent = 0;
   nextRound();
 }
@@ -328,16 +390,35 @@ function nextRound(){
   loadPlace();
 }
 async function loadPlace(){
-  const g = G, my = G.r;
+  const g = G, my = g.r, pre = g.pre && g.pre.round === my ? g.pre : null;
+  g.pre = null;
+  if (pre){ // další panorama už je načtené na pozadí
+    if (!pre.ok){ $('cover').classList.add('on'); await pre.done; if (G !== g || g.r !== my) return; }
+    fr[ci].classList.remove('vis'); ci = 1 - ci; fr[ci].classList.add('vis'); fr[ci].onload = null;
+    g.ans = pre.p; $('cover').classList.remove('on');
+  } else await showNow(g, my);
+  preload(g);
+}
+async function showNow(g, my){
   $('cover').classList.add('on');
-  const p = await (g.next || makePlace(g.src)); g.next = null;
+  const p = await take(g);
   if (G !== g || g.r !== my) return;
   g.ans = p;
-  $('pano').src = `https://maps.google.com/maps?q=&layer=c&cbll=${p.lat},${p.lng}&cbp=12,${Math.floor(Math.random() * 360)},0,0,0&output=svembed`;
+  const f = fr[ci]; f.classList.add('vis');
+  f.onload = () => setTimeout(() => $('cover').classList.remove('on'), 300);
+  f.src = pUrl(p);
   setTimeout(() => $('cover').classList.remove('on'), 6500);
-  g.next = makePlace(g.src);
 }
-$('pano').onload = () => setTimeout(() => $('cover').classList.remove('on'), 400);
+function preload(g){
+  if (g.r >= g.n) return;
+  const my = g.r + 1;
+  take(g).then(p => {
+    if (G !== g || g.r + 1 !== my) return;
+    const f = fr[1 - ci], pre = {round: my, p, ok: false};
+    pre.done = new Promise(res => { f.onload = () => { pre.ok = true; res(); }; setTimeout(res, 7000); });
+    f.classList.remove('vis'); f.src = pUrl(p); g.pre = pre;
+  });
+}
 
 function submit(){
   if (!G.guess || !G.ans || G.lock) return;
@@ -368,7 +449,7 @@ function finish(){
   $('fin').textContent = 0; show('end'); setTimeout(() => tween($('fin'), G.total, 1500, 0), 500);
 }
 
-$('playAll').onclick = () => startGame({t: 'cr'});
+$('playAll').onclick = () => startGame({t: 'cr', b: null});
 $('playPick').onclick = () => show('pick');
 $('pickBack').onclick = () => show('home');
 $('exit').onclick = () => show('home');
@@ -376,7 +457,7 @@ $('toHome').onclick = () => show('home');
 $('again').onclick = () => startGame(G.src);
 $('guess').onclick = submit;
 $('next').onclick = () => G.r >= G.n ? finish() : nextRound();
-$('skip').onclick = () => { if (G && !G.lock){ G.ans = null; loadPlace(); } };
+$('skip').onclick = () => { if (G && !G.lock){ G.ans = null; showNow(G, G.r); } };
 function setHidden(h){ $('mini').classList.toggle('hidden', h); $('showmap').classList.toggle('on', h); if (!h && gm) setTimeout(() => gm.invalidateSize(), 620); }
 $('hide').onclick = () => setHidden(true);
 $('showmap').onclick = () => setHidden(false);
